@@ -1,5 +1,5 @@
 {
-  "name": "",
+  "name": "ut-astro",
   "type": "module",
   "version": "0.0.1",
   "scripts": {
@@ -9,6 +9,7 @@
     "astro": "astro"
   },
   "dependencies": {
-    "astro": "^5.16.4"
+    "astro": "^5.16.4",
+    "pocketbase": "^0.26.5"
   }
 }

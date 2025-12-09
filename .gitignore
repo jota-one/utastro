@@ -22,3 +22,8 @@ pnpm-debug.log*
 
 # jetbrains setting folder
 .idea/
+
+# pocketbase
+pb/pb_data
+pb/pb_public
+pb/pocketbase
