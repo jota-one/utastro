@@ -1,7 +1,11 @@
 {
+    "oxc.fmt.experimental": true,
     "editor.defaultFormatter": "oxc.oxc-vscode",
-    "oxc.typeAware": true,
     "editor.codeActionsOnSave": {
         "source.fixAll.oxc": "always"
     },
+    "oxc.typeAware": true,
+    "oxc.unusedDisableDirectives": "warn",
+    "oxc.configPath": "",
+    "oxc.tsConfigPath": "tsconfig.json"
 }

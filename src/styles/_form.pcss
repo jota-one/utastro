@@ -1,0 +1,84 @@
+.input {
+  padding: 0.47rem;
+  font-size: 1.06rem;
+  border-radius: 3px;
+  box-shadow: 0 1px 3px rgba(0,0,0, 0.2) inset;
+  background: rgb(255,255,255, 0.4);
+
+  &::placeholder {
+    color: rgba(var(--color-neutral), 0.65);
+  }
+}
+
+.textarea {
+  padding: 0.47rem;
+  font-size: 1.06rem;
+  border-radius: 3px;
+  box-shadow: 0 1px 3px rgba(0,0,0, 0.2) inset;
+  background: rgb(255,255,255, 0.4);
+
+  &::placeholder {
+    color: rgba(var(--color-neutral), 0.65);
+  }
+}
+
+.checkbox {
+  display: inline-flex;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  margin: 0 10px 0 0;
+  border: 1px solid rgba(0,0,0,.5);
+  border-radius: 0.15rem;
+  background-color: transparent;
+  cursor: pointer;
+
+  &:checked {
+    border: none;
+    background-size: 100%;
+    background-image: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"%3E%3Cpath d="M9.56343 19.675L23 6.23846L20.7615 4L9.56315 15.1878L5.23818 10.8734L3 13.1116L9.56343 19.675Z" fill="rgb(53, 182, 90)"/%3E%3C/svg%3E');
+  }
+}
+
+.button-as-field,
+.dropdown {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.9rem;
+  font-weight: 400;
+  color: inherit;
+  background-color: rgba(var(--color-white), 0.9);
+  border: 1px solid rgba(128,128,128, 0.2);
+}
+
+.dropdown {
+  appearance: none;
+  padding: 0.5rem 2rem 0.5rem 0.6rem;
+  background-color: rgba(var(--color-white), 0.9);
+  background-image: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 13 9"%3E%3Cpath d="M2.45251 0.921058C1.50524 -0.0263097 0.557771 0.921058 0.557771 0.921058C0.557771 0.921058 -0.389597 1.86843 0.557771 2.81579L6.24198 8.5L11.9262 2.81579C12.8737 1.86841 11.9262 0.921058 11.9262 0.921058C11.9262 0.921058 10.9789 -0.0263226 10.0314 0.921058L6.24198 4.71053L2.45251 0.921058Z" fill="rgb(128,128,128)"/%3E%3C/svg%3E');
+  background-size: 0.5rem;
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+}
+
+.button-as-field,
+.dropdown,
+.multiselect {
+  border-radius: 0.35rem;
+
+  &:hover {
+    background-color: rgb(var(--color-white));
+    box-shadow: 0 0 5px rgba(0,0,0, 0.2);
+  }
+}
+
+.input,
+.textarea,
+.dropdown,
+.checkbox,
+.radio {
+  .error & {
+    border: 1px solid rgb(var(--color-error-text));
+  }
+}

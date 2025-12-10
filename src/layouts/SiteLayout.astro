@@ -1,0 +1,28 @@
+---
+import BaseLayout from '@layouts/BaseLayout.astro'
+import LayoutPageHeader from '@components/LayoutPageHeader.vue';
+import LayoutPageFooter from '@components/LayoutPageFooter.vue';
+// import Login from '@components/Login.vue'
+const isHome = Astro.url.pathname === '/';
+
+---
+
+<BaseLayout>
+  <div class="layout default">
+    <div id="fb-root" />
+    <!-- <GlobalError />
+    <CmsContentEditorBar v-if="canEdit" /> -->
+    <LayoutPageHeader />
+    <main class="main">
+      <slot />
+    </main>
+    <!-- <LayoutGlobalSponsors /> -->
+    <LayoutPageFooter />
+    <!-- <Modal id="session-unsubscribe">
+      <SessionUnsubscribeConfirm />
+    </Modal>
+    <Modal id="presence-checker">
+      <SessionPresenceChecker />
+    </Modal> -->
+  </div>
+</BaseLayout>

@@ -7,7 +7,9 @@
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "db": "cd pb && ./pocketbase serve"
+    "db": "cd pb && ./pocketbase serve",
+    "lint": "oxlint --type-aware",
+    "format": "oxfmt --write"
   },
   "dependencies": {
     "@astrojs/node": "^9.5.1",
