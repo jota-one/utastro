@@ -2,27 +2,45 @@
 import BaseLayout from '@layouts/BaseLayout.astro'
 import LayoutPageHeader from '@components/LayoutPageHeader.vue';
 import LayoutPageFooter from '@components/LayoutPageFooter.vue';
-// import Login from '@components/Login.vue'
-const isHome = Astro.url.pathname === '/';
 
+const isHome = Astro.url.pathname === '/';
 ---
 
 <BaseLayout>
   <div class="layout default">
     <div id="fb-root" />
-    <!-- <GlobalError />
-    <CmsContentEditorBar v-if="canEdit" /> -->
-    <LayoutPageHeader />
+    <LayoutPageHeader client:only="vue" />
     <main class="main">
       <slot />
     </main>
-    <!-- <LayoutGlobalSponsors /> -->
-    <LayoutPageFooter />
-    <!-- <Modal id="session-unsubscribe">
-      <SessionUnsubscribeConfirm />
-    </Modal>
-    <Modal id="presence-checker">
-      <SessionPresenceChecker />
-    </Modal> -->
+    <LayoutPageFooter client:load />
   </div>
 </BaseLayout>
+
+<style>
+  @import '@styles/_mediaquery.pcss';
+
+  .layout.default {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background: rgb(var(--color-bg));
+    mix-blend-mode: multiply;
+  }
+
+  .main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding-top: var(--size-gap-20);
+    padding-bottom: var(--size-gap-60);
+    z-index: 1;
+  }
+
+  @media (--m) {
+    .main {
+      padding-top: var(--size-gap-40);
+      padding-bottom: var(--size-gap-80);
+    }
+  }
+</style>

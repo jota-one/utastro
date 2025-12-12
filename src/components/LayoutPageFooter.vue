@@ -2,11 +2,11 @@
   <!-- <LayoutCitySponsors v-if="isCityPage" /> -->
   <footer class="footer">
     <div class="container">
-      <NuxtLink :href="homePage?.path" class="homepage-link" no-prefetch>
+      <a :href="homePage?.path" class="homepage-link" no-prefetch>
         <Logo class="logo" />
-      </NuxtLink>
+      </a>
       <nav class="navigation">
-        <NuxtLink
+        <a
           v-for="navItem in navigationItems"
           :key="navItem.path"
           no-prefetch
@@ -14,7 +14,7 @@
           class="link"
         >
           {{ navItem.label }}
-        </NuxtLink>
+      </a>
       </nav>
       <div class="bottom">
         <div class="social">
@@ -43,9 +43,9 @@
         </div>
         <div class="credits">
           &copy; 2010 - {{ new Date().getFullYear() }}
-          <NuxtLink to="/fr/contact" no-prefetch>
+          <a href="/fr/contact" no-prefetch>
             {{ t('common_main_credits') }}
-          </NuxtLink>
+          </a>
         </div>
       </div>
     </div>
@@ -54,6 +54,8 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import Logo from './Logo.vue'
+import Icon from './Icon.vue'
 
 // const { getI36n } = useI36n()
 // const { currentPage, homePage, navigation, pages } = useNavigation()

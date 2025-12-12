@@ -1,9 +1,13 @@
 ---
 import SiteLayout from '@layouts/SiteLayout.astro'
 import Hero from '@components/Hero.vue';
+import TextOn2Columns from '@components/TextOn2Columns.vue';
 ---
 
 <SiteLayout>
   <Hero client:load />
-  <h1>ÛTütütütütglü Astrogliglüban</h1>
+  <TextOn2Columns
+    column1='<p><b>Urban Training</b> te propose des cours <b>gratuits</b> alliant marche et exercices encadrés par un coach.</p><p>Cours libre <b>dès 16 ans</b></p>'
+    column2='<p>Pour y participer, choisis la ville, remplis le questionnaire santé et rendez-vous au lieu indiqué en tenue de sport.</p><p><b>Attention!</b> Pas de vestiaire ou de lieu pour déposer tes affaires.</p>'
+  />
 </SiteLayout>

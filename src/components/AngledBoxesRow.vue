@@ -8,7 +8,7 @@
         </div>
       </template>
     </div>
-    <ClientOnly v-if="scrollable && !isSingle && containerWidth < wrapperWidth">
+    <template v-if="scrollable && !isSingle && containerWidth < wrapperWidth">
       <nav v-if="withArrowNav" class="arrows">
         <button class="arrow prev" @click="scrollToBox(currentBoxIndex - 1)" />
         <button class="arrow next" @click="scrollToBox(currentBoxIndex + 1)" />
@@ -27,7 +27,7 @@
         <div ref="scrollBar" class="scrollbar" :style="scrollBarStyle" />
       </nav>
       <div :class="['gradient', { arrivedRight: arrivedState.right }]" />
-    </ClientOnly>
+    </template>
   </div>
 </template>
 

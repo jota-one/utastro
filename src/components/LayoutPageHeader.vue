@@ -7,16 +7,15 @@
       <LayoutHamburger :opened="menuOpened" @click="menuOpened = !menuOpened" />
       <div :class="['navigation-wrapper', { opened: menuOpened }]">
         <!-- <LayoutSubscriptionCounters v-if="isAuthenticated" class="counters" /> -->
-        <!-- <NuxtLink
-          v-if="subscriptionPage"
-          :href="subscriptionPage?.path"
+        <a
+          href="/fr/inscription"
           class="button primary"
           no-prefetch
           @click="closeMobileOverlay"
         >
-          {{ subscriptionPage?.label }}
-        </NuxtLink> -->
-        <!-- <button
+          Inscription
+        </a>
+        <button
           v-if="isAuthenticated"
           class="button tertiary"
           @click="onAuthButtonClick"
@@ -25,9 +24,9 @@
         </button>
         <button v-else class="button secondary" @click="onAuthButtonClick">
           {{ t('common_login') }}
-        </button> -->
+        </button>
         <nav class="navigation">
-          <NuxtLink
+          <a
             v-for="navItem in navigationItems"
             :key="navItem.path"
             no-prefetch
@@ -36,7 +35,7 @@
             @click="closeMobileOverlay"
           >
             {{ navItem.label }}
-          </NuxtLink>
+          </a>
           <div class="sep" />
           <!-- <select class="dropdown" @change="changeLang">
             <option
@@ -51,19 +50,23 @@
         </nav>
       </div>
     </div>
-    <!-- <Modal id="login">
+    <Modal id="login">
       <FormLogin
         @authenticated="onAuthenticated"
         @signup="closeModal('login')"
         @close="closeModal('login')"
       />
-    </Modal> -->
+    </Modal>
   </header>
 </template>
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import Logo from './Logo.vue'
+import LayoutHamburger from './LayoutHamburger.vue'
+import useModal from '../composables/useModal'
+import Modal from './Modal.vue'
+import FormLogin from './FormLogin.vue'
 
 // import type { Page } from '~'
 
@@ -74,9 +77,21 @@ import Logo from './Logo.vue'
 // const { langs } = useSettings()
 // const { isAuthenticated, logout } = useAuth()
 // const { currentPage, homePage, navigation, pages } = useNavigation()
-// const { modalParams, openModal, closeModal } = useModal()
+const { modalParams, openModal, closeModal, openedModal } = useModal()
 // const { $label: t } = getI36n()
+const t = (key: string) => {
+  return {
+    common_logout: 'Logout',
+    common_login: 'Connexion',
+  }[key] || key
+}
 
+const isAuthenticated = ref(false)
+
+// @todo: implement auth logic
+const logout = async () => {
+  isAuthenticated.value = false
+}
 const menuOpened = ref(false)
 const homePage = computed(() => ({
   path: '/',
@@ -97,11 +112,11 @@ const navigationItems = computed(() =>
   //     ni1.sort > ni2.sort ? 1 : ni1.sort === ni2.sort ? 0 : -1,
   //   ),
   [{
-    label: 'About',
-    path: '/about',
+    label: 'Mon compte',
+    path: '/fr/mon-compte',
   }, {
     label: 'Contact',
-    path: '/contact',
+    path: '/fr/contact',
   }]
 )
 
@@ -128,29 +143,31 @@ const navigationItems = computed(() =>
 //   }
 // }
 
-// const onAuthenticated = () => {
-//   if (modalParams.value.redirect) {
-//     router.push({ path: modalParams.value.redirect })
-//   }
+const onAuthenticated = () => {
+  if (modalParams.value.redirect) {
+    // @todo implement redirection logic
+    //router.push({ path: modalParams.value.redirect })
+  }
 
-//   closeModal('login')
-// }
+  closeModal('login')
+}
 
-// const onAuthButtonClick = async () => {
-//   let path = route.fullPath
+const onAuthButtonClick = async () => {
+  // let path = route.fullPath
 
-//   if (isAuthenticated.value) {
-//     await logout()
+  if (isAuthenticated.value) {
+    await logout()
 
-//     if (currentPage.value?.access !== 'all' && homePage.value) {
-//       path = homePage.value.path
-//     }
-//   } else {
-//     openModal('login')
-//   }
+    // @todo: implement redirection logic
+    // if (currentPage.value?.access !== 'all' && homePage.value) {
+    //   path = homePage.value.path
+    // }
+  } else {
+    openModal('login')
+  }
 
-//   router.push({ path })
-// }
+  // router.push({ path })
+}
 
 const closeMobileOverlay = () => {
   menuOpened.value = false
