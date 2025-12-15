@@ -2,11 +2,7 @@
   <div class="container">
     <div class="title">
       <component :is="'h1'">
-        <TextOnBg
-          v-for="(line, i) in text.split('\n')"
-          :key="`line-${i}`"
-          class="line"
-        >
+        <TextOnBg v-for="(line, i) in text.split('\n')" :key="`line-${i}`" class="line">
           {{ line }}
         </TextOnBg>
       </component>

@@ -22,13 +22,7 @@ export interface Marker {
   slug?: string
 }
 
-export type ColorTheme =
-  | 'error'
-  | 'info'
-  | 'warning'
-  | 'success'
-  | 'neutral'
-  | 'subscribed'
+export type ColorTheme = 'error' | 'info' | 'warning' | 'success' | 'neutral' | 'subscribed'
 export type LangCode = 'fr' | 'de' | 'en' | 'it' | 'es' | 'pt'
 export type I18nField = Record<LangCode, string>
 

@@ -3,13 +3,7 @@
     <AngledBoxesRow class="boxes" :boxes="['main', 'cta']">
       <template #box="{ item }">
         <div v-if="item === 'main'" class="main">
-          <img
-            class="bg-image"
-            decoding="async"
-            src="/img/hero.jpg"
-            width="100%"
-            height="100%"
-          />
+          <img class="bg-image" decoding="async" src="/img/hero.jpg" width="100%" height="100%" />
           <div class="bg-image-color" />
           <div class="bg-image-gradient" />
           <div class="headline">
@@ -37,11 +31,7 @@
         <div v-if="item === 'cta'" class="cta">
           <div class="wrapper">
             <img src="/img/map.jpg" class="map" />
-            <a
-              href="/"
-              class="button primary"
-              no-prefetch
-            >
+            <a href="/" class="button primary" no-prefetch>
               {{ subscribeButtonText }}
               <Icon name="marker" class="icon" />
             </a>

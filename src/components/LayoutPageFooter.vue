@@ -14,14 +14,11 @@
           class="link"
         >
           {{ navItem.label }}
-      </a>
+        </a>
       </nav>
       <div class="bottom">
         <div class="social">
-          <a
-            href="https://www.youtube.com/channel/UC253drkLYXxi-Il0StN_qxg"
-            target="_blank"
-          >
+          <a href="https://www.youtube.com/channel/UC253drkLYXxi-Il0StN_qxg" target="_blank">
             <Icon class="yt" name="youtube" />
           </a>
           <a

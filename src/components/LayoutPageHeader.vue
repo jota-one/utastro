@@ -7,19 +7,10 @@
       <LayoutHamburger :opened="menuOpened" @click="menuOpened = !menuOpened" />
       <div :class="['navigation-wrapper', { opened: menuOpened }]">
         <!-- <LayoutSubscriptionCounters v-if="isAuthenticated" class="counters" /> -->
-        <a
-          href="/fr/inscription"
-          class="button primary"
-          no-prefetch
-          @click="closeMobileOverlay"
-        >
+        <a href="/fr/inscription" class="button primary" no-prefetch @click="closeMobileOverlay">
           Inscription
         </a>
-        <button
-          v-if="isAuthenticated"
-          class="button tertiary"
-          @click="onAuthButtonClick"
-        >
+        <button v-if="isAuthenticated" class="button tertiary" @click="onAuthButtonClick">
           {{ t('common_logout') }}
         </button>
         <button v-else class="button secondary" @click="onAuthButtonClick">

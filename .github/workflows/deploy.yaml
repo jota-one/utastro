@@ -9,7 +9,6 @@ env:
   PB_PATH: pb
   ARTIFACT_NAME: dist
 
-
 jobs:
   deploy-db:
     name: Deploy Db

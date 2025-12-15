@@ -1,4 +1,4 @@
-import { computed, ref } from "vue"
+import { computed, ref } from 'vue'
 
 interface Modal {
   open: boolean
@@ -13,7 +13,7 @@ const modals = ref<Modals>({})
 
 export default function useModal() {
   const modalParams = ref<any>({})
-  
+
   const registerModal = (id: string) => {
     if (!modals.value[id]) {
       modals.value[id] = { open: false }
