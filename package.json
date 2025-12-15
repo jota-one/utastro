@@ -7,7 +7,7 @@
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "db": "cd pb && ./pocketbase serve",
+    "db": "cd pb && ./pocketbase serve --http=127.0.0.1:8091",
     "lint": "oxlint --type-aware",
     "format": "oxfmt --write"
   },
