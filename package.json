@@ -9,7 +9,10 @@
     "astro": "astro",
     "db": "cd pb && ./pocketbase serve --http=127.0.0.1:8091",
     "lint": "oxlint --type-aware",
-    "format": "oxfmt --write"
+    "format": "oxfmt --write",
+    "migrate:down": "cd pb && ./pocketbase migrate down",
+    "migrate:up": "cd pb && ./pocketbase migrate up",
+    "pb:build": "cd pb && go build -o pb-custom"
   },
   "dependencies": {
     "@astrojs/node": "^9.5.1",
