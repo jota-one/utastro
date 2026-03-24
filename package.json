@@ -15,7 +15,7 @@
     "pb:build": "cd pb && go build -o pb-custom"
   },
   "dependencies": {
-    "@astrojs/node": "^9.5.1",
+    "@astrojs/node": "^10.0.0",
     "@astrojs/vue": "^5.1.3",
     "@hcaptcha/vue3-hcaptcha": "^1.2.1",
     "@tailwindcss/vite": "^4.1.17",
