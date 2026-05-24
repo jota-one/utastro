@@ -4,6 +4,8 @@
     "paths": {
       "@assets/*": ["./src/assets/*"],
       "@components/*": ["./src/components/*"],
+      "@composables/*": ["./src/composables/*"],
+      "@config/*": ["./src/config/*"],
       "@layouts/*": ["./src/layouts/*"],
       "@styles/*": ["./src/styles/*"],
     },

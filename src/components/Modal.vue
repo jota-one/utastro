@@ -14,7 +14,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, watch, type PropType } from 'vue'
+import { onMounted, onUnmounted, watch, type PropType } from 'vue'
 
 import type { ColorTheme } from '../../'
 import useModal from '../composables/useModal'
@@ -46,18 +46,24 @@ const onEscape = (e: KeyboardEvent) => {
   }
 }
 
+watch(
+  () => openedModal.value,
+  value => {
+    if (props.id === value) {
+      document.addEventListener('keydown', onEscape)
+      emit('opened')
+    } else {
+      document.removeEventListener('keydown', onEscape)
+    }
+  },
+)
+
 onMounted(() => {
   registerModal(props.id)
+})
 
-  watch(
-    () => openedModal.value,
-    value => {
-      if (props.id === value) {
-        document.addEventListener('keydown', onEscape)
-        emit('opened')
-      }
-    },
-  )
+onUnmounted(() => {
+  document.removeEventListener('keydown', onEscape)
 })
 </script>
 

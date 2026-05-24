@@ -30,7 +30,9 @@ export default function useModal() {
   }
 
   const closeModal = (id: string) => {
-    modals.value[id].open = false
+    if (modals.value[id]) {
+      modals.value[id].open = false
+    }
   }
 
   return {
