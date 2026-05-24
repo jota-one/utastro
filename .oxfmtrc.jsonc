@@ -5,5 +5,5 @@
   "trailingComma": "all",
   "quoteProps": "as-needed",
   "arrowParens": "avoid",
-  "ignorePatterns": ["pb/pb_migrations"]
+  "ignorePatterns": ["pb/pb_migrations"],
 }

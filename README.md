@@ -73,7 +73,7 @@ pnpm format           # Format code with oxfmt
 
 - **ut_users** (auth collection)
   - Core fields: email, password, name, role, legacy_id
-  - Extended fields: street, npa, city, region, gender, birthdate, accept_* flags
+  - Extended fields: street, npa, city, region, gender, birthdate, accept\_\* flags
   - Built from legacy data via migrations + import commands
 
 ### Importing Data
@@ -115,7 +115,6 @@ cd pb
 - **Env file**: `.env.local` (git-ignored)
 - **Public config**: `src/config/index.ts` exposes `apiBaseUrl` from `PUBLIC_PB_BASE_URI`
 - **Default local**: `PUBLIC_PB_BASE_URI=http://localhost:8090` (set via `.env` or shell)
-
 
 ## Troubleshooting
 

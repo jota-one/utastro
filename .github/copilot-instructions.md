@@ -23,6 +23,7 @@ sqlite3 pb/pb_data/data.db "SELECT * FROM ut_users WHERE legacy_id = 18;"
 ```
 
 **Why this works:**
+
 - PocketBase stores data in SQLite at `pb/pb_data/data.db`
 - Direct SQLite queries bypass the HTTP API and show raw schema state
 - Fast feedback loop: run migration → immediate verification → iterate if needed
@@ -30,6 +31,7 @@ sqlite3 pb/pb_data/data.db "SELECT * FROM ut_users WHERE legacy_id = 18;"
 ### Common migration patterns
 
 **UPDATE with JOIN + COALESCE** (preferred for efficiency):
+
 ```javascript
 const sql = `
   UPDATE target_table
@@ -42,12 +44,14 @@ app.db().newQuery(sql).execute();
 ```
 
 This is more efficient than multiple correlated subqueries. Avoid:
+
 ```javascript
 // ❌ SLOW: one SELECT per column
 SET col1 = (SELECT ... LIMIT 1), col2 = (SELECT ... LIMIT 1), ...
 ```
 
 **Region ID mapping pattern:**
+
 ```javascript
 CASE region_id
   WHEN 8 THEN 'AG' WHEN 9 THEN 'AI' WHEN 10 THEN 'AR' WHEN 11 THEN 'BE'
@@ -58,6 +62,7 @@ END
 ```
 
 **MySQL → SQLite escaping:**
+
 - MySQL uses `\'` for literal single quote; SQLite expects `''`
 - Backticks (`` ` ``) are MySQL; SQLite uses double quotes or no quotes
 - Apply: `sql.replace(/\\'/g, "''").replace(/`/g, "")`
