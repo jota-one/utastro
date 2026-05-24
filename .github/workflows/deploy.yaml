@@ -34,6 +34,7 @@ jobs:
             --field repo=$repo \
             --field commit-sha=$commit_sha \
             --field pb-path=${{ env.PB_PATH }} \
+            --field branch=${{ github.ref_name }} \
             --field run-external-id=$run_external_id
           sleep 5
           gh run list -R jota-one/infra -L 10 --json name,databaseId,url | jq --arg n "$wf_name" '.[] | select(.name == $n)' > .wf_run
@@ -106,6 +107,7 @@ jobs:
             --field pb-path=${{ env.PB_PATH }} \
             --field build-artifact-name=${{ env.ARTIFACT_NAME }} \
             --field build-artifact-run-id=${{ github.run_id }} \
+            --field branch=${{ github.ref_name }} \
             --field run-external-id=$run_external_id
           sleep 5
           gh run list -R jota-one/infra -L 10 --json name,databaseId,url | jq --arg n "$wf_name" '.[] | select(.name == $n)' > .wf_run
