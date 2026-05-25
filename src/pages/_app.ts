@@ -1,9 +1,6 @@
-import { createApp } from 'vue'
-// import ElementPlus from "element-plus";
-// import "element-plus/dist/index.css";
+import type { App } from 'vue'
+import { setupI18n } from '../i18n'
 
-export default (App: any) => {
-  const app = createApp(App)
-  // app.use(ElementPlus);
-  return app
+export default (app: App) => {
+  setupI18n(app)
 }

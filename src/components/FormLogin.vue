@@ -92,7 +92,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, onMounted, reactive, ref } from 'vue'
+import { nextTick, onMounted, reactive, ref } from 'vue'
+import { useI36n } from '@jota-one/i36n'
 import AppErrorCode from '../../AppErrorCode'
 import ContentBlockTitle from './ContentBlockTitle.vue'
 import FormFieldWrapper from './FormFieldWrapper.vue'
@@ -100,15 +101,10 @@ import TipBox from './TipBox.vue'
 import ContentBlockSpace from './ContentBlockSpace.vue'
 import FormCaptcha from './FormCaptcha.vue'
 import config from '../config'
+import ArrowLink from './ArrowLink.vue'
 
 const { hcaptcha } = config
-// const { getI36n } = useI36n()
-// const { generateResetPasswordLink, login } = useAuth()
-// const { currentLangCode } = useSettings()
-// const { pages } = useNavigation()
-// const { loadUserProfile, loadUserSubscriptions } = useUserProfile()
-
-const t = computed(() => (key: string) => key) // @todo: implement i18n
+const { t } = useI36n()
 
 const emit = defineEmits(['authenticated', 'signup', 'close'])
 
@@ -160,7 +156,7 @@ async function onLogin() {
 
       if (e.data?.data?.code) {
         const code = e.data?.data?.code
-        resetPasswordError.value = t.value(AppErrorCode[code])
+        resetPasswordError.value = t(AppErrorCode[code])
       }
     }
   } else {
@@ -174,9 +170,9 @@ async function onLogin() {
     } catch (e: any) {
       if (e.data?.data?.code) {
         const code = e.data?.data?.code
-        error.value = t.value(AppErrorCode[code])
+        error.value = t(AppErrorCode[code])
       } else {
-        error.value = t.value('login_invalid_credentials')
+        error.value = t('login_invalid_credentials')
       }
     }
   }

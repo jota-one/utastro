@@ -17,6 +17,9 @@ importers:
       '@hcaptcha/vue3-hcaptcha':
         specifier: ^1.3.0
         version: 1.3.0(vue@3.5.34(typescript@6.0.3))
+      '@jota-one/i36n':
+        specifier: ^3.0.0
+        version: 3.0.0(vue@3.5.34(typescript@6.0.3))
       '@tailwindcss/vite':
         specifier: ^4.3.0
         version: 4.3.0(vite@7.3.3(jiti@2.7.0)(lightningcss@1.32.0)(yaml@2.9.0))
@@ -623,6 +626,14 @@ packages:
     engines: {node: ^18.17.0 || ^20.3.0 || >=21.0.0}
     cpu: [x64]
     os: [win32]
+
+  '@jota-one/i36n@3.0.0':
+    resolution: {integrity: sha512-MX+NXhG1euJMaUzljti0fisxCZ0Sf3SzZJt0152V3vWov1ECnwLqO5XWxGwEngp2l85Z+Pujz3J/hIhzkIyZyQ==}
+    peerDependencies:
+      vue: '>=3.0.5'
+
+  '@jota-one/replacer@0.4.0':
+    resolution: {integrity: sha512-I8BFZt7IeeWAxefeGW93q2Kh+OnWVu6GcB14r74USXmpnRcOt+i2pnLwptBfzw0R27LwZZq5C3AcpjSe4qJ7RQ==}
 
   '@jridgewell/gen-mapping@0.3.13':
     resolution: {integrity: sha512-2kkt/7niJ6MgEPxF0bYdQ6etZaA+fQvDcLKckhy1yIQOzaoKjBBjSj63/aLVjYE3qhRt5dvM+uUyfCg6UKCBbA==}
@@ -2324,6 +2335,9 @@ packages:
     resolution: {integrity: sha512-dWUG8F5sIIARXih1DTaQAX4SsiTXhInKf1buxdY9DIg4ZYPZK5nGM1VRIYmEbDbsHt7USo99xSLFu5Q1IqTmsg==}
     engines: {node: '>= 18'}
 
+  snarkdown@2.0.0:
+    resolution: {integrity: sha512-MgL/7k/AZdXCTJiNgrO7chgDqaB9FGM/1Tvlcenenb7div6obaDATzs16JhFyHHBGodHT3B7RzRc5qk8pFhg3A==}
+
   source-map-js@1.2.1:
     resolution: {integrity: sha512-UXWMKhLOwVKb728IUtQPXxfYU+usdybtUrK/8uGE8CQMvrhOpwvzDBwj0QhSL7MQc7vIsISBG8VQ8+IDQxpfQA==}
     engines: {node: '>=0.10.0'}
@@ -3186,6 +3200,14 @@ snapshots:
 
   '@img/sharp-win32-x64@0.34.5':
     optional: true
+
+  '@jota-one/i36n@3.0.0(vue@3.5.34(typescript@6.0.3))':
+    dependencies:
+      '@jota-one/replacer': 0.4.0
+      snarkdown: 2.0.0
+      vue: 3.5.34(typescript@6.0.3)
+
+  '@jota-one/replacer@0.4.0': {}
 
   '@jridgewell/gen-mapping@0.3.13':
     dependencies:
@@ -5107,6 +5129,8 @@ snapshots:
   sisteransi@1.0.5: {}
 
   smol-toml@1.6.1: {}
+
+  snarkdown@2.0.0: {}
 
   source-map-js@1.2.1: {}
 
