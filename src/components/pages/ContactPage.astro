@@ -1,0 +1,50 @@
+---
+import ContentBlockTitle from '@components/ContentBlockTitle.vue'
+import ContentBlockSpace from '@components/ContentBlockSpace.vue'
+import AddressBlock from '@components/AddressBlock.vue'
+
+interface Props {
+  lang: 'fr' | 'de' | 'en'
+}
+
+const { lang } = Astro.props as Props
+---
+
+{lang === 'fr' && (
+  <>
+    <ContentBlockTitle text="Contactez-nous!" />
+    <div class="container superslim">
+      <p>Pour participer aux cours, n'oubliez pas de remplir&nbsp;<a href="/fr/inscription">la fiche d'inscription</a>.<br />Vous pouvez directement joindre Mathieu pour toutes questions sur Urban Training.</p>
+    </div>
+    <AddressBlock person={{
+      firstName: 'Mathieu',
+      lastName: 'Gleyre',
+      title: 'Président et responsable Urban Training',
+      street: 'La Vy de Bottens 4',
+      zip: 1055,
+      city: 'Froideville',
+      phone: '+41 (0) 78 673 85 03',
+      email: 'administration@urban-training.ch',
+    }} />
+    <ContentBlockSpace size="half" />
+    <ContentBlockTitle text="Qui sommes-nous ?" />
+    <div class="container superslim">
+      <p>L'association Urban Training est une association sans but lucratif et d'intérêt public, régie par les présents statuts et subsidiairement par les articles 60 et suivants du Code civil suisse. Elle est politiquement neutre et confessionnellement indépendante.</p>
+      <p>Le siège de l'association est situé dans le Canton de Vaud.<br />Sa durée est indéterminée et a été fondée le 1 avril 2010.</p>
+    </div>
+    <ContentBlockSpace size="half" />
+    <ContentBlockTitle text="Buts" />
+    <div class="container superslim">
+      <p>L'association a pour but permettre à la population de faire gratuitement du sport du mois d'avril au mois d'octobre.<br />L'Urban Training consiste à faire des exercices de gym, sous la surveillance d'un coach professionnel, en utilisant le mobilier urbain.</p>
+      <p>Le président<br /><b>Mathieu Gleyre</b></p>
+    </div>
+  </>
+)}
+
+{lang === 'de' && (
+  <ContentBlockTitle text="Kontakt" />
+)}
+
+{lang === 'en' && (
+  <ContentBlockTitle text="Contact" />
+)}

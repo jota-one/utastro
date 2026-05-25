@@ -1,0 +1,18 @@
+---
+import PageLayout from '@layouts/PageLayout.astro'
+import ContactPage from '@components/pages/ContactPage.astro'
+
+export function getStaticPaths() {
+  return [
+    { params: { lang: 'fr', slug: 'contact' }, props: { page: 'contact', lang: 'fr' } },
+    { params: { lang: 'de', slug: 'kontakt' }, props: { page: 'contact', lang: 'de' } },
+    { params: { lang: 'en', slug: 'contact' }, props: { page: 'contact', lang: 'en' } },
+  ]
+}
+
+const { page, lang } = Astro.props
+---
+
+<PageLayout>
+  {page === 'contact' && <ContactPage lang={lang} />}
+</PageLayout>
