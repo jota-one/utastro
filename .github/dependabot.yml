@@ -10,7 +10,7 @@ updates:
           - minor
           - patch
     ignore:
-      - dependency-name: "*"
+      - dependency-name: '*'
         update-types:
           - version-update:semver-major
 
@@ -24,7 +24,7 @@ updates:
           - minor
           - patch
     ignore:
-      - dependency-name: "*"
+      - dependency-name: '*'
         update-types:
           - version-update:semver-major
 
@@ -38,6 +38,6 @@ updates:
           - minor
           - patch
     ignore:
-      - dependency-name: "*"
+      - dependency-name: '*'
         update-types:
           - version-update:semver-major

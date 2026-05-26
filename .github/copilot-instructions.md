@@ -39,8 +39,8 @@ const sql = `
       col2 = COALESCE(source.field2, target_table.col2)
   FROM source_table source
   WHERE source.key_col = target_table.legacy_id;
-`;
-app.db().newQuery(sql).execute();
+`
+app.db().newQuery(sql).execute()
 ```
 
 This is more efficient than multiple correlated subqueries. Avoid:
