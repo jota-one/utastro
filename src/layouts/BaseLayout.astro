@@ -1,10 +1,16 @@
 ---
 // import '@fontsource-variable/oswald'
 import '@styles/main.pcss'
+import type { LangCode } from '@/routes'
+
+interface Props {
+  lang?: LangCode
+}
+const { lang = 'fr' } = Astro.props
 ---
 
 <!doctype html>
-<html lang="fr">
+<html lang={lang}>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />

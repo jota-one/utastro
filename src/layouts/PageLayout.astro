@@ -1,8 +1,14 @@
 ---
 import SiteLayout from "./SiteLayout.astro";
+import type { LangCode } from '@/routes'
+
+interface Props {
+  lang?: LangCode
+}
+const { lang } = Astro.props
 ---
 
-<SiteLayout navBg="bg-black/80">
+<SiteLayout {lang}>
     <main class="container mt-20 mx-auto py-8">
       <slot />
     </main>

@@ -7,6 +7,8 @@ export type Lang = (typeof SUPPORTED)[number]
 
 export function detectLang(): Lang {
   if (typeof window === 'undefined') return 'fr'
+  const docLang = document.documentElement.lang
+  if ((SUPPORTED as readonly string[]).includes(docLang)) return docLang as Lang
   const stored = localStorage.getItem(STORAGE_KEY)
   if (stored && (SUPPORTED as readonly string[]).includes(stored)) return stored as Lang
   const browser = navigator.language.split('-')[0]

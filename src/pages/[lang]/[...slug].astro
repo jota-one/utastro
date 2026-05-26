@@ -1,18 +1,19 @@
 ---
 import PageLayout from '@layouts/PageLayout.astro'
+import StubPage from '@components/pages/StubPage.astro'
 import ContactPage from '@components/pages/ContactPage.astro'
+import { getStaticPagePaths } from '@/routes'
+import type { PageName, LangCode } from '@/routes'
 
-export function getStaticPaths() {
-  return [
-    { params: { lang: 'fr', slug: 'contact' }, props: { page: 'contact', lang: 'fr' } },
-    { params: { lang: 'de', slug: 'kontakt' }, props: { page: 'contact', lang: 'de' } },
-    { params: { lang: 'en', slug: 'contact' }, props: { page: 'contact', lang: 'en' } },
-  ]
-}
+export const getStaticPaths = getStaticPagePaths
 
-const { page, lang } = Astro.props
+const { page, lang } = Astro.props as { page: PageName; lang: LangCode }
 ---
 
-<PageLayout>
-  {page === 'contact' && <ContactPage lang={lang} />}
+<PageLayout {lang}>
+  {page === 'contact' ? (
+    <ContactPage lang={lang} />
+  ) : (
+    <StubPage name={page} lang={lang} />
+  )}
 </PageLayout>

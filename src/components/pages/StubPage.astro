@@ -1,0 +1,19 @@
+---
+interface Props {
+  name: string
+  lang: string
+}
+const { name, lang } = Astro.props
+---
+<div class="stub">
+  <p>[stub] <strong>{name}</strong> <small>({lang})</small></p>
+</div>
+
+<style>
+  .stub {
+    padding: 4rem 2rem;
+    text-align: center;
+    color: #aaa;
+    font-size: 0.9rem;
+  }
+</style>

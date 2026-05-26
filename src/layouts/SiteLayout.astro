@@ -2,18 +2,22 @@
 import BaseLayout from '@layouts/BaseLayout.astro'
 import LayoutPageHeader from '@components/LayoutPageHeader.vue';
 import LayoutPageFooter from '@components/LayoutPageFooter.vue';
+import type { LangCode } from '@/routes'
 
-const isHome = Astro.url.pathname === '/';
+interface Props {
+  lang?: LangCode
+}
+const { lang } = Astro.props
 ---
 
-<BaseLayout>
+<BaseLayout {lang}>
   <div class="layout default">
     <div id="fb-root" />
     <LayoutPageHeader client:only="vue" />
     <main class="main">
       <slot />
     </main>
-    <LayoutPageFooter client:load />
+    <LayoutPageFooter client:only="vue" />
   </div>
 </BaseLayout>
 
