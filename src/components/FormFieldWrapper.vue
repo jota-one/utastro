@@ -13,8 +13,8 @@
 </template>
 
 <script setup lang="ts">
-import FormOptional from './FormOptional.vue';
-import FormRequired from './FormRequired.vue';
+import FormOptional from './FormOptional.vue'
+import FormRequired from './FormRequired.vue'
 
 defineProps({
   icon: {

@@ -24,9 +24,7 @@ onBeforeUnmount(() => {
 watch(
   () => props.active,
   active => {
-    window.document.documentElement.style.overflow = active
-      ? 'hidden'
-      : 'initial'
+    window.document.documentElement.style.overflow = active ? 'hidden' : 'initial'
   },
   { immediate: true },
 )

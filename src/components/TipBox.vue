@@ -11,7 +11,7 @@
 <script setup lang="ts">
 import { computed, type PropType } from 'vue'
 
-import type { ColorTheme } from '../../'
+import type { ColorTheme } from '@/types'
 import Icon from './Icon.vue'
 
 defineEmits(['close'])

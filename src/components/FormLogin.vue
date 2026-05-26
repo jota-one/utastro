@@ -81,7 +81,7 @@
         </div>
         <div class="row">
           <ArrowLink
-            href="/fr/inscription/formulaire"
+            :href="route('subscription-form')"
             :label="t('login_action_signup')"
             @click="$emit('signup')"
           />
@@ -94,17 +94,22 @@
 <script setup lang="ts">
 import { nextTick, onMounted, reactive, ref } from 'vue'
 import { useI36n } from '@jota-one/i36n'
-import AppErrorCode from '../../AppErrorCode'
+import { useAuth } from '@composables/useAuth'
+import AppErrorCode from '@/AppErrorCode'
 import ContentBlockTitle from './ContentBlockTitle.vue'
 import FormFieldWrapper from './FormFieldWrapper.vue'
 import TipBox from './TipBox.vue'
 import ContentBlockSpace from './ContentBlockSpace.vue'
 import FormCaptcha from './FormCaptcha.vue'
-import config from '../config'
+import config from '@/config'
 import ArrowLink from './ArrowLink.vue'
+
+import { useRoutes } from '@composables/useRoutes'
 
 const { hcaptcha } = config
 const { t } = useI36n()
+const { login } = useAuth()
+const { route } = useRoutes()
 
 const emit = defineEmits(['authenticated', 'signup', 'close'])
 
@@ -161,16 +166,11 @@ async function onLogin() {
     }
   } else {
     try {
-      // await login(credentials)
-
+      await login(credentials)
       emit('authenticated')
-
-      // await loadUserProfile()
-      // await loadUserSubscriptions()
     } catch (e: any) {
       if (e.data?.data?.code) {
-        const code = e.data?.data?.code
-        error.value = t(AppErrorCode[code])
+        error.value = t(AppErrorCode[e.data.data.code])
       } else {
         error.value = t('login_invalid_credentials')
       }

@@ -3,7 +3,7 @@
 </template>
 
 <script setup lang="ts">
-import type { BlockSpaceSize } from '../../'
+import type { BlockSpaceSize } from '@/types'
 
 interface Props {
   size: BlockSpaceSize

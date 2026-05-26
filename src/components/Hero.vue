@@ -31,7 +31,7 @@
         <div v-if="item === 'cta'" class="cta">
           <div class="wrapper">
             <img src="/img/map.jpg" class="map" />
-            <a href="/" class="button primary" no-prefetch>
+            <a :href="route('subscription')" class="button primary" no-prefetch>
               {{ subscribeButtonText }}
               <Icon name="marker" class="icon" />
             </a>
@@ -46,7 +46,15 @@
         src="https://www.youtube.com/embed/VOSzfnBBnsc"
         title="YouTube video player"
         frameborder="0"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        allow="
+          accelerometer;
+          autoplay;
+          clipboard-write;
+          encrypted-media;
+          gyroscope;
+          picture-in-picture;
+          web-share;
+        "
         allowfullscreen
       ></iframe>
       <button class="close-button" tabindex="-1" @click="viewVideo = false">
@@ -57,37 +65,28 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-import AngledBoxesRow from './AngledBoxesRow.vue';
-import TextOnBg from './TextOnBg.vue';
-import Icon from './Icon.vue';
+import { ref } from 'vue'
+import AngledBoxesRow from './AngledBoxesRow.vue'
+import TextOnBg from './TextOnBg.vue'
+import Icon from './Icon.vue'
+import { useRoutes } from '@composables/useRoutes'
 
-// const { pages } = useNavigation()
+type Props = {
+  headlineTextLines?: string[]
+  headlineHighlightTextLines?: string[]
+  subscribeButtonText?: string
+  vignetteText?: string
+}
 
-defineProps({
-  headlineHighlightTextLines: {
-    type: Array<string>,
-    default: () => [],
-  },
-  subscribeButtonText: {
-    type: String,
-    default: '',
-  },
-  vignetteText: {
-    type: String,
-    default: '',
-  },
-})
+const {
+  headlineTextLines = [],
+  headlineHighlightTextLines = [],
+  subscribeButtonText = '',
+  vignetteText = '',
+} = defineProps<Props>()
 
-const headlineTextLines = ["Marche et exercices","en plein air"]
-const headlineHighlightTextLines = ["pour tous"]
-const subscribeButtonText = "Inscris-toi!"
-const vignetteText = "Gratuit!"
-
+const { route } = useRoutes()
 const viewVideo = ref(false)
-// const subscriptionPage = computed(() =>
-//   Object.values(pages.value).find(page => page.name === 'subscription'),
-// )
 </script>
 
 <style lang="postcss" scoped>
@@ -140,11 +139,7 @@ const viewVideo = ref(false)
 }
 
 .bg-image-gradient {
-  background-image: linear-gradient(
-    0,
-    rgba(var(--color-black), 0.7),
-    transparent 50%
-  );
+  background-image: linear-gradient(0, rgba(var(--color-black), 0.7), transparent 50%);
   mix-blend-mode: multiply;
 }
 

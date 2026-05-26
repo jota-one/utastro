@@ -2,7 +2,7 @@
   <!-- <LayoutCitySponsors v-if="isCityPage" /> -->
   <footer class="footer">
     <div class="container">
-      <a :href="homePage?.path" class="homepage-link" no-prefetch>
+      <a :href="route('home')" class="homepage-link" no-prefetch>
         <Logo class="logo" />
       </a>
       <nav class="navigation">
@@ -40,7 +40,7 @@
         </div>
         <div class="credits">
           &copy; 2010 - {{ new Date().getFullYear() }}
-          <a href="/fr/contact" no-prefetch>
+          <a :href="route('contact')" no-prefetch>
             {{ t('common_main_credits') }}
           </a>
         </div>
@@ -50,44 +50,13 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { useI36n } from '@jota-one/i36n'
 import Logo from './Logo.vue'
 import Icon from './Icon.vue'
+import { useRoutes } from '@composables/useRoutes'
 
-// const { getI36n } = useI36n()
-// const { currentPage, homePage, navigation, pages } = useNavigation()
-// const { $label: t } = getI36n()
-const homePage = computed(() => ({
-  path: '/',
-}))
-
-const navigationItems = computed(() =>
-  // navigation.value
-  //   .filter(page => page.show !== 'never')
-  //   .sort((ni1, ni2) =>
-  //     ni1.sort > ni2.sort ? 1 : ni1.sort === ni2.sort ? 0 : -1,
-  //   ),
-  [{
-    label: 'About',
-    path: '/about',
-  }, {
-    label: 'Contact',
-    path: '/contact',
-  }]
-)
-
-const t = (key: string) => {
-  const translations: Record<string, string> = {
-    common_main_credits: 'All rights reserved.',
-  }
-  return translations[key] || key
-}
-
-// const cityPage = computed(() =>
-//   Object.values(pages.value).find(page => page.name === 'city'),
-// )
-
-// const isCityPage = computed(() => currentPage.value?.id === cityPage.value?.id)
+const { t } = useI36n()
+const { route, navItems: navigationItems } = useRoutes()
 </script>
 
 <style lang="postcss" scoped>

@@ -1,14 +1,19 @@
 <template>
   <header class="header">
     <div class="container">
-      <a :href="homePage?.path" class="logo" no-prefetch>
+      <a :href="route('home')" class="logo" no-prefetch>
         <Logo boxed />
       </a>
       <LayoutHamburger :opened="menuOpened" @click="menuOpened = !menuOpened" />
       <div :class="['navigation-wrapper', { opened: menuOpened }]">
-        <!-- <LayoutSubscriptionCounters v-if="isAuthenticated" class="counters" /> -->
-        <a href="/fr/inscription" class="button primary" no-prefetch @click="closeMobileOverlay">
-          Inscription
+        <LayoutSubscriptionCounters v-if="isAuthenticated" class="counters" />
+        <a
+          :href="route('subscription')"
+          class="button primary"
+          no-prefetch
+          @click="closeMobileOverlay"
+        >
+          {{ label('subscription') }}
         </a>
         <button v-if="isAuthenticated" class="button tertiary" @click="onAuthButtonClick">
           {{ t('common_logout') }}
@@ -52,64 +57,23 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { ref } from 'vue'
+import { useI36n } from '@jota-one/i36n'
 import Logo from './Logo.vue'
 import LayoutHamburger from './LayoutHamburger.vue'
-import useModal from '../composables/useModal'
+import LayoutSubscriptionCounters from './LayoutSubscriptionCounters.vue'
+import useModal from '@composables/useModal'
 import Modal from './Modal.vue'
 import FormLogin from './FormLogin.vue'
+import { useAuth } from '@composables/useAuth'
+import { useRoutes } from '@composables/useRoutes'
 
-// import type { Page } from '~'
+const { t } = useI36n()
+const { modalParams, openModal, closeModal } = useModal()
+const { isAuthenticated, logout } = useAuth()
+const { route, label, navItems: navigationItems } = useRoutes()
 
-// const { api } = useRuntimeConfig().public
-// const { getI36n } = useI36n()
-// const route = useRoute()
-// const router = useRouter()
-// const { langs } = useSettings()
-// const { isAuthenticated, logout } = useAuth()
-// const { currentPage, homePage, navigation, pages } = useNavigation()
-const { modalParams, openModal, closeModal, openedModal } = useModal()
-// const { $label: t } = getI36n()
-const t = (key: string) => {
-  return {
-    common_logout: 'Logout',
-    common_login: 'Connexion',
-  }[key] || key
-}
-
-const isAuthenticated = ref(false)
-
-// @todo: implement auth logic
-const logout = async () => {
-  isAuthenticated.value = false
-}
 const menuOpened = ref(false)
-const homePage = computed(() => ({
-  path: '/',
-}))
-
-// const subscriptionPage = computed(() =>
-//   Object.values(pages.value).find(page => page.name === 'subscription'),
-// )
-
-const navigationItems = computed(() =>
-  // navigation.value
-  //   .filter(
-  //     page =>
-  //       page.show !== 'never' &&
-  //       ![subscriptionPage.value?.id].includes(page.pageId),
-  //   )
-  //   .sort((ni1, ni2) =>
-  //     ni1.sort > ni2.sort ? 1 : ni1.sort === ni2.sort ? 0 : -1,
-  //   ),
-  [{
-    label: 'Mon compte',
-    path: '/fr/mon-compte',
-  }, {
-    label: 'Contact',
-    path: '/fr/contact',
-  }]
-)
 
 // const changeLang = async (e: Event) => {
 //   const pageId = currentPage.value?.id
@@ -144,20 +108,13 @@ const onAuthenticated = () => {
 }
 
 const onAuthButtonClick = async () => {
-  // let path = route.fullPath
-
   if (isAuthenticated.value) {
-    await logout()
+    logout()
 
     // @todo: implement redirection logic
-    // if (currentPage.value?.access !== 'all' && homePage.value) {
-    //   path = homePage.value.path
-    // }
   } else {
     openModal('login')
   }
-
-  // router.push({ path })
 }
 
 const closeMobileOverlay = () => {

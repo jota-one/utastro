@@ -11,7 +11,7 @@
 </template>
 
 <script setup lang="ts">
-import TextOnBg from './TextOnBg.vue';
+import TextOnBg from './TextOnBg.vue'
 
 defineProps({
   text: {

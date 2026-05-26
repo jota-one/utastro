@@ -16,8 +16,8 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, watch, type PropType } from 'vue'
 
-import type { ColorTheme } from '../../'
-import useModal from '../composables/useModal'
+import type { ColorTheme } from '@/types'
+import useModal from '@composables/useModal'
 import Icon from './Icon.vue'
 import LayoutOverlay from './LayoutOverlay.vue'
 
