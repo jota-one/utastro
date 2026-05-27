@@ -15,6 +15,7 @@ func main() {
 
 	// Register custom import commands
 	app.RootCmd.AddCommand(commands.ImportDataCommand(app))
+	app.RootCmd.AddCommand(commands.ImportAllDataCommand(app))
 	app.RootCmd.AddCommand(commands.ImportUsersCommand(app))
 
 	// Serve static files from pb_public (same as default pocketbase binary)

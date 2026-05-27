@@ -27,8 +27,9 @@ pnpm-debug.log*
 pb/pb_data
 pb/pb_public
 pb/pocketbase
-pb/sql_import_sources
 pb/pb-custom
 
 # sources
-src/sql_import_sources
+pb/sql_import_sources
+pb/json_import_sources
+src/json_import_sources

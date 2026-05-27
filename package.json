@@ -12,7 +12,9 @@
     "format": "oxfmt --write",
     "migrate:down": "cd pb && ./pocketbase migrate down",
     "migrate:up": "cd pb && ./pocketbase migrate up",
-    "pb:build": "cd pb-tools && go build -o ../pb/pb-custom"
+    "pb:build": "cd pb-tools && go build -o ../pb/pb-custom",
+    "pb:import-all": "cd pb && ./pb-custom import-all-data",
+    "ut:import-users": "cd pb && ./pb-custom import-users"
   },
   "dependencies": {
     "@astrojs/node": "^10.1.1",
