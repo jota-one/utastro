@@ -71,7 +71,7 @@ jobs:
 
       - name: Prepare artifact
         run: |
-          mkdir _artifact && cp -r ${{ env.PB_PATH }} pb_tools _artifact
+          mkdir _artifact && cp -r ${{ env.PB_PATH }} pb-tools _artifact
 
       - name: Upload artifact
         uses: actions/upload-artifact@v7
