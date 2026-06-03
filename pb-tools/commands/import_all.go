@@ -19,7 +19,7 @@ func ImportAllDataCommand(app *pocketbase.PocketBase) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "import-all-data",
 		Short:   "Bulk import all JSON files from a directory into their respective tables",
-		Example: `  pb-custom import-all-data --dir=sql_import_sources`,
+		Example: `  pb-custom import-all-data --input=sql_import_sources`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			entries, err := os.ReadDir(dir)
 			if err != nil {
@@ -44,7 +44,7 @@ func ImportAllDataCommand(app *pocketbase.PocketBase) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVar(&dir, "dir", "json_import_sources", "Directory containing JSON files")
+	cmd.Flags().StringVar(&dir, "input", "json_import_sources", "Directory containing JSON files")
 	cmd.Flags().IntVar(&chunkSize, "chunk-size", 1000, "Number of records per transaction")
 
 	return cmd
