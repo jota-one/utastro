@@ -71,7 +71,7 @@ jobs:
 
       - name: Prepare artifact
         run: |
-          mkdir _artifact && cp -r ${{ env.PB_PATH }} _artifact
+          mkdir _artifact && cp -r ${{ env.PB_PATH }} pb_tools _artifact
 
       - name: Upload artifact
         uses: actions/upload-artifact@v7
@@ -89,7 +89,7 @@ jobs:
         uses: actions/create-github-app-token@v3
         id: app-token
         with:
-          app-id: ${{ secrets.JOTA_INFRA_APP_ID }}
+          client-id: ${{ secrets.JOTA_INFRA_APP_ID }}
           private-key: ${{ secrets.JOTA_INFRA_APP_PRIVATE_KEY }}
           owner: jota-one
 
