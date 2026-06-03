@@ -36,10 +36,24 @@ jobs:
             --field pb-path=${{ env.PB_PATH }} \
             --field branch=${{ github.ref_name }} \
             --field run-external-id=$run_external_id
-          sleep 5
-          gh run list -R jota-one/infra -L 10 --json name,databaseId,url | jq --arg n "$wf_name" '.[] | select(.name == $n)' > .wf_run
-          run_id=$(cat .wf_run | jq '.databaseId')
-          run_url=$(cat .wf_run | jq '.url')
+
+          echo "Waiting for workflow run to appear..."
+          for i in {1..12}; do
+            sleep 5
+            gh run list -R jota-one/infra -L 10 --json name,databaseId,url | jq --arg n "$wf_name" '.[] | select(.name == $n)' > .wf_run
+            if [ -s .wf_run ]; then
+              break
+            fi
+            echo "Attempt $i: run not found yet, retrying..."
+          done
+
+          if [ ! -s .wf_run ]; then
+            echo "Failed to find workflow run after 60 seconds"
+            exit 1
+          fi
+
+          run_id=$(cat .wf_run | jq -r '.databaseId')
+          run_url=$(cat .wf_run | jq -r '.url')
           echo "Watching workflow run $run_url"
           gh run watch $run_id --repo jota-one/infra --compact --exit-status 1
 
@@ -109,9 +123,23 @@ jobs:
             --field build-artifact-run-id=${{ github.run_id }} \
             --field branch=${{ github.ref_name }} \
             --field run-external-id=$run_external_id
-          sleep 5
-          gh run list -R jota-one/infra -L 10 --json name,databaseId,url | jq --arg n "$wf_name" '.[] | select(.name == $n)' > .wf_run
-          run_id=$(cat .wf_run | jq '.databaseId')
-          run_url=$(cat .wf_run | jq '.url')
+
+          echo "Waiting for workflow run to appear..."
+          for i in {1..12}; do
+            sleep 5
+            gh run list -R jota-one/infra -L 10 --json name,databaseId,url | jq --arg n "$wf_name" '.[] | select(.name == $n)' > .wf_run
+            if [ -s .wf_run ]; then
+              break
+            fi
+            echo "Attempt $i: run not found yet, retrying..."
+          done
+
+          if [ ! -s .wf_run ]; then
+            echo "Failed to find workflow run after 60 seconds"
+            exit 1
+          fi
+
+          run_id=$(cat .wf_run | jq -r '.databaseId')
+          run_url=$(cat .wf_run | jq -r '.url')
           echo "Watching workflow run $run_url"
           gh run watch $run_id --repo jota-one/infra --compact --exit-status 1
