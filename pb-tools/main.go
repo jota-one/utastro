@@ -18,6 +18,7 @@ func main() {
 	app.RootCmd.AddCommand(commands.ImportAllDataCommand(app))
 	app.RootCmd.AddCommand(commands.ImportUsersCommand(app))
 	app.RootCmd.AddCommand(commands.ImportCitiesCommand(app))
+	app.RootCmd.AddCommand(commands.ImportEventsCommand(app))
 
 	// Serve static files from pb_public (same as default pocketbase binary)
 	app.OnServe().BindFunc(func(se *core.ServeEvent) error {
