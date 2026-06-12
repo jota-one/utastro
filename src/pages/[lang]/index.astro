@@ -6,8 +6,10 @@ import ContentBlockSpace from '@components/ContentBlockSpace.vue'
 import ContentBlockTitle from '@components/ContentBlockTitle.vue'
 import SessionsView from '@components/SessionsView.vue'
 import ArrowLink from '@components/ArrowLink.vue'
+import Teasers from '@components/Teasers.vue'
 import { LANGS, getPath } from '@/routes'
 import type { LangCode } from '@/routes'
+import type { Teaser } from '@/types'
 
 export function getStaticPaths() {
   return LANGS.map(lang => ({ params: { lang }, props: { lang } }))
@@ -54,6 +56,17 @@ const allSessionsLabels: Record<LangCode, string> = {
 }
 
 const subscriptionPath = getPath('subscription', lang)
+const coachFormPath = getPath('coach-subscription-form', lang)
+
+const coachTeasers: Teaser[] = lang === 'fr' ? [
+  {
+    tags: [{ id: 1, label: 'Job' }],
+    title: 'Recherche coaches',
+    description: "<b>T'es sympa? Motivant? Souriant?</b><p>Alors rejoins-nous pour faire bouger la Suisse!</p>",
+    link: { href: coachFormPath, label: 'Envoie ton CV' },
+    displayTargets: [],
+  },
+] : []
 
 const textColumns = {
   column1: '<p><b>Urban Training</b> te propose des cours <b>gratuits</b> alliant marche et exercices encadrés par un coach.</p><p>Cours libre <b>dès 16 ans</b></p>',
@@ -74,6 +87,7 @@ const textColumns = {
     <ArrowLink as-button href={subscriptionPath} label={allSessionsLabels[lang]} />
   </div>
   <ContentBlockSpace size='half' />
+  <Teasers client:only="vue" teasers={coachTeasers} />
 </SiteLayout>
 
 <style>
