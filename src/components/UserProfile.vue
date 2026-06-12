@@ -229,10 +229,10 @@ if (isAuthenticated.value) {
   padding: 0.25rem 1rem;
   margin-top: 1px;
   background: rgb(var(--color-primary));
-}
 
-.arrow-link {
-  color: rgb(var(--color-white));
+  .arrow-link {
+    color: rgb(var(--color-white));
+  }
 }
 
 .coach-tab-icon {
