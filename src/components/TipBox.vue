@@ -9,18 +9,20 @@
 </template>
 
 <script setup lang="ts">
-import { computed, type PropType } from 'vue'
-
+import { computed } from 'vue'
+import Icon from '@/components/Icon.vue'
 import type { ColorTheme } from '@/types'
-import Icon from './Icon.vue'
 
 defineEmits(['close'])
-const props = defineProps({
-  colorTheme: {
-    type: String as PropType<ColorTheme>,
-    default: '',
-  },
-  closeable: Boolean,
+
+type Props = {
+  colorTheme?: ColorTheme
+  closeable?: boolean
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  colorTheme: undefined,
+  closeable: false,
 })
 
 const iconName = computed(() => {

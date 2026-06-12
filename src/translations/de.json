@@ -200,6 +200,8 @@
   "subscriptionform_emergency_contact_label": "Kontaktperson (Name und Telefon) im Notfall",
   "subscriptionform_emergency_contact_placeholder": "Thobias, 079 123 45 67",
   "subscriptionform_empty_required_fields": "Einige Pflichtfelder sind nicht ausgefüllt",
+  "subscriptionform_name_label": "Vollständiger Name",
+  "subscriptionform_name_placeholder": "Dein Vor- und Nachname",
   "subscriptionform_firstname_label": "Vorname",
   "subscriptionform_firstname_placeholder": "Dein Vorname",
   "subscriptionform_gender_female_label": "wiblich",

@@ -1,24 +1,24 @@
 <template>
-  <span class="required">
-    {{ t('common_required') }}
+  <span class="optional">
+    {{ t('common_optional') }}
   </span>
 </template>
 
 <script setup lang="ts">
-import { useI36n } from '@jota-one/i36n'
-const { t } = useI36n()
+const { getI36n } = useI36n()
+const { $label: t } = getI36n()
 </script>
 
 <style lang="postcss" scoped>
-.required {
+.optional {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   padding: 4px 8px;
   font-size: 0.7rem;
   font-weight: 500;
-  color: rgb(var(--color-error-text));
+  color: rgb(var(--color-info));
   border-radius: 3px;
-  background: rgb(var(--color-error-bg));
+  background: rgb(var(--color-info-bg));
 }
 </style>

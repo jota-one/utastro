@@ -1,0 +1,11 @@
+---
+import UserProfile from '@components/UserProfile.vue'
+
+interface Props {
+  lang: 'fr' | 'de' | 'en'
+}
+
+const { lang } = Astro.props as Props
+---
+
+<UserProfile client:only="vue" :lang="lang" />

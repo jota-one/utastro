@@ -310,6 +310,8 @@
   "subscriptionform_emergency_contact_label": "Contact (nom et téléphone) en cas d’urgence",
   "subscriptionform_emergency_contact_placeholder": "Laurence, 079 123 45 67",
   "subscriptionform_empty_required_fields": "Certains champs obligatoires ne sont pas remplis.",
+  "subscriptionform_name_label": "Nom complet",
+  "subscriptionform_name_placeholder": "Ton prénom et nom de famille",
   "subscriptionform_firstname_label": "Prénom",
   "subscriptionform_firstname_placeholder": "Ton prénom",
   "subscriptionform_gender_female_label": "Féminin",

@@ -5,8 +5,8 @@
 </template>
 
 <script setup lang="ts">
-import { useI36n } from '@jota-one/i36n'
-const { t } = useI36n()
+const { getI36n } = useI36n()
+const { $label: t } = getI36n()
 </script>
 
 <style lang="postcss" scoped>

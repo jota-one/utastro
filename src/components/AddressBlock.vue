@@ -7,7 +7,7 @@
       <div class="city">{{ person.zip }} {{ person.city }}</div>
       <div v-if="person.phone" class="phone">{{ person.phone }}</div>
       <div class="email">
-        <a :href="`mailto:${person.email}`">{{ person.email }}</a>
+        <a href="`mailto:${person.email}`">{{ person.email }}</a>
       </div>
     </div>
   </div>

@@ -6,11 +6,14 @@ const user = ref<Record<string, any> | null>(pb.authStore.record)
 const userJwt = useSessionStorage('ut_jwt', '')
 
 if (userJwt.value && !pb.authStore.isValid) {
-  pb.authStore.save(userJwt.value, user.value)
+  pb.authStore.save(userJwt.value, user.value as any)
 }
 
 export function useAuth() {
   const isAuthenticated = computed(() => userJwt.value.length > 0 && pb.authStore.isValid)
+  const isAdminUser = computed(() => user.value?.role === 'admin')
+  const isStaffUser = computed(() => user.value?.role === 'staff' || isAdminUser.value)
+  const userId = computed(() => user.value?.id)
 
   const login = async (credentials: { email: string; password: string }) => {
     const data = await pb.send('/api/custom/auth/login', {
@@ -33,6 +36,9 @@ export function useAuth() {
 
   return {
     isAuthenticated,
+    isAdminUser,
+    isStaffUser,
+    userId,
     login,
     logout,
     user,

@@ -2,6 +2,7 @@
 import PageLayout from '@layouts/PageLayout.astro'
 import StubPage from '@components/pages/StubPage.astro'
 import ContactPage from '@components/pages/ContactPage.astro'
+import MyAccountPage from '@components/pages/MyAccountPage.astro'
 import { getStaticPagePaths } from '@/routes'
 import type { PageName, LangCode } from '@/routes'
 
@@ -13,6 +14,8 @@ const { page, lang } = Astro.props as { page: PageName; lang: LangCode }
 <PageLayout {lang}>
   {page === 'contact' ? (
     <ContactPage lang={lang} />
+  ) : page === 'my-account' ? (
+    <MyAccountPage lang={lang} />
   ) : (
     <StubPage name={page} lang={lang} />
   )}

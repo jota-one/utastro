@@ -205,6 +205,8 @@
   "subscriptionform_emergency_contact_label": "Emergency contact (name and phone)",
   "subscriptionform_emergency_contact_placeholder": "John, 079 123 45 67",
   "subscriptionform_empty_required_fields": "Some mandatory fields are empty",
+  "subscriptionform_name_label": "Full name",
+  "subscriptionform_name_placeholder": "Your first and last name",
   "subscriptionform_firstname_label": "First name",
   "subscriptionform_firstname_placeholder": "Your first name",
   "subscriptionform_gender_female_label": "female",

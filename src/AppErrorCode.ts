@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 enum AppErrorCode {
   ERROR_HC_USER_ACTIVATION_TOKEN_EXPIRED,
   ERROR_HC_USER_ALREADY_EXISTS,
