@@ -1,0 +1,89 @@
+---
+export const prerender = false
+
+import SiteLayout from '@layouts/SiteLayout.astro'
+import ContentBlockTitle from '@components/ContentBlockTitle.vue'
+import ContentBlockSpace from '@components/ContentBlockSpace.vue'
+import SessionsView from '@components/SessionsView.vue'
+import ArrowLink from '@components/ArrowLink.vue'
+import { getPath, LANGS } from '@/routes'
+import { pb } from '@/pb'
+import type { LangCode } from '@/routes'
+import type { City, Coords } from '@/types'
+
+const { lang, parent, city: citySlug } = Astro.params as {
+  lang: LangCode
+  parent: string
+  city: string
+}
+
+if (!LANGS.includes(lang)) {
+  return Astro.redirect('/fr')
+}
+
+const subscriptionPath = getPath('subscription', lang)
+const expectedParent = subscriptionPath.replace(`/${lang}/`, '')
+
+if (parent !== expectedParent) {
+  return new Response(null, { status: 404 })
+}
+
+let city: City | null = null
+try {
+  const record = await pb.collection('ut_cities').getFirstListItem(
+    `slug="${citySlug}" && enabled=true`,
+    { fields: 'id,label,slug,coords' },
+  )
+  const [lat, lng] = (record.coords || '').split(',').map(Number)
+  city = {
+    id: record.id,
+    label: record.label,
+    slug: record.slug,
+    coords: [lat || 0, lng || 0] as Coords,
+    sponsors: [],
+  }
+} catch {
+  return new Response(null, { status: 404 })
+}
+
+const pageTitles: Record<LangCode, string> = {
+  fr: `Prochaines sessions à ${city.label}`,
+  de: `Nächste Sessions in ${city.label}`,
+  en: `Next sessions in ${city.label}`,
+}
+
+const mapsUrl = `https://www.google.com/maps?q=${city.coords.join(',')}`
+
+const backLinkLabels: Record<LangCode, string> = {
+  fr: 'Toutes les sessions',
+  de: 'Alle Sessions',
+  en: 'All sessions',
+}
+---
+
+<SiteLayout {lang}>
+  <ContentBlockTitle text={pageTitles[lang]} />
+  <div class="maps-link container slim">
+    <a href={mapsUrl} target="_blank" rel="noopener noreferrer" class="button secondary">
+      {lang === 'fr' ? 'Voir sur la carte' : lang === 'de' ? 'Auf der Karte anzeigen' : 'Open on map'}
+    </a>
+  </div>
+  <ContentBlockSpace size="half" />
+  <SessionsView client:only="vue" asideType="citySubscription" city={city} />
+  <ContentBlockSpace size="half" />
+  <div class="back-link">
+    <ArrowLink reverse as-button href={subscriptionPath} label={backLinkLabels[lang]} />
+  </div>
+  <ContentBlockSpace size="half" />
+</SiteLayout>
+
+<style>
+.maps-link {
+  padding-top: 1rem;
+}
+
+.back-link {
+  display: flex;
+  justify-content: center;
+}
+</style>

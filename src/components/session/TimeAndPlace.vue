@@ -39,9 +39,11 @@
 import { computed } from 'vue'
 import { useCities } from '@/composables/useCities'
 import { useSessions } from '@/composables/useSessions'
+import { getPath } from '@/routes'
 import Icon from '@/components/Icon.vue'
 import Badge from '@/components/Badge.vue'
 import type { Session } from '@/types'
+import type { LangCode } from '@/routes'
 
 interface Props {
   session: Session
@@ -60,9 +62,9 @@ const startTime = computed(() => getTime(props.session.start))
 const endTime = computed(() => props.session.end && getTime(props.session.end))
 
 const getCityPageHref = () => {
-  const lang = window.location.pathname.split('/').filter(Boolean)[0] || 'fr'
+  const lang = (window.location.pathname.split('/').filter(Boolean)[0] || 'fr') as LangCode
   const slug = cities.value[props.session.cityId]?.slug
-  return slug ? `/${lang}/city/${slug}` : undefined
+  return slug ? `${getPath('subscription', lang)}/${slug}` : undefined
 }
 
 const colorTheme = computed(() =>

@@ -21,16 +21,15 @@ export interface UserSubscriptions {
 
 const userProfile = ref<UserProfile | null>(null)
 const userSubscriptions = ref<UserSubscriptions | null>(null)
+let loadSubscriptionsPromise: Promise<void> | null = null
 
 export const useUserProfile = () => {
   const { isAuthenticated, userId } = useAuth()
 
-  const loadUserSubscriptions = async () => {
-    if (!userId.value) {
-      return
-    }
-
-    const [cityRecords, subRecords] = await Promise.all([
+  const loadUserSubscriptions = (): Promise<void> => {
+    if (!userId.value) { return Promise.resolve() }
+    if (loadSubscriptionsPromise) { return loadSubscriptionsPromise }
+    loadSubscriptionsPromise = Promise.all([
       pb.collection('ut_city_watchers').getFullList({
         filter: `user="${userId.value}"`,
         fields: 'id,city',
@@ -39,17 +38,20 @@ export const useUserProfile = () => {
         filter: `user="${userId.value}"`,
         fields: 'id,event,is_event_admin',
       }),
-    ])
-
-    userSubscriptions.value = {
-      cities: cityRecords.map(r => ({ id: r.id, cityId: r.city })),
-      sessions: subRecords
-        .filter(r => !r.is_event_admin)
-        .map(r => ({ id: r.id, eventId: r.event })),
-      coachingSessions: subRecords
-        .filter(r => r.is_event_admin)
-        .map(r => ({ id: r.id, eventId: r.event })),
-    }
+    ]).then(([cityRecords, subRecords]) => {
+      userSubscriptions.value = {
+        cities: cityRecords.map(r => ({ id: r.id, cityId: r.city })),
+        sessions: subRecords
+          .filter(r => !r.is_event_admin)
+          .map(r => ({ id: r.id, eventId: r.event })),
+        coachingSessions: subRecords
+          .filter(r => r.is_event_admin)
+          .map(r => ({ id: r.id, eventId: r.event })),
+      }
+    }).finally(() => {
+      loadSubscriptionsPromise = null
+    })
+    return loadSubscriptionsPromise
   }
 
   const loadUserProfile = async () => {

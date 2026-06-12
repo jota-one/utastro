@@ -123,6 +123,8 @@ import { useUserProfile } from '@/composables/useUserProfile'
 import { useSessions } from '@/composables/useSessions'
 import { useCities } from '@/composables/useCities'
 import { useI36n } from '@jota-one/i36n'
+import { getPath } from '@/routes'
+import type { LangCode } from '@/routes'
 
 const { isAuthenticated, isAdminUser, isStaffUser } = useAuth()
 const {
@@ -170,8 +172,8 @@ const unwatchedCities = computed(() =>
 )
 
 const getCityPageLink = (city: City) => {
-  const lang = window.location.pathname.split('/').filter(Boolean)[0] || 'fr'
-  return `/${lang}/city/${city.slug}`
+  const lang = (window.location.pathname.split('/').filter(Boolean)[0] || 'fr') as LangCode
+  return `${getPath('subscription', lang)}/${city.slug}`
 }
 
 const watchCitiesAndClearDropdown = () => {
