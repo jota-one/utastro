@@ -6,7 +6,14 @@
       </a>
       <LayoutHamburger :opened="menuOpened" @click="menuOpened = !menuOpened" />
       <div :class="['navigation-wrapper', { opened: menuOpened }]">
-        <LayoutSubscriptionCounters v-if="isAuthenticated" class="counters" />
+        <LayoutSubscriptionCounters
+        v-if="isAuthenticated"
+        :cities-count="citiesCount"
+        :subscribed-sessions-count="subscribedSessionsCount"
+        :coach-sessions-count="coachSessionsCount"
+        :show-coach="isStaffUser"
+        class="counters"
+      />
         <a
           :href="route('subscription')"
           class="button primary"
@@ -57,7 +64,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useI36n } from '@jota-one/i36n'
 import Logo from './Logo.vue'
 import LayoutHamburger from './LayoutHamburger.vue'
@@ -66,12 +73,32 @@ import useModal from '@composables/useModal'
 import Modal from './Modal.vue'
 import FormLogin from './FormLogin.vue'
 import { useAuth } from '@composables/useAuth'
+import { useUserProfile } from '@composables/useUserProfile'
+import { useCities } from '@composables/useCities'
 import { useRoutes } from '@composables/useRoutes'
 
 const { t } = useI36n()
 const { modalParams, openModal, closeModal } = useModal()
-const { isAuthenticated, logout } = useAuth()
+const { isAuthenticated, isStaffUser, logout } = useAuth()
+const { watchingCities, subscribedSessions, coachingSessions, loadUserSubscriptions } = useUserProfile()
+const { cities, loadCities } = useCities()
 const { route, label, navItems: navigationItems } = useRoutes()
+
+const citiesCount = computed(
+  () => watchingCities.value.filter(w => !!cities.value[w.cityId]).length,
+)
+const subscribedSessionsCount = computed(() => subscribedSessions.value.length)
+const coachSessionsCount = computed(() => coachingSessions.value.length)
+
+loadCities()
+
+if (isAuthenticated.value) {
+  loadUserSubscriptions()
+}
+
+watch(isAuthenticated, (val) => {
+  if (val) { loadUserSubscriptions() }
+})
 
 const menuOpened = ref(false)
 
