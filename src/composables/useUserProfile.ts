@@ -4,8 +4,8 @@ import { useAuth } from '@/composables/useAuth'
 import { pb } from '@/pb'
 
 export interface EventSubscription {
-  id: number
-  eventId: number
+  id: string
+  eventId: string
 }
 
 export interface CityWatcher {
@@ -30,15 +30,25 @@ export const useUserProfile = () => {
       return
     }
 
-    const records = await pb.collection('ut_city_watchers').getFullList({
-      filter: `user="${userId.value}"`,
-      fields: 'id,city',
-    })
+    const [cityRecords, subRecords] = await Promise.all([
+      pb.collection('ut_city_watchers').getFullList({
+        filter: `user="${userId.value}"`,
+        fields: 'id,city',
+      }),
+      pb.collection('ut_subscriptions').getFullList({
+        filter: `user="${userId.value}"`,
+        fields: 'id,event,is_event_admin',
+      }),
+    ])
 
     userSubscriptions.value = {
-      cities: records.map(r => ({ id: r.id, cityId: r.city })),
-      coachingSessions: [],
-      sessions: [],
+      cities: cityRecords.map(r => ({ id: r.id, cityId: r.city })),
+      sessions: subRecords
+        .filter(r => !r.is_event_admin)
+        .map(r => ({ id: r.id, eventId: r.event })),
+      coachingSessions: subRecords
+        .filter(r => r.is_event_admin)
+        .map(r => ({ id: r.id, eventId: r.event })),
     }
   }
 

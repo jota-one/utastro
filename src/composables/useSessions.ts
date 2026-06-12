@@ -4,12 +4,14 @@ import useDateRange from '@/composables/useDateRange'
 import { useCities } from '@/composables/useCities'
 import { useAuth } from '@/composables/useAuth'
 import { useUserProfile } from '@/composables/useUserProfile'
+import { useSettings } from '@/composables/useSettings'
 import { pb } from '@/pb'
 
 import type {
   Attendee,
   City,
   ColorTheme,
+  Coords,
   DateRange,
   DateRangeSize,
   Session,
@@ -27,6 +29,37 @@ const sessionMatchesTags = (session: Session, filteredTags: Tag[]) =>
     (session.tags || []).map((t: Tag) => t.id).includes(tag.id),
   )
 
+const mapRecordToSession = (r: Record<string, any>, lang: string): Session => {
+  const loc = r.expand?.location
+  const coordParts = (loc?.coords || '').split(',').map(Number)
+  return {
+    id: r.id,
+    title: r[`title_${lang}`] || r.title_fr || '',
+    location: {
+      label: loc?.[`label_${lang}`] || loc?.label_fr || '',
+      coords: [coordParts[0] || 0, coordParts[1] || 0] as Coords,
+      address: loc?.address || '',
+    },
+    cityId: r.city,
+    start: new Date(r.start_date),
+    end: r.end_date ? new Date(r.end_date) : undefined,
+    subscriptions: {
+      starting: r.subscription_publish_date ? new Date(r.subscription_publish_date) : undefined,
+      max: r.max_subscriptions || 0,
+      currentCount: r.subscription_count || 0,
+      staffCount: r.staff_count || 0,
+    },
+    tags: (r.expand?.types || []).map((t: Record<string, any>) => ({
+      id: t.id,
+      label: t[`label_${lang}`] || t.label_fr || t.xid,
+    })),
+    moreInfo: r[`description_${lang}`] || r.description_fr || undefined,
+    paused: r.progress === 'paused' ? r.progress : null,
+    cancelled: r.progress === 'cancelled' ? r.progress : null,
+    attendees: (r.attendees || 'todo') as SessionAttendeesStatus,
+  }
+}
+
 const sessions = ref<Session[] | null>(null)
 const sessionsLoaded = ref(false)
 const sessionDetail = ref<Session | null>(null)
@@ -43,21 +76,37 @@ export const useSessions = () => {
   const { getDay, getWeek, getMonth } = useDateRange()
   const { filteredCities } = useCities()
 
-  const loadSession = async (_sessionId: number | undefined): Promise<void> => {
-    // TODO: load from PocketBase sessions collection (not yet created)
+  const loadSession = async (sessionId: string | undefined): Promise<void> => {
+    if (!sessionId) {
+      return
+    }
+    const { currentLangCode } = useSettings()
+    const record = await pb.collection('ut_events').getOne(sessionId, {
+      expand: 'location,types',
+    })
+    sessionDetail.value = mapRecordToSession(record, currentLangCode.value)
   }
 
-  const loadAttendees = async (_sessionId: number | undefined): Promise<void> => {
+  const loadAttendees = async (_sessionId: string | undefined): Promise<void> => {
     // TODO: load from PocketBase once attendance feature is implemented
   }
 
   const loadSessions = async () => {
-    // TODO: load from PocketBase sessions collection (not yet created)
-    sessions.value = []
+    const { currentLangCode } = useSettings()
+    const { from, to } = sessionsDateRange.value
+    const fromStr = from.format('YYYY-MM-DD HH:mm:ss')
+    const toStr = to.format('YYYY-MM-DD HH:mm:ss')
+
+    const records = await pb.collection('ut_events').getFullList({
+      filter: `start_date >= "${fromStr}" && start_date < "${toStr}"`,
+      expand: 'location,types',
+    })
+
+    sessions.value = records.map(r => mapRecordToSession(r, currentLangCode.value))
     sessionsLoaded.value = true
   }
 
-  const updateSessionCount = (sessionId: number, count: number, asStaff?: boolean) => {
+  const updateSessionCount = (sessionId: string, count: number, asStaff?: boolean) => {
     if (sessions.value) {
       sessions.value = sessions.value.map(session => {
         if (session.id === sessionId) {
@@ -80,12 +129,42 @@ export const useSessions = () => {
     }
   }
 
-  const subscribeToSession = async (_sessionId: number, _asStaff?: boolean) => {
-    // TODO: implement with PocketBase
+  const subscribeToSession = async (sessionId: string, asStaff?: boolean) => {
+    const { userId } = useAuth()
+    if (!userId.value) {
+      return
+    }
+    await pb.collection('ut_subscriptions').create({
+      user: userId.value,
+      event: sessionId,
+      is_event_admin: asStaff || false,
+    })
+    const session = sessions.value?.find(s => s.id === sessionId)
+    const newCount = asStaff
+      ? (session?.subscriptions.staffCount || 0) + 1
+      : (session?.subscriptions.currentCount || 0) + 1
+    updateSessionCount(sessionId, newCount, asStaff)
+    await useUserProfile().loadUserSubscriptions()
   }
 
-  const unsubscribeFromSession = async (_sessionId: number, _asStaff?: boolean) => {
-    // TODO: implement with PocketBase
+  const unsubscribeFromSession = async (sessionId: string, asStaff?: boolean) => {
+    const { userId } = useAuth()
+    if (!userId.value) {
+      return
+    }
+    const { subscribedSessions, coachingSessions } = useUserProfile()
+    const list = asStaff ? coachingSessions.value : subscribedSessions.value
+    const sub = list.find(s => s.eventId === sessionId)
+    if (!sub) {
+      return
+    }
+    await pb.collection('ut_subscriptions').delete(sub.id)
+    const session = sessions.value?.find(s => s.id === sessionId)
+    const newCount = asStaff
+      ? Math.max((session?.subscriptions.staffCount || 1) - 1, 0)
+      : Math.max((session?.subscriptions.currentCount || 1) - 1, 0)
+    updateSessionCount(sessionId, newCount, asStaff)
+    await useUserProfile().loadUserSubscriptions()
   }
 
   const watchCities = async (cityIds: string[]) => {

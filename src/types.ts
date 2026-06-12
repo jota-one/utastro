@@ -48,7 +48,7 @@ export interface Page {
 }
 
 export interface Tag {
-  id: number
+  id: string
   label: string
 }
 
@@ -141,7 +141,7 @@ export interface SessionSubscriptions {
 export type SessionAttendeesStatus = 'todo' | 'checked' | 'disabled'
 
 export interface Session {
-  id: number
+  id: string
   title: string
   location: SessionLocation
   cityId: string
