@@ -13,7 +13,7 @@ export default defineConfig({
     ...(process.env.NODE_ENV === 'production'
       ? {
           ssr: {
-            noExternal: ['vue', 'pocketbase', '@primevue/themes', '@primeuix/themes'],
+            noExternal: ['vue', 'pocketbase', '@primevue/themes', '@primeuix/themes', '@jota-one/i36n', '@vueuse/core', '@hcaptcha/vue3-hcaptcha'],
           },
         }
       : {}),
