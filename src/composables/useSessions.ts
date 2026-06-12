@@ -61,6 +61,7 @@ const mapRecordToSession = (r: Record<string, any>, lang: string): Session => {
 }
 
 const sessions = ref<Session[] | null>(null)
+const profileSessions = ref<Session[] | null>(null)
 const sessionsLoaded = ref(false)
 const sessionDetail = ref<Session | null>(null)
 const sessionAttendees = ref<Attendee[] | null>(null)
@@ -85,6 +86,20 @@ export const useSessions = () => {
       expand: 'location,types',
     })
     sessionDetail.value = mapRecordToSession(record, currentLangCode.value)
+  }
+
+  const loadSessionsByIds = async (ids: string[]): Promise<void> => {
+    if (!ids.length) {
+      profileSessions.value = []
+      return
+    }
+    const { currentLangCode } = useSettings()
+    const filter = ids.map(id => `id="${id}"`).join(' || ')
+    const records = await pb.collection('ut_events').getFullList({
+      filter,
+      expand: 'location,types',
+    })
+    profileSessions.value = records.map(r => mapRecordToSession(r, currentLangCode.value))
   }
 
   const loadAttendees = async (_sessionId: string | undefined): Promise<void> => {
@@ -241,6 +256,7 @@ export const useSessions = () => {
 
   return {
     filteredTags,
+    profileSessions,
     sessionAttendees,
     sessionAttendeesStatus,
     sessionDetail,
@@ -258,6 +274,7 @@ export const useSessions = () => {
     loadAttendees,
     loadSession,
     loadSessions,
+    loadSessionsByIds,
     sessionMatchesCities,
     sessionMatchesTags,
     subscribeToSession,

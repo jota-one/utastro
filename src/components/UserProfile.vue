@@ -133,7 +133,7 @@ const {
   loadUserProfile,
   loadUserSubscriptions,
 } = useUserProfile()
-const { sessions, loadSessions, unwatchCity, watchCities } = useSessions()
+const { profileSessions, loadSessionsByIds, unwatchCity, watchCities } = useSessions()
 const { cities, loadCities } = useCities()
 const { t } = useI36n()
 
@@ -154,17 +154,7 @@ const adminLink = computed(() => {
   return `/${lang}/admin`
 })
 
-const userSubscribedSessions = computed(() => {
-  let userSessions = subscribedSessions.value || []
-
-  if (isStaffUser) {
-    userSessions = [...userSessions, ...coachingSessions.value]
-  }
-
-  return sessions.value?.filter(session =>
-    userSessions.map(subscription => subscription.eventId).includes(session.id),
-  )
-})
+const userSubscribedSessions = computed(() => profileSessions.value ?? [])
 
 const userWatchingCities = computed(() =>
   watchingCities.value
@@ -206,9 +196,14 @@ onMounted(() => {
 
 if (isAuthenticated.value) {
   loadUserProfile()
-  loadUserSubscriptions()
   loadCities()
-  loadSessions()
+  loadUserSubscriptions().then(() => {
+    const ids = [
+      ...(subscribedSessions.value || []).map(s => s.eventId),
+      ...(isStaffUser ? (coachingSessions.value || []).map(s => s.eventId) : []),
+    ]
+    loadSessionsByIds(ids)
+  })
 }
 </script>
 
