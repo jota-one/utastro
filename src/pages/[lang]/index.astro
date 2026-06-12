@@ -4,7 +4,9 @@ import Hero from '@components/Hero.vue'
 import TextOn2Columns from '@components/TextOn2Columns.vue'
 import ContentBlockSpace from '@components/ContentBlockSpace.vue'
 import ContentBlockTitle from '@components/ContentBlockTitle.vue'
-import { LANGS } from '@/routes'
+import SessionsView from '@components/SessionsView.vue'
+import ArrowLink from '@components/ArrowLink.vue'
+import { LANGS, getPath } from '@/routes'
 import type { LangCode } from '@/routes'
 
 export function getStaticPaths() {
@@ -45,6 +47,14 @@ const sessionsTitles: Record<LangCode, string> = {
   en: 'Next sessions',
 }
 
+const allSessionsLabels: Record<LangCode, string> = {
+  fr: 'Toutes les sessions',
+  de: 'Alle Sessions',
+  en: 'All sessions',
+}
+
+const subscriptionPath = getPath('subscription', lang)
+
 const textColumns = {
   column1: '<p><b>Urban Training</b> te propose des cours <b>gratuits</b> alliant marche et exercices encadrés par un coach.</p><p>Cours libre <b>dès 16 ans</b></p>',
   column2: '<p>Pour y participer, choisis la ville, remplis le questionnaire santé et rendez-vous au lieu indiqué en tenue de sport.</p><p><b>Attention!</b> Pas de vestiaire ou de lieu pour déposer tes affaires.</p><p><b>Les cours Urban Training ont lieux par tous les temps!</b></p>',
@@ -58,4 +68,17 @@ const textColumns = {
   )}
   <ContentBlockSpace size='half' />
   <ContentBlockTitle text={sessionsTitles[lang]} />
+  <SessionsView client:only="vue" asideType="facebookLink" initialDateRangeSize="week" listMax={10} />
+  <ContentBlockSpace size='half' />
+  <div class="all-sessions-link">
+    <ArrowLink as-button href={subscriptionPath} label={allSessionsLabels[lang]} />
+  </div>
+  <ContentBlockSpace size='half' />
 </SiteLayout>
+
+<style>
+.all-sessions-link {
+  display: flex;
+  justify-content: center;
+}
+</style>
