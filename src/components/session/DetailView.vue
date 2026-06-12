@@ -43,7 +43,7 @@
               rel="noopener noreferrer"
               class="button secondary"
             >
-              {{ t('common_open_map') || 'Voir sur la carte' }}
+              {{ t('common_open_map') }}
             </a>
           </div>
 
