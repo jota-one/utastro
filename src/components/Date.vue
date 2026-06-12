@@ -11,6 +11,8 @@ import type { PropType } from 'vue'
 
 import type { Session } from '@/types'
 import { pad } from '@/utils/format'
+import { computed } from 'vue'
+import { useLocaleDate } from '@/composables/useLocaleDate'
 
 const props = defineProps({
   session: {

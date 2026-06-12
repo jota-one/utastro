@@ -9,7 +9,7 @@ export default function useDateRange() {
   const { currentLangCode } = useSettings()
   const { getLocaleDate } = useLocaleDate()
   const { getI36n } = useI36n()
-  const { $label: t } = getI36n()
+  const { t } = getI36n()
 
   const _addWeek = (date: Dayjs): Dayjs => getLocaleDate(date).endOf('week')
 
@@ -114,9 +114,9 @@ export default function useDateRange() {
 
       if (withArticle) {
         if (isNow(range, rangeSize)) {
-          text = t.value('common_today')
+          text = t('common_today')
         } else if (isNow(getPreviousDay(range.from), rangeSize)) {
-          text = t.value('common_tomorrow')
+          text = t('common_tomorrow')
         } else {
           text =
             (currentLangCode.value === 'fr'
@@ -138,9 +138,9 @@ export default function useDateRange() {
 
       if (withArticle) {
         if (isNow(range, rangeSize)) {
-          text = t.value('common_this_week')
+          text = t('common_this_week')
         } else if (isNow(getPreviousWeek(range.from), rangeSize)) {
-          text = t.value('common_next_week')
+          text = t('common_next_week')
         } else {
           text =
             (currentLangCode.value === 'fr'
@@ -155,9 +155,9 @@ export default function useDateRange() {
 
       if (withArticle) {
         if (isNow(range, rangeSize)) {
-          text = t.value('common_this_month')
+          text = t('common_this_month')
         } else if (isNow(getPreviousMonth(range.from), rangeSize)) {
-          text = t.value('common_next_month')
+          text = t('common_next_month')
         } else {
           text =
             (currentLangCode.value === 'fr'
