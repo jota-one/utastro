@@ -1,0 +1,11 @@
+---
+import SessionsView from '@components/SessionsView.vue'
+
+interface Props {
+  lang: 'fr' | 'de' | 'en'
+}
+
+const { lang } = Astro.props as Props
+---
+
+<SessionsView client:only="vue" asideType="facebookLink" initialDateRangeSize="month" />

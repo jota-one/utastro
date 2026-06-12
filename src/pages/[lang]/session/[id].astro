@@ -1,0 +1,13 @@
+---
+export const prerender = false
+
+import PageLayout from '@layouts/PageLayout.astro'
+import SessionDetailView from '@components/session/DetailView.vue'
+import type { LangCode } from '@/routes'
+
+const { lang, id } = Astro.params as { lang: LangCode; id: string }
+---
+
+<PageLayout lang={lang}>
+  <SessionDetailView client:only="vue" session-id={id} />
+</PageLayout>
