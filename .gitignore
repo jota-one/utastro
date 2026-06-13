@@ -29,6 +29,11 @@ pb/pb_public
 pb/pocketbase
 pb/pb-custom
 
+# k6 load tests
+tests/load/.env
+tests/load/test-users.json
+tests/load/results.json
+
 # sources
 pb/sql_import_sources
 pb/json_import_sources
