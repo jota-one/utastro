@@ -76,6 +76,37 @@ pnpm format           # Format code with oxfmt
   - Extended fields: street, npa, city, region, gender, birthdate, accept\_\* flags
   - Built from legacy data via migrations + import commands
 
+### Exporting from legacy MariaDB (urban-training prod)
+
+The script `scripts/export-mariadb.sh` connects to the production MariaDB via a Kubernetes port-forward and exports selected tables as JSON into `pb/json_import_sources/`.
+
+**Prerequisites** (checked automatically at startup):
+- `kubectl` configured with access to the cluster
+- `mysql-client` — installed automatically via `brew install mysql-client` if missing
+- `python3`
+- `fzf` — optional, enables interactive multi-select; falls back to a numbered list
+
+**Usage:**
+
+```bash
+./scripts/export-mariadb.sh
+```
+
+The script will prompt for:
+1. Path to the `urban-training` repo (default: `../urban-training`)
+2. kubectl context (default: `ut-prod`)
+3. MariaDB user (`istvan` or `joel`)
+4. Password — stored in macOS Keychain on first run, retrieved silently afterwards
+
+Then opens an interactive table picker (fzf or numbered list) and exports each selected table to `pb/json_import_sources/<table>.json`, overwriting any existing file. The JSON format matches the phpMyAdmin export format expected by `import-data`.
+
+**Keychain entry format:** `urban-training-mariadb` / `___UT_PROD_ISTVAN` (service / account)
+
+To reset a stored password:
+```bash
+security delete-generic-password -s "urban-training-mariadb" -a "___UT_PROD_ISTVAN"
+```
+
 ### Importing Data
 
 Raw data (table exported as JSON from phpMyAdmin) are processed via custom Go commands:
