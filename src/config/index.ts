@@ -1,5 +1,6 @@
 export default {
   apiBaseUrl: import.meta.env.PUBLIC_PB_BASE_URI,
+  astroBaseUri: import.meta.env.PUBLIC_ASTRO_BASE_URI,
 
   // API Configuration
   apiPrefix: import.meta.env.PUBLIC_API_PREFIX || '/api',

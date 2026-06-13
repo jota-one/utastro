@@ -99,7 +99,7 @@ import TipBox from '@components/TipBox.vue'
 import type { CaptchaModel } from '@/types'
 
 const { t } = useI36n()
-const { hcaptcha } = config
+const { hcaptcha, astroBaseUri } = config
 
 const submitted = ref(false)
 const submitting = ref(false)
@@ -149,7 +149,7 @@ const submit = async () => {
     formData.append('captchaToken', captchaModel.value.token)
     fileList.value.forEach(f => formData.append('files', f))
 
-    const res = await fetch('/app/coaches', { method: 'POST', body: formData })
+    const res = await fetch(astroBaseUri + '/app/coaches', { method: 'POST', body: formData })
 
     if (!res.ok) {
       throw new Error(`HTTP ${res.status}`)
