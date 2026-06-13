@@ -25,11 +25,7 @@ export default {
   },
 
   // Email & Communication
-  mandrill: {
-    apiKey: import.meta.env.MANDRILL_API_KEY,
-  },
-  webmasterEmail: import.meta.env.WEBMASTER_EMAIL || 'administration@urban-training.ch',
-
+  webmasterEmail: import.meta.env.WEBMASTER_EMAIL || 'juniors@jota.one',
   // Feature Flags
   presenceCheckValidation: import.meta.env.PUBLIC_PRESENCE_CHECK_VALIDATION === 'true',
   dateRangeNav: import.meta.env.PUBLIC_DATE_RANGE_NAV === 'true',

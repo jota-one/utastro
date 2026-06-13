@@ -1,6 +1,10 @@
 // @ts-check
 import tailwindcss from '@tailwindcss/vite'
 import { defineConfig } from 'astro/config'
+import { loadEnv } from 'vite'
+
+const env = loadEnv('development', process.cwd(), '')
+Object.assign(process.env, env)
 
 import vue from '@astrojs/vue'
 
