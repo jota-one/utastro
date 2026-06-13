@@ -14,6 +14,7 @@
               </div>
             </template>
           </SessionCityWatchWidget>
+          <FacebookWidget v-if="asideType === 'facebookWidget'" />
           <SessionAsideWidget
             v-if="asideType === 'facebookLink'"
             :title="t('sessions_aside_facebook_title')"
@@ -80,12 +81,13 @@ import SessionList from '@/components/session/List.vue'
 import SessionAsideWidget from '@/components/session/AsideWidget.vue'
 import SessionCityWatchWidget from '@/components/session/CityWatchWidget.vue'
 import SessionUnsubscribeConfirm from '@/components/session/UnsubscribeConfirm.vue'
+import FacebookWidget from '@/components/FacebookWidget.vue'
 import Modal from '@/components/Modal.vue'
 import Badge from '@/components/Badge.vue'
 import ArrowLink from '@/components/ArrowLink.vue'
 import type { City, DateRangeSize } from '@/types'
 
-export type AsideType = 'citySubscription' | 'facebookLink'
+export type AsideType = 'citySubscription' | 'facebookLink' | 'facebookWidget'
 
 type Props = {
   asideType: AsideType

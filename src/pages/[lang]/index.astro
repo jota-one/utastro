@@ -81,7 +81,7 @@ const textColumns = {
   )}
   <ContentBlockSpace size='half' />
   <ContentBlockTitle text={sessionsTitles[lang]} />
-  <SessionsView client:only="vue" asideType="facebookLink" initialDateRangeSize="week" listMax={10} />
+  <SessionsView client:only="vue" asideType="facebookWidget" initialDateRangeSize="week" listMax={10} />
   <ContentBlockSpace size='half' />
   <div class="all-sessions-link">
     <ArrowLink as-button href={subscriptionPath} label={allSessionsLabels[lang]} />
