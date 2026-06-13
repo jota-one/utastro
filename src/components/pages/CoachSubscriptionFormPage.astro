@@ -1,0 +1,36 @@
+---
+import ContentBlockTitle from '@components/ContentBlockTitle.vue'
+import ContentBlockSpace from '@components/ContentBlockSpace.vue'
+import CoachSubscriptionForm from '@components/content/CoachSubscriptionForm.vue'
+import type { LangCode } from '@/routes'
+
+interface Props {
+  lang: LangCode
+}
+
+const { lang } = Astro.props
+
+const titles: Record<LangCode, string> = {
+  fr: 'Nous cherchons des coaches',
+  de: 'Wir suchen Coaches',
+  en: "We're looking for coaches",
+}
+
+const intros: Record<LangCode, string> = {
+  fr: "Intéressé(e) ? Fais nous parvenir ton dossier de candidature !",
+  de: "Interessiert? Schick uns deine Bewerbungsunterlagen!",
+  en: "Interested? Send us your application!",
+}
+---
+
+<ContentBlockTitle text={titles[lang]} />
+<ContentBlockSpace size="quarter" />
+<p class="container superslim intro">{intros[lang]}</p>
+<CoachSubscriptionForm client:only="vue" />
+<ContentBlockSpace size="half" />
+
+<style>
+.intro {
+  font-size: 1rem;
+}
+</style>

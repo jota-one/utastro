@@ -4,6 +4,7 @@ import StubPage from '@components/pages/StubPage.astro'
 import ContactPage from '@components/pages/ContactPage.astro'
 import MyAccountPage from '@components/pages/MyAccountPage.astro'
 import SubscriptionPage from '@components/pages/SubscriptionPage.astro'
+import CoachSubscriptionFormPage from '@components/pages/CoachSubscriptionFormPage.astro'
 import { getStaticPagePaths } from '@/routes'
 import type { PageName, LangCode } from '@/routes'
 
@@ -19,6 +20,8 @@ const { page, lang } = Astro.props as { page: PageName; lang: LangCode }
     <MyAccountPage lang={lang} />
   ) : page === 'subscription' ? (
     <SubscriptionPage lang={lang} />
+  ) : page === 'coach-subscription-form' ? (
+    <CoachSubscriptionFormPage lang={lang} />
   ) : (
     <StubPage name={page} lang={lang} />
   )}
