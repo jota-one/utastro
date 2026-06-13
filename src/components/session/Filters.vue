@@ -53,7 +53,12 @@
         track-by="id"
       />
     </FormFieldWrapper>
-    <FormFieldWrapper class="navigator" :label="t('sessions_navigate_label')" hide-error>
+    <FormFieldWrapper
+      v-if="config.dateRangeNav"
+      class="navigator"
+      :label="t('sessions_navigate_label')"
+      hide-error
+    >
       <FormDateRangeNavigator
         :initial-date-range="sessionsDateRange"
         :initial-date-range-size="sessionsDateRangeSize"
@@ -70,6 +75,7 @@ import { ref, computed } from 'vue'
 import VueMultiselect from 'vue-multiselect'
 import 'vue-multiselect/dist/vue-multiselect.css'
 import { useI36n } from '@jota-one/i36n'
+import config from '@/config'
 import { useCities } from '@/composables/useCities'
 import { useSessions } from '@/composables/useSessions'
 import useDateRange from '@/composables/useDateRange'

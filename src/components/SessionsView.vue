@@ -71,7 +71,7 @@
 
 <script setup lang="ts">
 import dayjs from 'dayjs'
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { useI36n } from '@jota-one/i36n'
 import { useCities } from '@/composables/useCities'
 import { useSessions } from '@/composables/useSessions'
@@ -86,6 +86,7 @@ import Modal from '@/components/Modal.vue'
 import Badge from '@/components/Badge.vue'
 import ArrowLink from '@/components/ArrowLink.vue'
 import type { City, DateRangeSize } from '@/types'
+import config from '@/config'
 
 export type AsideType = 'citySubscription' | 'facebookLink' | 'facebookWidget'
 
@@ -126,7 +127,9 @@ const filteredSessions = computed(() =>
   (sessions.value || []).filter(session => {
     const matchesCities = sessionMatchesCities(session, cities.value)
     const matchesTags = sessionMatchesTags(session, filteredTags.value)
-    const matchesDateRange = isInRange(dayjs(session.start), sessionsDateRange.value)
+    const matchesDateRange = config.dateRangeNav
+      ? isInRange(dayjs(session.start), sessionsDateRange.value)
+      : true
     return matchesDateRange && matchesCities && matchesTags
   }),
 )
@@ -138,8 +141,14 @@ const forceShowCityWatchWidget = computed(
     filteredCities.value.length > 0,
 )
 
+if (config.dateRangeNav) {
+  watch(sessionsDateRange, () => loadSessions(), { deep: true })
+}
+
 onMounted(async () => {
-  sessionsDateRangeSize.value = props.initialDateRangeSize
+  if (config.dateRangeNav) {
+    sessionsDateRangeSize.value = props.initialDateRangeSize
+  }
   await loadCities()
   await loadSessions()
 })

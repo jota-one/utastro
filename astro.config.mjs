@@ -1,4 +1,5 @@
 // @ts-check
+/// <reference types="node" />
 import tailwindcss from '@tailwindcss/vite'
 import { defineConfig } from 'astro/config'
 import { loadEnv } from 'vite'

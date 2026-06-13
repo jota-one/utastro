@@ -6,6 +6,7 @@ import { useAuth } from '@/composables/useAuth'
 import { useUserProfile } from '@/composables/useUserProfile'
 import { useSettings } from '@/composables/useSettings'
 import { pb } from '@/pb'
+import config from '@/config'
 
 import type {
   Attendee,
@@ -74,7 +75,7 @@ const sessionsDateRange = ref<DateRange>({
 const sessionsDateRangeSize = ref<DateRangeSize>('week')
 
 export const useSessions = () => {
-  const { getDay, getWeek, getMonth } = useDateRange()
+  const { getDay, getWeek, getMonth, getYear } = useDateRange()
   const { filteredCities } = useCities()
 
   const loadSession = async (sessionId: string | undefined): Promise<void> => {
@@ -108,12 +109,16 @@ export const useSessions = () => {
 
   const loadSessions = async () => {
     const { currentLangCode } = useSettings()
-    const { from, to } = sessionsDateRange.value
-    const fromStr = from.format('YYYY-MM-DD HH:mm:ss')
-    const toStr = to.format('YYYY-MM-DD HH:mm:ss')
+
+    const { from: rangeFrom, to } = config.dateRangeNav
+      ? sessionsDateRange.value
+      : { from: dayjs(), to: dayjs().add(12, 'month') }
+
+    const from = rangeFrom.isBefore(dayjs()) ? dayjs() : rangeFrom
+    const filter = `start_date > "${from.format('YYYY-MM-DD HH:mm:ss')}" && start_date < "${to.format('YYYY-MM-DD HH:mm:ss')}"`
 
     const records = await pb.collection('ut_events').getFullList({
-      filter: `start_date >= "${fromStr}" && start_date < "${toStr}"`,
+      filter,
       expand: 'location,types',
     })
 
@@ -242,15 +247,22 @@ export const useSessions = () => {
     session.subscriptions.currentCount >= session.subscriptions.max
 
   const jumpToNextAvailableSession = (city?: City) => {
+    if (!config.dateRangeNav) {
+      return
+    }
+
     const nextSession = getNextAvailableSession(city)
 
     if (nextSession) {
+      const anchor = dayjs(nextSession.start)
       sessionsDateRange.value =
         sessionsDateRangeSize.value === 'day'
-          ? getDay(dayjs(nextSession.start))
+          ? getDay(anchor)
           : sessionsDateRangeSize.value === 'week'
-          ? getWeek(dayjs(nextSession.start))
-          : getMonth(dayjs(nextSession.start))
+            ? getWeek(anchor)
+            : sessionsDateRangeSize.value === 'month'
+              ? getMonth(anchor)
+              : getYear()
     }
   }
 
