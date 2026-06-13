@@ -11,22 +11,17 @@
 </template>
 
 <script setup lang="ts">
-defineProps({
-  href: {
-    type: String,
-    default: '',
-  },
-  label: {
-    type: String,
-    default: '',
-  },
-  target: {
-    type: String,
-    default: '_self',
-  },
-  asButton: Boolean,
-  noPadding: Boolean,
-  reverse: Boolean,
+type Props = {
+  href: string
+  label: string
+  target?: string
+  asButton?: boolean
+  noPadding?: boolean
+  reverse?: boolean,
+}
+
+withDefaults(defineProps<Props>(), {
+  target: '_self'
 })
 </script>
 
