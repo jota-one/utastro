@@ -10,11 +10,7 @@
       <div class="current-range" v-html="currentRange" />
     </div>
     <div class="row">
-      <button
-        class="button-as-field text"
-        :disabled="isNow(range, rangeSize)"
-        @click="jumpToNow"
-      >
+      <button class="button-as-field text" :disabled="isNow(range, rangeSize)" @click="jumpToNow">
         {{ now }}
       </button>
       <div class="spacer" />
@@ -77,10 +73,10 @@ const now = computed(() =>
   rangeSize.value === 'day'
     ? t('common_today')
     : rangeSize.value === 'week'
-    ? t('common_this_week')
-    : rangeSize.value === 'month'
-    ? t('common_this_month')
-    : t('common_this_year'),
+      ? t('common_this_week')
+      : rangeSize.value === 'month'
+        ? t('common_this_month')
+        : t('common_this_year'),
 )
 
 const currentRange = computed(() => getRangeText(range.value, rangeSize.value))
@@ -115,10 +111,10 @@ const jumpToNow = () => {
     rangeSize.value === 'day'
       ? getDay(now)
       : rangeSize.value === 'week'
-      ? getWeek(now)
-      : rangeSize.value === 'month'
-      ? getMonth(now)
-      : getYear(),
+        ? getWeek(now)
+        : rangeSize.value === 'month'
+          ? getMonth(now)
+          : getYear(),
   )
 }
 

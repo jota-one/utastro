@@ -1,92 +1,82 @@
 <template>
   <form @submit.prevent="submit">
-      <div v-if="!userProfile" class="container superslim">
-        <TipBox color-theme="info">
-          <div v-html="t('subscriptionform_top_tip')" />
-        </TipBox>
-      </div>
+    <div v-if="!userProfile" class="container superslim">
+      <TipBox color-theme="info">
+        <div v-html="t('subscriptionform_top_tip')" />
+      </TipBox>
+    </div>
 
-      <ContentBlockSpace size="quarter" />
+    <ContentBlockSpace size="quarter" />
 
-      <div class="container superslim block">
-        <FormSubscriptionLogin
-          v-model="model.login"
-          :user-profile="userProfile"
-          @show-update-password="makePasswordRequired"
-          @hide-update-password="makePasswordOptional"
+    <div class="container superslim block">
+      <FormSubscriptionLogin
+        v-model="model.login"
+        :user-profile="userProfile"
+        @show-update-password="makePasswordRequired"
+        @hide-update-password="makePasswordOptional"
+      />
+    </div>
+
+    <ContentBlockSpace size="quarter" />
+    <ContentBlockTitle :text="t('subscriptionform_details_title')" />
+
+    <div class="container superslim block">
+      <FormSubscriptionDetails v-model="model.details" />
+    </div>
+
+    <ContentBlockSpace size="quarter" />
+
+    <ContentBlockTitle :text="t('subscriptionform_validation_title')" />
+    <div class="container superslim">
+      <FormSubscriptionAgreements v-model="model.agreements" :user-profile="userProfile" />
+    </div>
+
+    <ContentBlockSpace size="quarter" />
+    <div class="container superslim submit">
+      <TipBox v-if="hasEmptyRequiredFields" color-theme="error">
+        {{ t('subscriptionform_empty_required_fields') }}
+      </TipBox>
+      <TipBox v-if="submitError" color-theme="error">
+        <div
+          v-html="
+            t('subscriptionform_subscription_not_sent', {
+              error: submitError,
+            })
+          "
         />
-      </div>
-
-      <ContentBlockSpace size="quarter" />
-      <ContentBlockTitle :text="t('subscriptionform_details_title')" />
-
-      <div class="container superslim block">
-        <FormSubscriptionDetails v-model="model.details" />
-      </div>
-
-      <ContentBlockSpace size="quarter" />
-
-      <ContentBlockTitle :text="t('subscriptionform_validation_title')" />
-      <div class="container superslim">
-        <FormSubscriptionAgreements
-          v-model="model.agreements"
-          :user-profile="userProfile"
-        />
-      </div>
-
-      <ContentBlockSpace size="quarter" />
-      <div class="container superslim submit">
-        <TipBox v-if="hasEmptyRequiredFields" color-theme="error">
-          {{ t('subscriptionform_empty_required_fields') }}
-        </TipBox>
-        <TipBox v-if="submitError" color-theme="error">
-          <div
-            v-html="
-              t('subscriptionform_subscription_not_sent', {
-                error: submitError,
-              })
-            "
-          />
-        </TipBox>
-        <template v-if="!userProfile && !submitted">
-          <FormCaptcha
-            v-if="hcaptcha.enabled"
-            ref="captchaEl"
-            v-model="model.captcha"
-          />
-          <button
-            :class="['button primary', { loading: submitting }]"
-            type="submit"
-            :disabled="!canSubmit || submitting"
-          >
-            {{ t(submitButtonLabel) }}
-          </button>
-        </template>
+      </TipBox>
+      <template v-if="!userProfile && !submitted">
+        <FormCaptcha v-if="hcaptcha.enabled" ref="captchaEl" v-model="model.captcha" />
         <button
-          v-if="userProfile"
           :class="['button primary', { loading: submitting }]"
           type="submit"
           :disabled="!canSubmit || submitting"
         >
           {{ t(submitButtonLabel) }}
         </button>
-        <TipBox v-if="submitted" color-theme="success">
-          <div
-            v-html="
-              t(
-                userProfile
-                  ? 'profile_update_success'
-                  : 'subscriptionform_success_text',
-                { email: model.login.email },
-              )
-            "
-          />
-        </TipBox>
-        <TipBox color-theme="neutral">
-          <div v-html="t('subscriptionform_legal_disclaimer')" />
-        </TipBox>
-      </div>
-    </form>
+      </template>
+      <button
+        v-if="userProfile"
+        :class="['button primary', { loading: submitting }]"
+        type="submit"
+        :disabled="!canSubmit || submitting"
+      >
+        {{ t(submitButtonLabel) }}
+      </button>
+      <TipBox v-if="submitted" color-theme="success">
+        <div
+          v-html="
+            t(userProfile ? 'profile_update_success' : 'subscriptionform_success_text', {
+              email: model.login.email,
+            })
+          "
+        />
+      </TipBox>
+      <TipBox color-theme="neutral">
+        <div v-html="t('subscriptionform_legal_disclaimer')" />
+      </TipBox>
+    </div>
+  </form>
 </template>
 
 <script setup lang="ts">
@@ -162,46 +152,28 @@ const model = reactive<Model>({
 
 const requiredFields = ref({
   login: ['email', 'password', 'passwordConfirm'],
-  details: [
-    'name',
-    'zip',
-    'city',
-    'phone',
-    'gender',
-    'birthdate',
-  ],
+  details: ['name', 'zip', 'city', 'phone', 'gender', 'birthdate'],
   agreements: ['risks'],
 })
 
 const hasEmptyRequiredFields = computed(() => {
-  return Object.entries(requiredFields.value).reduce(
-    (acc, [fieldGroup, keys]) => {
-      for (const key of keys) {
-        const isEmpty = [undefined, ''].includes(
-          (model as any)[fieldGroup][key],
-        )
-        acc = acc || isEmpty
-      }
-      return acc
-    },
-    false,
-  )
+  return Object.entries(requiredFields.value).reduce((acc, [fieldGroup, keys]) => {
+    for (const key of keys) {
+      const isEmpty = [undefined, ''].includes((model as any)[fieldGroup][key])
+      acc = acc || isEmpty
+    }
+    return acc
+  }, false)
 })
 
 const canSubmit = computed(
   () =>
     !hasEmptyRequiredFields.value &&
-    (props.userProfile
-      ? true
-      : hcaptcha.enabled
-      ? model.captcha.isValid
-      : true),
+    (props.userProfile ? true : hcaptcha.enabled ? model.captcha.isValid : true),
 )
 
 const submitButtonLabel = computed(() =>
-  submitting.value
-    ? 'subscriptionform_submit_button_loading'
-    : 'subscriptionform_submit_button',
+  submitting.value ? 'subscriptionform_submit_button_loading' : 'subscriptionform_submit_button',
 )
 
 const makePasswordRequired = () => {

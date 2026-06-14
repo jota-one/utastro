@@ -1,104 +1,84 @@
 <template>
   <div v-if="isAuthenticated" class="container slim user-profile">
-      <Tabs>
-        <Tab
-          :is-active="activeTab === 'profile'"
-          :label="t('profile_my_profile')"
-          @click="navigateTo('profile')"
-        />
-        <Tab
-          :is-active="activeTab === 'cities'"
-          :label="t('profile_my_cities')"
-          :counter-value="userWatchingCities.length"
-          counter-color="success"
-          icon="city"
-          @click="navigateTo('cities')"
-        />
-        <Tab
-          :is-active="activeTab === 'sessions'"
-          :label="t('profile_my_sessions')"
-          :counter-value="subscribedSessions.length"
-          always-display-counter
-          counter-color="success"
-          icon="sneaker"
-          @click="navigateTo('sessions')"
-        >
-          <template v-if="coachingSessions.length">
-            <Icon name="coach" class="coach-tab-icon" />
-            {{ t('profile_sessions_as_staff') }}:
-            <Counter :count="coachingSessions.length" color-theme="success" />
-          </template>
-        </Tab>
-        <template #outer>
-          <a
-            v-if="isAdminUser"
-            :href="adminLink"
-            class="button primary admin"
-            no-prefetch
-          >
-            Admin
-          </a>
+    <Tabs>
+      <Tab
+        :is-active="activeTab === 'profile'"
+        :label="t('profile_my_profile')"
+        @click="navigateTo('profile')"
+      />
+      <Tab
+        :is-active="activeTab === 'cities'"
+        :label="t('profile_my_cities')"
+        :counter-value="userWatchingCities.length"
+        counter-color="success"
+        icon="city"
+        @click="navigateTo('cities')"
+      />
+      <Tab
+        :is-active="activeTab === 'sessions'"
+        :label="t('profile_my_sessions')"
+        :counter-value="subscribedSessions.length"
+        always-display-counter
+        counter-color="success"
+        icon="sneaker"
+        @click="navigateTo('sessions')"
+      >
+        <template v-if="coachingSessions.length">
+          <Icon name="coach" class="coach-tab-icon" />
+          {{ t('profile_sessions_as_staff') }}:
+          <Counter :count="coachingSessions.length" color-theme="success" />
         </template>
-      </Tabs>
-      <div class="tab-content">
-        <div v-if="userProfile && activeTab === 'profile'" class="profile">
-          <ContentSubscriptionForm :user-profile="userProfile" />
-        </div>
-        <SessionList
-          v-if="activeTab === 'sessions'"
-          :sessions="userSubscribedSessions"
-        />
-        <template v-if="activeTab === 'cities'">
-          <div
-            class="watch-city-info"
-            v-html="t('sessions_watch_cities_info')"
-          />
-          <div class="watch-city-form">
-            <FormFieldWrapper
-              :label="t('sessions_watch_cities_dropdown_label')"
-              hide-error
-              class="field"
-            >
-              <VueMultiselect
-                v-model="selectedCities"
-                :options="unwatchedCities"
-                :multiple="true"
-                :close-on-select="true"
-                placeholder=""
-                select-label=""
-                selected-label=""
-                deselect-label=""
-                label="label"
-                track-by="id"
-              />
-            </FormFieldWrapper>
-            <button
-              class="button primary"
-              :disabled="!selectedCities.length"
-              @click="watchCitiesAndClearDropdown"
-            >
-              {{ t('sessions_watch_cities_button') }}
-            </button>
-          </div>
-          <ul v-if="userWatchingCities.length" class="cities-list">
-            <li v-for="city in userWatchingCities" :key="city.id" class="city">
-              <ArrowLink
-                :href="getCityPageLink(city)"
-                :label="city.label"
-                class="arrow-link"
-              />
-              <button
-                class="button primary subscribed"
-                @click="unwatchCity(city.id)"
-              >
-                {{ t('sessions_aside_city_subscribed_button') }}
-              </button>
-            </li>
-          </ul>
-          <EmptyList v-else icon="city" :empty-label="t('cities_list_empty')" />
-        </template>
+      </Tab>
+      <template #outer>
+        <a v-if="isAdminUser" :href="adminLink" class="button primary admin" no-prefetch> Admin </a>
+      </template>
+    </Tabs>
+    <div class="tab-content">
+      <div v-if="userProfile && activeTab === 'profile'" class="profile">
+        <ContentSubscriptionForm :user-profile="userProfile" />
       </div>
+      <SessionList v-if="activeTab === 'sessions'" :sessions="userSubscribedSessions" />
+      <template v-if="activeTab === 'cities'">
+        <div class="watch-city-info" v-html="t('sessions_watch_cities_info')" />
+        <div class="watch-city-form">
+          <FormFieldWrapper
+            :label="t('sessions_watch_cities_dropdown_label')"
+            hide-error
+            class="field"
+          >
+            <VueMultiselect
+              v-model="selectedCities"
+              :options="unwatchedCities"
+              :multiple="true"
+              :close-on-select="true"
+              placeholder=""
+              select-label=""
+              selected-label=""
+              deselect-label=""
+              label="label"
+              track-by="id"
+            />
+          </FormFieldWrapper>
+          <button
+            class="button primary"
+            :disabled="!selectedCities.length"
+            @click="watchCitiesAndClearDropdown"
+          >
+            {{ t('sessions_watch_cities_button') }}
+          </button>
+        </div>
+        <ul v-if="userWatchingCities.length" class="cities-list">
+          <li v-for="city in userWatchingCities" :key="city.id" class="city">
+            <ArrowLink :href="getCityPageLink(city)" :label="city.label" class="arrow-link" />
+            <button class="button primary subscribed" @click="unwatchCity(city.id)">
+              {{ t('sessions_aside_city_subscribed_button') }}
+            </button>
+          </li>
+        </ul>
+        <EmptyList v-else icon="city" :empty-label="t('cities_list_empty')" />
+      </template>
     </div>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -140,16 +120,19 @@ const { cities, loadCities } = useCities()
 const { t } = useI36n()
 
 const getTabFromHash = (hash: string) => {
-  if (hash === '#cities') { return 'cities' }
-  if (hash === '#sessions') { return 'sessions' }
+  if (hash === '#cities') {
+    return 'cities'
+  }
+  if (hash === '#sessions') {
+    return 'sessions'
+  }
   return 'profile'
 }
 
 const activeTab = ref(getTabFromHash(window.location.hash))
 const selectedCities = ref<City[]>([])
 
-const sortCities = (a: City, b: City) =>
-  a.label > b.label ? 1 : a.label === b.label ? 0 : -1
+const sortCities = (a: City, b: City) => (a.label > b.label ? 1 : a.label === b.label ? 0 : -1)
 
 const adminLink = computed(() => {
   const lang = window.location.pathname.split('/').filter(Boolean)[0] || 'fr'

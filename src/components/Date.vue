@@ -1,8 +1,7 @@
 <template>
   <span class="session-date">
-    <span class="day-name">{{ date.name }}</span> {{ date.day
-    }}<span class="sep">/</span>{{ date.month }}<span class="sep">/</span
-    >{{ date.year }}
+    <span class="day-name">{{ date.name }}</span> {{ date.day }}<span class="sep">/</span
+    >{{ date.month }}<span class="sep">/</span>{{ date.year }}
   </span>
 </template>
 

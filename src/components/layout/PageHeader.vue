@@ -7,13 +7,13 @@
       <LayoutHamburger :opened="menuOpened" @click="menuOpened = !menuOpened" />
       <div :class="['navigation-wrapper', { opened: menuOpened }]">
         <LayoutSubscriptionCounters
-        v-if="isAuthenticated"
-        :cities-count="citiesCount"
-        :subscribed-sessions-count="subscribedSessionsCount"
-        :coach-sessions-count="coachSessionsCount"
-        :show-coach="isStaffUser"
-        class="counters"
-      />
+          v-if="isAuthenticated"
+          :cities-count="citiesCount"
+          :subscribed-sessions-count="subscribedSessionsCount"
+          :coach-sessions-count="coachSessionsCount"
+          :show-coach="isStaffUser"
+          class="counters"
+        />
         <a
           :href="route('subscription')"
           class="button primary"
@@ -80,7 +80,8 @@ import { useRoutes } from '@composables/useRoutes'
 const { t } = useI36n()
 const { modalParams, openModal, closeModal } = useModal()
 const { isAuthenticated, isStaffUser, logout } = useAuth()
-const { watchingCities, subscribedSessions, coachingSessions, loadUserSubscriptions } = useUserProfile()
+const { watchingCities, subscribedSessions, coachingSessions, loadUserSubscriptions } =
+  useUserProfile()
 const { cities, loadCities } = useCities()
 const { route, label, navItems: navigationItems } = useRoutes()
 
@@ -96,8 +97,10 @@ if (isAuthenticated.value) {
   loadUserSubscriptions()
 }
 
-watch(isAuthenticated, (val) => {
-  if (val) { loadUserSubscriptions() }
+watch(isAuthenticated, val => {
+  if (val) {
+    loadUserSubscriptions()
+  }
 })
 
 const menuOpened = ref(false)

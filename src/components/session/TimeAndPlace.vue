@@ -10,23 +10,14 @@
     <div class="detail">
       <Icon class="icon place" name="marker" :color-theme="colorTheme" />
       <div :class="['text', { showAddress }]">
-        <a
-          no-prefetch
-          :href="getCityPageHref()"
-        >
-          <Badge
-            :label="cities[session.cityId]?.label"
-            :color-theme="colorTheme"
-          />
+        <a no-prefetch :href="getCityPageHref()">
+          <Badge :label="cities[session.cityId]?.label" :color-theme="colorTheme" />
         </a>
         <div class="location">
           {{ session.location.label }}
         </div>
         <div v-if="session.location.address && showAddress" class="address">
-          <template
-            v-for="(line, i) in session.location.address.split('\n')"
-            :key="`line-${i}`"
-          >
+          <template v-for="(line, i) in session.location.address.split('\n')" :key="`line-${i}`">
             {{ line }}<br />
           </template>
         </div>

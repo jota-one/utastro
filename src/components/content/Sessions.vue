@@ -29,17 +29,11 @@
               />
             </template>
           </SessionAsideWidget>
-          <SessionCityWatchWidget
-            v-if="asideType === 'citySubscription' && city"
-            :city="city"
-          />
+          <SessionCityWatchWidget v-if="asideType === 'citySubscription' && city" :city="city" />
         </div>
       </div>
       <div>
-        <SessionFilters
-          :single-city="city"
-          @empty-period-text-updated="emptyPeriodText = $event"
-        />
+        <SessionFilters :single-city="city" @empty-period-text-updated="emptyPeriodText = $event" />
         <div class="list">
           <SessionList
             :single-city="city"

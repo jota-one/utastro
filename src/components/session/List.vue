@@ -77,11 +77,7 @@ import type { City, DateRangeSize, Session } from '@/types'
 
 const { t } = useI36n()
 const { getLocaleDate } = useLocaleDate()
-const {
-  sessionsDateRangeSize,
-  getNextAvailableSession,
-  jumpToNextAvailableSession,
-} = useSessions()
+const { sessionsDateRangeSize, getNextAvailableSession, jumpToNextAvailableSession } = useSessions()
 
 interface Props {
   loading?: boolean
@@ -138,10 +134,7 @@ const nextAvailableSessionDate = computed(() => {
 })
 
 const loadMore = () => {
-  if (
-    props.max > renderListStop.value &&
-    props.max - renderListStop.value < LIST_CHUNK_LENGTH
-  ) {
+  if (props.max > renderListStop.value && props.max - renderListStop.value < LIST_CHUNK_LENGTH) {
     renderListStop.value = props.max
   } else {
     renderListStop.value += LIST_CHUNK_LENGTH
@@ -152,11 +145,11 @@ const displaySeparator = (index: number, unit: DateRangeSize) => {
   return sessionsDateRangeSize.value === 'day'
     ? false
     : index === 0
-    ? true
-    : !getLocaleDate(renderedItems.value[index - 1].start).isSame(
-        getLocaleDate(renderedItems.value[index].start),
-        unit,
-      )
+      ? true
+      : !getLocaleDate(renderedItems.value[index - 1].start).isSame(
+          getLocaleDate(renderedItems.value[index].start),
+          unit,
+        )
 }
 
 onMounted(() => {

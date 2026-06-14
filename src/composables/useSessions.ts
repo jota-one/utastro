@@ -21,14 +21,11 @@ import type {
 } from '@/types'
 
 const sessionMatchesCities = (session: Session, filteredCities: City[]) =>
-  !filteredCities.length ||
-  filteredCities.map((city: City) => city.id).includes(session.cityId)
+  !filteredCities.length || filteredCities.map((city: City) => city.id).includes(session.cityId)
 
 const sessionMatchesTags = (session: Session, filteredTags: Tag[]) =>
   !filteredTags.length ||
-  filteredTags.some((tag: Tag) =>
-    (session.tags || []).map((t: Tag) => t.id).includes(tag.id),
-  )
+  filteredTags.some((tag: Tag) => (session.tags || []).map((t: Tag) => t.id).includes(tag.id))
 
 const mapRecordToSession = (r: Record<string, any>, lang: string): Session => {
   const loc = r.expand?.location

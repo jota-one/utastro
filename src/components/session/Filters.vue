@@ -1,11 +1,7 @@
 <template>
   <div class="session-filters">
     <div class="bg" />
-    <FormFieldWrapper
-      :label="t('sessions_filter_locations_label')"
-      hide-error
-      class="filter"
-    >
+    <FormFieldWrapper :label="t('sessions_filter_locations_label')" hide-error class="filter">
       <VueMultiselect
         v-if="!singleCity"
         v-model="filteredCities"

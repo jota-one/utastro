@@ -26,7 +26,9 @@ withDefaults(defineProps<Props>(), {
   font-weight: 500;
   border-radius: 5px;
   border: 1px solid;
-  transition: color 0.3s ease-in-out, background 0.3s ease-in-out;
+  transition:
+    color 0.3s ease-in-out,
+    background 0.3s ease-in-out;
 
   &.error {
     color: rgb(var(--color-error-text));

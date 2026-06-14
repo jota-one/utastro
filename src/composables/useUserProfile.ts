@@ -27,8 +27,12 @@ export const useUserProfile = () => {
   const { isAuthenticated, userId } = useAuth()
 
   const loadUserSubscriptions = (): Promise<void> => {
-    if (!userId.value) { return Promise.resolve() }
-    if (loadSubscriptionsPromise) { return loadSubscriptionsPromise }
+    if (!userId.value) {
+      return Promise.resolve()
+    }
+    if (loadSubscriptionsPromise) {
+      return loadSubscriptionsPromise
+    }
     loadSubscriptionsPromise = Promise.all([
       pb.collection('ut_city_watchers').getFullList({
         filter: `user="${userId.value}"`,
@@ -38,19 +42,21 @@ export const useUserProfile = () => {
         filter: `user="${userId.value}"`,
         fields: 'id,event,is_event_admin',
       }),
-    ]).then(([cityRecords, subRecords]) => {
-      userSubscriptions.value = {
-        cities: cityRecords.map(r => ({ id: r.id, cityId: r.city })),
-        sessions: subRecords
-          .filter(r => !r.is_event_admin)
-          .map(r => ({ id: r.id, eventId: r.event })),
-        coachingSessions: subRecords
-          .filter(r => r.is_event_admin)
-          .map(r => ({ id: r.id, eventId: r.event })),
-      }
-    }).finally(() => {
-      loadSubscriptionsPromise = null
-    })
+    ])
+      .then(([cityRecords, subRecords]) => {
+        userSubscriptions.value = {
+          cities: cityRecords.map(r => ({ id: r.id, cityId: r.city })),
+          sessions: subRecords
+            .filter(r => !r.is_event_admin)
+            .map(r => ({ id: r.id, eventId: r.event })),
+          coachingSessions: subRecords
+            .filter(r => r.is_event_admin)
+            .map(r => ({ id: r.id, eventId: r.event })),
+        }
+      })
+      .finally(() => {
+        loadSubscriptionsPromise = null
+      })
     return loadSubscriptionsPromise
   }
 
@@ -60,7 +66,8 @@ export const useUserProfile = () => {
     }
 
     const record = await pb.collection('ut_users').getOne(userId.value, {
-      fields: 'id,email,name,street,npa,city,country,phone,gender,birthdate,region,accept_risks,accept_promo',
+      fields:
+        'id,email,name,street,npa,city,country,phone,gender,birthdate,region,accept_risks,accept_promo',
     })
 
     if (record) {
@@ -83,15 +90,11 @@ export const useUserProfile = () => {
   }
 
   const watchingCities = computed(() =>
-    isAuthenticated.value && userSubscriptions.value
-      ? userSubscriptions.value.cities
-      : [],
+    isAuthenticated.value && userSubscriptions.value ? userSubscriptions.value.cities : [],
   )
 
   const subscribedSessions = computed(() =>
-    isAuthenticated.value && userSubscriptions.value
-      ? userSubscriptions.value.sessions
-      : [],
+    isAuthenticated.value && userSubscriptions.value ? userSubscriptions.value.sessions : [],
   )
 
   const coachingSessions = computed(() =>

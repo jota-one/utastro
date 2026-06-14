@@ -32,31 +32,19 @@
       </TagList>
     </div>
     <div class="body">
-      <SessionTimeAndPlace
-        :session="session"
-        :subscribed="subscribed"
-        class="time-place"
-      />
+      <SessionTimeAndPlace :session="session" :subscribed="subscribed" class="time-place" />
       <div v-if="!session.paused && !session.cancelled" class="subscribe">
         <template v-if="session.moreInfo">
           <button class="more-info" @click="toggleMoreInfo(session.id)">
             <Icon name="info" class="icon" />
           </button>
           <div v-if="openedMoreInfos.includes(session.id)" class="info-box">
-            <TipBox
-              color-theme="info"
-              closeable
-              @close="toggleMoreInfo(session.id)"
-            >
+            <TipBox color-theme="info" closeable @close="toggleMoreInfo(session.id)">
               <div v-html="session.moreInfo" />
             </TipBox>
           </div>
         </template>
-        <div
-          v-if="isFull(session)"
-          class="subscription-info"
-          v-html="t('session_full')"
-        />
+        <div v-if="isFull(session)" class="subscription-info" v-html="t('session_full')" />
         <div
           v-else-if="isAlmostFull(session)"
           class="subscription-info"
@@ -75,11 +63,7 @@
         <a
           no-prefetch
           :class="`button ${
-            subscribed
-              ? 'secondary subscribed'
-              : canSubscribe(session)
-              ? 'primary'
-              : 'secondary'
+            subscribed ? 'secondary subscribed' : canSubscribe(session) ? 'primary' : 'secondary'
           }`"
           :href="sessionDetailPage"
         >
@@ -104,11 +88,7 @@
           <Icon name="info" class="icon" />
         </button>
         <div v-if="openedMoreInfos.includes(session.id)" class="info-box">
-          <TipBox
-            color-theme="info"
-            closeable
-            @close="toggleMoreInfo(session.id)"
-          >
+          <TipBox color-theme="info" closeable @close="toggleMoreInfo(session.id)">
             <div v-html="t('sessions_paused_info')" />
           </TipBox>
         </div>

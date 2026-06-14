@@ -17,11 +17,11 @@ type Props = {
   target?: string
   asButton?: boolean
   noPadding?: boolean
-  reverse?: boolean,
+  reverse?: boolean
 }
 
 withDefaults(defineProps<Props>(), {
-  target: '_self'
+  target: '_self',
 })
 </script>
 

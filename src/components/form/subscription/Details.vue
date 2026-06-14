@@ -44,11 +44,7 @@
   </FormFieldWrapper>
   <FormFieldWrapper :label="t('subscriptionform_region_label')" required>
     <select v-model="model.regionId" class="dropdown" required>
-      <option
-        v-for="canton in SWISS_CANTONS"
-        :key="canton.value"
-        :value="canton.value"
-      >
+      <option v-for="canton in SWISS_CANTONS" :key="canton.value" :value="canton.value">
         {{ canton.label }}
       </option>
     </select>
@@ -76,11 +72,7 @@
   </FormFieldWrapper>
   <FormFieldWrapper :label="t('subscriptionform_gender_label')" required>
     <select v-model="model.gender" class="dropdown" required>
-      <option
-        v-for="gender in genders"
-        :key="gender.value"
-        :value="gender.value"
-      >
+      <option v-for="gender in genders" :key="gender.value" :value="gender.value">
         {{ gender.label }}
       </option>
     </select>

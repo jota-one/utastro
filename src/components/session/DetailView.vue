@@ -100,9 +100,7 @@
             <div v-if="watching" class="watching-info">
               <Icon name="success" color-theme="success" />
               <div>
-                <div
-                  v-html="t('sessions_aside_city_subscribed_text_1', { city: city?.label })"
-                />
+                <div v-html="t('sessions_aside_city_subscribed_text_1', { city: city?.label })" />
                 <p v-html="t('sessions_aside_city_subscribed_text_2')" />
               </div>
             </div>
@@ -191,9 +189,7 @@ const moreInfoOpened = ref(true)
 const subscribeAfterLogin = ref(false)
 const watchAfterLogin = ref(false)
 
-const city = computed(
-  () => sessionDetail.value && cities.value[sessionDetail.value.cityId],
-)
+const city = computed(() => sessionDetail.value && cities.value[sessionDetail.value.cityId])
 
 const title = computed(() => {
   if (!sessionDetail.value) {
@@ -222,9 +218,7 @@ const watching = computed(
 )
 
 const colorTheme = computed(() =>
-  !sessionDetail.value || paused.value
-    ? 'neutral'
-    : getSessionTheme(sessionDetail.value),
+  !sessionDetail.value || paused.value ? 'neutral' : getSessionTheme(sessionDetail.value),
 )
 
 const cityBackLink = computed(() => {
@@ -242,8 +236,7 @@ const eventStarted = computed(
 const displaySubscribeButton = computed(
   () =>
     !eventStarted.value &&
-    (subscribed.value ||
-      (sessionDetail.value && canSubscribe(sessionDetail.value))),
+    (subscribed.value || (sessionDetail.value && canSubscribe(sessionDetail.value))),
 )
 
 const subscribe = async () => {
