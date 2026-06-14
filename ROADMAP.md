@@ -48,7 +48,6 @@ Certaines tâches doivent être faites en 1er lieu et ensebmle pour que tout le 
 - Questionner certaines choses qu'on a automatisée mais qu'ona pas besoin de garder automatique (genre les teasers)
 - Prendre en compte / garder en tête les modifs qu'on a fait le plus souvent (modifier labels, images)
 
-
 ## History
 
 - [2026-06-12] Port user profile page — composables, components, utils, styles migrés depuis Nuxt ; page `mon-compte` fonctionnelle avec formulaire profil et onglet villes

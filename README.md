@@ -81,6 +81,7 @@ pnpm format           # Format code with oxfmt
 The script `scripts/export-mariadb.sh` connects to the production MariaDB via a Kubernetes port-forward and exports selected tables as JSON into `pb/json_import_sources/`.
 
 **Prerequisites** (checked automatically at startup):
+
 - `kubectl` configured with access to the cluster
 - `mysql-client` — installed automatically via `brew install mysql-client` if missing
 - `python3`
@@ -93,6 +94,7 @@ The script `scripts/export-mariadb.sh` connects to the production MariaDB via a 
 ```
 
 The script will prompt for:
+
 1. Path to the `urban-training` repo (default: `../urban-training`)
 2. kubectl context (default: `ut-prod`)
 3. MariaDB user (`istvan` or `joel`)
@@ -103,6 +105,7 @@ Then opens an interactive table picker (fzf or numbered list) and exports each s
 **Keychain entry format:** `urban-training-mariadb` / `___UT_PROD_ISTVAN` (service / account)
 
 To reset a stored password:
+
 ```bash
 security delete-generic-password -s "urban-training-mariadb" -a "___UT_PROD_ISTVAN"
 ```
