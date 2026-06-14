@@ -22,7 +22,7 @@
 import { ref, watch } from 'vue'
 import { useI36n } from '@jota-one/i36n'
 import TipBox from '@/components/TipBox.vue'
-import ContentBlockSpace from '@/components/ContentBlockSpace.vue'
+import ContentBlockSpace from '@components/content/BlockSpace.vue'
 import FormSubscriptionAgreement from '@/components/form/subscription/Agreement.vue'
 import type { UserProfile, UserProfileAgreements } from '@/types'
 

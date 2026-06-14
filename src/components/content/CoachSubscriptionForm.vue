@@ -92,9 +92,9 @@
 import { ref, reactive } from 'vue'
 import { useI36n } from '@jota-one/i36n'
 import config from '@/config'
-import FormFieldWrapper from '@components/FormFieldWrapper.vue'
-import FormCaptcha from '@components/FormCaptcha.vue'
-import ContentBlockSpace from '@components/ContentBlockSpace.vue'
+import FormFieldWrapper from '@components/form/FieldWrapper.vue'
+import FormCaptcha from '@components/form/Captcha.vue'
+import ContentBlockSpace from '@components/content/BlockSpace.vue'
 import TipBox from '@components/TipBox.vue'
 import type { CaptchaModel } from '@/types'
 

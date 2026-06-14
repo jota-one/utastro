@@ -73,7 +73,7 @@
 <script setup lang="ts">
 import { ref, reactive, watch } from 'vue'
 import { useI36n } from '@jota-one/i36n'
-import FormFieldWrapper from '@/components/FormFieldWrapper.vue'
+import FormFieldWrapper from '@/components/form/FieldWrapper.vue'
 import AppErrorCode from '@/AppErrorCode'
 import { validatePassword } from '@/utils/validate'
 import type { UserProfile, UserProfileLogin } from '@/types'

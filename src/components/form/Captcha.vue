@@ -1,5 +1,5 @@
 <template>
-  <vue-hcaptcha
+  <VueHcaptcha
     ref="captchaEl"
     class="form-captcha"
     :sitekey="hcaptcha.sitekey"
@@ -11,10 +11,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed } from 'vue'
 import VueHcaptcha from '@hcaptcha/vue3-hcaptcha'
-import config from '@/config'
+
 import type { CaptchaModel } from '@/types'
+import { computed, reactive, ref } from 'vue'
+import config from '@/config'
 
 const { hcaptcha } = config
 
@@ -37,12 +38,7 @@ const model = reactive({
 })
 
 const isValid = computed(
-  () =>
-    model.verified &&
-    !model.expired &&
-    !model.error &&
-    model.token &&
-    model.eKey,
+  () => model.verified && !model.expired && !model.error && model.token && model.eKey,
 )
 
 const onExpire = () => {

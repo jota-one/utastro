@@ -66,9 +66,9 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import AngledBoxesRow from './AngledBoxesRow.vue'
-import TextOnBg from './TextOnBg.vue'
-import Icon from './Icon.vue'
+import AngledBoxesRow from '@components/AngledBoxesRow.vue'
+import TextOnBg from '@components/TextOnBg.vue'
+import Icon from '@components/Icon.vue'
 import { useRoutes } from '@composables/useRoutes'
 
 type Props = {

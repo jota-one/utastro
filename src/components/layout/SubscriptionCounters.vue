@@ -34,8 +34,8 @@
 </template>
 
 <script setup lang="ts">
-import Icon from './Icon.vue'
-import Counter from './Counter.vue'
+import Icon from '@components/Icon.vue'
+import Counter from '@components/Counter.vue'
 import { useRoutes } from '@composables/useRoutes'
 
 type Props = {

@@ -51,8 +51,8 @@
 
 <script setup lang="ts">
 import { useI36n } from '@jota-one/i36n'
-import Logo from './Logo.vue'
-import Icon from './Icon.vue'
+import Logo from '@components/Logo.vue'
+import Icon from '@components/Icon.vue'
 import { useRoutes } from '@composables/useRoutes'
 
 const { t } = useI36n()

@@ -102,7 +102,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import { useI36n } from '@jota-one/i36n'
-import FormFieldWrapper from '@/components/FormFieldWrapper.vue'
+import FormFieldWrapper from '@/components/form/FieldWrapper.vue'
 import type { UserProfileDetails } from '@/types'
 
 const SWISS_CANTONS = [

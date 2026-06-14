@@ -48,9 +48,9 @@
 <script setup lang="ts">
 import type { Teaser } from '@/types'
 import AngledBoxesRow from '@components/AngledBoxesRow.vue'
-import ContentBlockSpace from '@components/ContentBlockSpace.vue'
-import ContentBlockTitle from '@components/ContentBlockTitle.vue'
-import ArrowLink from '@components/ArrowLink.vue'
+import ContentBlockSpace from '@components/content/BlockSpace.vue'
+import ContentBlockTitle from '@components/content/BlockTitle.vue'
+import ArrowLink from '@/components/ArrowLink.vue'
 import TagList from '@components/TagList.vue'
 import Tag from '@components/Tag.vue'
 import TextOnBg from '@components/TextOnBg.vue'

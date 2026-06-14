@@ -79,7 +79,7 @@ import config from '@/config'
 import { useCities } from '@/composables/useCities'
 import { useSessions } from '@/composables/useSessions'
 import useDateRange from '@/composables/useDateRange'
-import FormFieldWrapper from '@/components/FormFieldWrapper.vue'
+import FormFieldWrapper from '@/components/form/FieldWrapper.vue'
 import FormDateRangeNavigator from '@/components/form/DateRangeNavigator.vue'
 import type { City, DateRange, DateRangeSize } from '@/types'
 

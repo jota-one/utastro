@@ -16,7 +16,7 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import FormRequired from '@/components/FormRequired.vue'
+import FormRequired from '@/components/form/Required.vue'
 interface Props {
   modelValue?: boolean
   name: string

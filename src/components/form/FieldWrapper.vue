@@ -13,6 +13,9 @@
 </template>
 
 <script setup lang="ts">
+import FormOptional from '@components/form/Optional.vue'
+import FormRequired from '@components/form/Required.vue'
+
 defineProps({
   icon: {
     type: String,

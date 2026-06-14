@@ -2,10 +2,10 @@
 export const prerender = false
 
 import SiteLayout from '@layouts/SiteLayout.astro'
-import ContentBlockTitle from '@components/ContentBlockTitle.vue'
-import ContentBlockSpace from '@components/ContentBlockSpace.vue'
-import SessionsView from '@components/SessionsView.vue'
-import ArrowLink from '@components/ArrowLink.vue'
+import ContentBlockTitle from '@components/content/BlockTitle.vue'
+import ContentBlockSpace from '@components/content/BlockSpace.vue'
+import SessionsView from '@/components/content/Sessions.vue'
+import ArrowLink from '@/components/ArrowLink.vue'
 import { getPath, LANGS } from '@/routes'
 import { pb } from '@/pb'
 import type { LangCode } from '@/routes'

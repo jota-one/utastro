@@ -19,7 +19,7 @@ import { onMounted, onUnmounted, watch, type PropType } from 'vue'
 import type { ColorTheme } from '@/types'
 import useModal from '@composables/useModal'
 import Icon from './Icon.vue'
-import LayoutOverlay from './LayoutOverlay.vue'
+import LayoutOverlay from '@components/layout/Overlay.vue'
 
 const { registerModal, openedModal, closeModal } = useModal()
 

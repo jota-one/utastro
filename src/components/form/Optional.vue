@@ -5,8 +5,7 @@
 </template>
 
 <script setup lang="ts">
-const { getI36n } = useI36n()
-const { $label: t } = getI36n()
+const t = (key: string) => key // @todo: implement i18n
 </script>
 
 <style lang="postcss" scoped>
