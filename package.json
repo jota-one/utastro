@@ -8,6 +8,8 @@
     "preview": "astro preview",
     "astro": "astro",
     "db": "cd pb && ./pocketbase serve --http=127.0.0.1:8091",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
     "lint": "oxlint --type-aware",
     "format": "oxfmt --write",
     "migrate:down": "cd pb && ./pocketbase migrate down",
@@ -32,8 +34,9 @@
     "vue-multiselect": "^3.5.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.52.0",
     "@types/node": "^24.13.2",
-    "oxfmt": "^0.52.0",
+    "oxfmt": "^0.54.0",
     "oxlint": "^1.67.0",
     "oxlint-tsgolint": "^0.23.0",
     "postcss": "^8.5.15",

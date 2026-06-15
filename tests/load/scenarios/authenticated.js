@@ -50,11 +50,10 @@ export function authenticatedFlow(email, password) {
       randomSleep(0.5, 1.5)
 
       // 5. Unsubscribe (cleanup)
-      res = http.del(
-        `${PB_URL}/api/collections/ut_subscriptions/records/${subId}`,
-        null,
-        { headers, tags: { type: 'api' } },
-      )
+      res = http.del(`${PB_URL}/api/collections/ut_subscriptions/records/${subId}`, null, {
+        headers,
+        tags: { type: 'api' },
+      })
       check(res, { 'unsubscribe 204': r => r.status === 204 })
     }
   }
@@ -75,11 +74,10 @@ export function authenticatedFlow(email, password) {
       randomSleep(0.5, 1)
 
       // 7. Unwatch city (cleanup)
-      res = http.del(
-        `${PB_URL}/api/collections/ut_city_watchers/records/${watchId}`,
-        null,
-        { headers, tags: { type: 'api' } },
-      )
+      res = http.del(`${PB_URL}/api/collections/ut_city_watchers/records/${watchId}`, null, {
+        headers,
+        tags: { type: 'api' },
+      })
       check(res, { 'unwatch city 204': r => r.status === 204 })
     }
   }

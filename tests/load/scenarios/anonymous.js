@@ -33,10 +33,9 @@ export function anonymousFlow() {
   if (events && events.length > 0) {
     const eventId = events[0].id
     randomSleep(1, 2)
-    res = http.get(
-      `${PB_URL}/api/collections/ut_events/records/${eventId}?expand=location,types`,
-      { tags: { type: 'api' } },
-    )
+    res = http.get(`${PB_URL}/api/collections/ut_events/records/${eventId}?expand=location,types`, {
+      tags: { type: 'api' },
+    })
     check(res, { 'event detail 200': r => r.status === 200 })
   }
 

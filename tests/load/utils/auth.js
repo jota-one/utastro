@@ -7,14 +7,10 @@ import { PB_URL } from '../config.js'
  * Returns { token, userId } or null on failure.
  */
 export function login(email, password) {
-  const res = http.post(
-    `${PB_URL}/api/custom/auth/login`,
-    JSON.stringify({ email, password }),
-    {
-      headers: { 'Content-Type': 'application/json' },
-      tags: { type: 'auth' },
-    },
-  )
+  const res = http.post(`${PB_URL}/api/custom/auth/login`, JSON.stringify({ email, password }), {
+    headers: { 'Content-Type': 'application/json' },
+    tags: { type: 'auth' },
+  })
 
   const ok = check(res, { 'login 200': r => r.status === 200 })
   if (!ok) return null

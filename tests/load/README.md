@@ -31,6 +31,7 @@ Add real accounts that exist in the test DB. For stress tests (100 auth VUs), ai
 ### 3. Get test record IDs
 
 In the PocketBase admin of the test instance, grab:
+
 - An event `id` (not full, not cancelled) → `TEST_EVENT_ID` in `.env`
 - An active city `id` → `TEST_CITY_ID` in `.env`
 
@@ -64,21 +65,21 @@ k6 does not support `--env-file`. Use the provided wrapper script which sources 
 
 ## Scenarios covered
 
-| Scenario | Auth | Endpoints |
-|---|---|---|
-| anonymous | No | `GET /fr` (SSR), `GET /api/collections/ut_cities/records`, `GET /api/collections/ut_events/records`, `GET /api/collections/ut_events/records/:id` |
-| authenticated | Yes | `/api/custom/auth/login`, `ut_subscriptions` (list/create/delete), `ut_city_watchers` (list/create/delete) |
+| Scenario      | Auth | Endpoints                                                                                                                                         |
+| ------------- | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| anonymous     | No   | `GET /fr` (SSR), `GET /api/collections/ut_cities/records`, `GET /api/collections/ut_events/records`, `GET /api/collections/ut_events/records/:id` |
+| authenticated | Yes  | `/api/custom/auth/login`, `ut_subscriptions` (list/create/delete), `ut_city_watchers` (list/create/delete)                                        |
 
 All write operations are immediately reversed so the test DB stays clean across runs.
 
 ## Thresholds
 
-| Metric | Load | Stress |
-|---|---|---|
-| SSR pages p95 | < 2 s | < 5 s |
-| PocketBase API p95 | < 500 ms | < 2 s |
-| Auth p95 | < 1 s | < 1 s |
-| Error rate | < 1% | < 1% |
+| Metric             | Load     | Stress |
+| ------------------ | -------- | ------ |
+| SSR pages p95      | < 2 s    | < 5 s  |
+| PocketBase API p95 | < 500 ms | < 2 s  |
+| Auth p95           | < 1 s    | < 1 s  |
+| Error rate         | < 1%     | < 1%   |
 
 ## Interpreting results
 
@@ -87,6 +88,7 @@ All write operations are immediately reversed so the test DB stays clean across 
 **`checks_succeeded`** — assertions on HTTP responses (status codes). Target: **100%** on smoke, **> 99%** on load/stress.
 
 **`http_req_duration` by tag** — the most important numbers are `p(95)` (95th percentile), not the average:
+
 - `{type:page}` — Astro SSR rendering time
 - `{type:api}` — PocketBase reads (cities, events, subscriptions)
 - `{type:auth}` — login endpoint
@@ -97,23 +99,23 @@ All write operations are immediately reversed so the test DB stays clean across 
 
 ### Reference baseline (local dev, smoke test)
 
-| Metric | Value |
-|---|---|
-| Homepage SSR p95 | ~13 ms |
-| PocketBase API p95 | ~9 ms |
-| Auth (login) | ~123 ms |
+| Metric             | Value   |
+| ------------------ | ------- |
+| Homepage SSR p95   | ~13 ms  |
+| PocketBase API p95 | ~9 ms   |
+| Auth (login)       | ~123 ms |
 
 Expect ×10–×20 on the target VPS under concurrent load. A p95 of 200–500 ms for SSR pages is healthy.
 
 ### Warning signs
 
-| Signal | Likely cause |
-|---|---|
-| `http_req_failed` spikes during sustain | Server saturated, OOM, or process crash |
-| `p(95)` grows steadily (no plateau) | Memory leak or GC pressure |
-| `subscribe 200` / `unsubscribe 204` failures | SQLite write lock contention |
-| `login` latency > 1 s | PocketBase under CPU pressure |
-| `WARN Request Failed` in bursts | Port exhaustion or connection pool full |
+| Signal                                       | Likely cause                            |
+| -------------------------------------------- | --------------------------------------- |
+| `http_req_failed` spikes during sustain      | Server saturated, OOM, or process crash |
+| `p(95)` grows steadily (no plateau)          | Memory leak or GC pressure              |
+| `subscribe 200` / `unsubscribe 204` failures | SQLite write lock contention            |
+| `login` latency > 1 s                        | PocketBase under CPU pressure           |
+| `WARN Request Failed` in bursts              | Port exhaustion or connection pool full |
 
 ### Expected bottlenecks on the target VPS
 

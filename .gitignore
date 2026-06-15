@@ -29,6 +29,12 @@ pb/pb_public
 pb/pocketbase
 pb/pb-custom
 
+# Playwright e2e tests
+tests/e2e/.env
+tests/e2e/reports/
+test-results/
+playwright/.auth/
+
 # k6 load tests
 tests/load/.env
 tests/load/test-users.json

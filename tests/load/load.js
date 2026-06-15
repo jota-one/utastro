@@ -10,9 +10,7 @@ import { thresholds } from './config.js'
 import { anonymousFlow } from './scenarios/anonymous.js'
 import { authenticatedFlow } from './scenarios/authenticated.js'
 
-const users = new SharedArray('test-users', () =>
-  JSON.parse(open('./test-users.json')),
-)
+const users = new SharedArray('test-users', () => JSON.parse(open('./test-users.json')))
 
 export const options = {
   scenarios: {
@@ -20,9 +18,9 @@ export const options = {
       executor: 'ramping-vus',
       startVUs: 0,
       stages: [
-        { duration: '1m', target: 80 },   // ramp up to 80 VUs
-        { duration: '3m', target: 80 },   // sustain
-        { duration: '30s', target: 0 },   // ramp down
+        { duration: '1m', target: 80 }, // ramp up to 80 VUs
+        { duration: '3m', target: 80 }, // sustain
+        { duration: '30s', target: 0 }, // ramp down
       ],
       exec: 'runAnonymous',
     },
