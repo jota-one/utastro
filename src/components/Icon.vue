@@ -14,7 +14,7 @@
 <script setup lang="ts">
 import icons from '@assets/icons.json'
 import type { ColorTheme } from '@/types'
-import { computed } from 'vue'
+import { computed, type PropType } from 'vue'
 
 const props = defineProps({
   name: {

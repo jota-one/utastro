@@ -277,7 +277,7 @@
   "sessions_detail_button": "Details",
   "sessions_empty": "Aucune session prévue",
   "sessions_empty_period": "Aucune session prévue {period}",
-  "sessions_filter_locations_label": "Filter par ville(s)",
+  "sessions_filter_locations_label": "Filtrer par ville(s)",
   "sessions_filter_tags_label": "Filtrer par activité(s)",
   "sessions_label": "Session(s)",
   "sessions_loading": "Chargement des sessions...",

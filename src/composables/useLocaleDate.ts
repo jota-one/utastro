@@ -1,4 +1,4 @@
-import dayjs, { Dayjs } from 'dayjs'
+import dayjs, { type Dayjs } from 'dayjs'
 import de from 'dayjs/locale/de-ch'
 import en from 'dayjs/locale/en-gb'
 import fr from 'dayjs/locale/fr-ch'

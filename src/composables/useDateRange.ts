@@ -1,4 +1,4 @@
-import dayjs, { Dayjs } from 'dayjs'
+import dayjs, { type Dayjs } from 'dayjs'
 import { useSettings } from '@/composables/useSettings'
 import { useLocaleDate } from '@/composables/useLocaleDate'
 import { useI36n } from '@/composables/useI36n'

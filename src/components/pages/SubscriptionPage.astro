@@ -1,11 +1,11 @@
 ---
+import BlockSpace from '@/components/content/BlockSpace.vue'
+import BlockTitle from '@/components/content/BlockTitle.vue'
+import Map from '@/components/content/Map.vue'
 import SessionsView from '@/components/content/Sessions.vue'
 
-interface Props {
-  lang: 'fr' | 'de' | 'en'
-}
-
-const { lang } = Astro.props as Props
 ---
-
+<BlockTitle text="Inscription à Urban Training" />
+<Map client:only="vue" />
+<BlockSpace size="half" />
 <SessionsView client:only="vue" asideType="facebookLink" initialDateRangeSize="month" />
