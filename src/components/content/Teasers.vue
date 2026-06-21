@@ -18,7 +18,11 @@
             >
               <img v-if="item.imageUrl" class="image" :src="item.imageUrl" />
               <TagList class="tags">
-                <Tag v-for="tag in item.tags" :key="tag.id" :label="tag.label" />
+                <Tag
+                  v-for="tag in item.tags"
+                  :key="tag.id"
+                  :label="tag.label"
+                />
               </TagList>
               <div class="content">
                 <h3 v-if="item.title" class="title">

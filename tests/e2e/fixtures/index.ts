@@ -1,4 +1,9 @@
-import { test as base, expect, type Page, type BrowserContext } from '@playwright/test'
+import {
+  test as base,
+  expect,
+  type Page,
+  type BrowserContext,
+} from '@playwright/test'
 
 const PB_URL = process.env.PB_URL || 'http://localhost:8091'
 const MAILPIT_URL = process.env.MAILPIT_URL || 'http://localhost:8025'
@@ -12,7 +17,10 @@ async function fetchAuthToken(email: string, password: string) {
     body: JSON.stringify({ email, password }),
   })
   if (!res.ok) throw new Error(`Auth failed for ${email}: ${res.status}`)
-  return res.json() as Promise<{ token: string; record: Record<string, unknown> }>
+  return res.json() as Promise<{
+    token: string
+    record: Record<string, unknown>
+  }>
 }
 
 /**
@@ -23,7 +31,10 @@ export async function injectAuth(page: Page, email: string, password: string) {
   const { token, record } = await fetchAuthToken(email, password)
   await page.addInitScript(
     ({ token, record }) => {
-      window.localStorage.setItem('pocketbase_auth', JSON.stringify({ token, record }))
+      window.localStorage.setItem(
+        'pocketbase_auth',
+        JSON.stringify({ token, record }),
+      )
       window.sessionStorage.setItem('ut_jwt', token)
     },
     { token, record },
@@ -43,7 +54,10 @@ export async function createAuthContext(
   const context = await browser.newContext()
   await context.addInitScript(
     ({ token, record }) => {
-      window.localStorage.setItem('pocketbase_auth', JSON.stringify({ token, record }))
+      window.localStorage.setItem(
+        'pocketbase_auth',
+        JSON.stringify({ token, record }),
+      )
       window.sessionStorage.setItem('ut_jwt', token)
     },
     { token, record },
@@ -66,7 +80,10 @@ export interface MailpitMessage {
  * Polls Mailpit until an email arrives for the given address (max ~10s).
  * Returns the latest message or throws if none found.
  */
-export async function waitForEmail(toAddress: string, timeoutMs = 10_000): Promise<MailpitMessage> {
+export async function waitForEmail(
+  toAddress: string,
+  timeoutMs = 10_000,
+): Promise<MailpitMessage> {
   const deadline = Date.now() + timeoutMs
   while (Date.now() < deadline) {
     const res = await fetch(`${MAILPIT_URL}/api/v1/messages?limit=10`)

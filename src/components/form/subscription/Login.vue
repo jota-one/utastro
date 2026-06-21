@@ -26,7 +26,13 @@
   <div v-else class="empty" />
   <template v-if="!userProfile || updatePassword">
     <FormFieldWrapper
-      :label="t(updatePassword ? 'reset_password_new_label' : 'subscriptionform_password_label')"
+      :label="
+        t(
+          updatePassword
+            ? 'reset_password_new_label'
+            : 'subscriptionform_password_label',
+        )
+      "
       :error="errors.password"
       required
     >
@@ -77,7 +83,11 @@ interface Props {
   userProfile?: UserProfile
 }
 
-const emit = defineEmits(['update:modelValue', 'show-update-password', 'hide-update-password'])
+const emit = defineEmits([
+  'update:modelValue',
+  'show-update-password',
+  'hide-update-password',
+])
 const props = defineProps<Props>()
 
 const { t } = useI36n()

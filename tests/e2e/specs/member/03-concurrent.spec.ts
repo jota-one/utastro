@@ -16,9 +16,18 @@ import { EventDetailPage } from '../../pages/EventDetailPage'
  */
 
 const USERS = [
-  { email: process.env.TEST_MEMBER_EMAIL!, password: process.env.TEST_MEMBER_PASSWORD! },
-  { email: process.env.TEST_MEMBER_2_EMAIL!, password: process.env.TEST_MEMBER_2_PASSWORD! },
-  { email: process.env.TEST_MEMBER_3_EMAIL!, password: process.env.TEST_MEMBER_3_PASSWORD! },
+  {
+    email: process.env.TEST_MEMBER_EMAIL!,
+    password: process.env.TEST_MEMBER_PASSWORD!,
+  },
+  {
+    email: process.env.TEST_MEMBER_2_EMAIL!,
+    password: process.env.TEST_MEMBER_2_PASSWORD!,
+  },
+  {
+    email: process.env.TEST_MEMBER_3_EMAIL!,
+    password: process.env.TEST_MEMBER_3_PASSWORD!,
+  },
 ]
 
 test('only one user gets the last available spot', async ({ browser }) => {
@@ -38,7 +47,9 @@ test('only one user gets the last available spot', async ({ browser }) => {
     // Navigate all 3 to the event page simultaneously
     await Promise.all(
       contexts.map(({ page }) =>
-        page.goto(`/fr/session/${eventId}`).then(() => page.waitForLoadState('networkidle')),
+        page
+          .goto(`/fr/session/${eventId}`)
+          .then(() => page.waitForLoadState('networkidle')),
       ),
     )
 
@@ -50,11 +61,15 @@ test('only one user gets the last available spot', async ({ browser }) => {
 
     // All 3 click subscribe at the same time
     await Promise.all(
-      contexts.map(({ page }) => page.locator('button', { hasText: "Je m'inscris!" }).click()),
+      contexts.map(({ page }) =>
+        page.locator('button', { hasText: "Je m'inscris!" }).click(),
+      ),
     )
 
     // Wait for all pages to settle
-    await Promise.all(contexts.map(({ page }) => page.waitForLoadState('networkidle')))
+    await Promise.all(
+      contexts.map(({ page }) => page.waitForLoadState('networkidle')),
+    )
 
     // Count outcomes
     const results = await Promise.all(

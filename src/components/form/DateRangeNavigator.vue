@@ -10,14 +10,26 @@
       <div class="current-range" v-html="currentRange" />
     </div>
     <div class="row">
-      <button class="button-as-field text" :disabled="isNow(range, rangeSize)" @click="jumpToNow">
+      <button
+        class="button-as-field text"
+        :disabled="isNow(range, rangeSize)"
+        @click="jumpToNow"
+      >
         {{ now }}
       </button>
       <div class="spacer" />
-      <button class="button-as-field prev" :disabled="disablePrev" @click="navigatePrev()">
+      <button
+        class="button-as-field prev"
+        :disabled="disablePrev"
+        @click="navigatePrev()"
+      >
         <Icon name="chevron" class="icon" />
       </button>
-      <button class="button-as-field next" :disabled="disableNext" @click="navigateNext()">
+      <button
+        class="button-as-field next"
+        :disabled="disableNext"
+        @click="navigateNext()"
+      >
         <Icon name="chevron" class="icon" />
       </button>
     </div>

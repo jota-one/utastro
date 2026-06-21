@@ -90,11 +90,15 @@ export const useUserProfile = () => {
   }
 
   const watchingCities = computed(() =>
-    isAuthenticated.value && userSubscriptions.value ? userSubscriptions.value.cities : [],
+    isAuthenticated.value && userSubscriptions.value
+      ? userSubscriptions.value.cities
+      : [],
   )
 
   const subscribedSessions = computed(() =>
-    isAuthenticated.value && userSubscriptions.value ? userSubscriptions.value.sessions : [],
+    isAuthenticated.value && userSubscriptions.value
+      ? userSubscriptions.value.sessions
+      : [],
   )
 
   const coachingSessions = computed(() =>

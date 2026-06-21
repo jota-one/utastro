@@ -21,14 +21,17 @@ export default {
   gmap: {
     apiKey: import.meta.env.PUBLIC_GMAP_API_KEY,
     staticUrl:
-      import.meta.env.PUBLIC_GMAP_STATIC_URL || 'https://maps.googleapis.com/maps/api/staticmap',
-    staticLink: import.meta.env.PUBLIC_GMAP_STATIC_LINK || 'https://www.google.com/maps',
+      import.meta.env.PUBLIC_GMAP_STATIC_URL ||
+      'https://maps.googleapis.com/maps/api/staticmap',
+    staticLink:
+      import.meta.env.PUBLIC_GMAP_STATIC_LINK || 'https://www.google.com/maps',
   },
 
   // Email & Communication
   webmasterEmail: import.meta.env.WEBMASTER_EMAIL || 'juniors@jota.one',
   // Feature Flags
-  presenceCheckValidation: import.meta.env.PUBLIC_PRESENCE_CHECK_VALIDATION === 'true',
+  presenceCheckValidation:
+    import.meta.env.PUBLIC_PRESENCE_CHECK_VALIDATION === 'true',
   dateRangeNav: import.meta.env.PUBLIC_DATE_RANGE_NAV === 'true',
   logger: import.meta.env.LOGGER === 'true',
 

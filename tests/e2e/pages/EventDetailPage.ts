@@ -30,7 +30,9 @@ export class EventDetailPage {
   }
 
   watchingCityConfirmation() {
-    return this.page.getByText('Es-tu sûr de vouloir te désinscrire', { exact: false })
+    return this.page.getByText('Es-tu sûr de vouloir te désinscrire', {
+      exact: false,
+    })
   }
 
   async subscribe() {

@@ -78,9 +78,11 @@ const scrollToBox = (index: number) => {
 function updateWidths() {
   let _wrapperWidth = 0
 
-  wrapper.value?.querySelectorAll('.box:not(.offset), .sep').forEach((value: Element) => {
-    _wrapperWidth += (value as HTMLElement).offsetWidth
-  })
+  wrapper.value
+    ?.querySelectorAll('.box:not(.offset), .sep')
+    .forEach((value: Element) => {
+      _wrapperWidth += (value as HTMLElement).offsetWidth
+    })
 
   wrapperWidth.value = _wrapperWidth
   containerWidth.value = container.value?.offsetWidth || 1

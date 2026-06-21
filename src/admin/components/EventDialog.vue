@@ -95,7 +95,12 @@
     </el-form>
     <template #footer>
       <el-button @click="emit('update:modelValue', false)">Annuler</el-button>
-      <el-button type="primary" :disabled="!formIsValid" :loading="saving" @click="save">
+      <el-button
+        type="primary"
+        :disabled="!formIsValid"
+        :loading="saving"
+        @click="save"
+      >
         Enregistrer
       </el-button>
     </template>
@@ -124,14 +129,21 @@ const emit = defineEmits<{
 
 const open = ref(props.modelValue)
 const saving = ref(false)
-const locations = ref<{ id: string; label: string; cityLabel: string; cityId: string }[]>([])
+const locations = ref<
+  { id: string; label: string; cityLabel: string; cityId: string }[]
+>([])
 const eventTypes = ref<Record<string, any>[]>([])
 const dates = ref<string[]>([])
 
 const emptyForm = () => ({
-  title_fr: '', title_de: '', title_en: '',
-  description_fr: '', description_de: '', description_en: '',
-  start_date: '', end_date: '',
+  title_fr: '',
+  title_de: '',
+  title_en: '',
+  description_fr: '',
+  description_de: '',
+  description_en: '',
+  start_date: '',
+  end_date: '',
   subscription_publish_date: '',
   max_subscriptions: 0,
   location: '',
@@ -141,12 +153,22 @@ const emptyForm = () => ({
 })
 const form = ref(emptyForm())
 
-const formIsValid = computed(() => Boolean(form.value.location) && dates.value?.length === 2)
+const formIsValid = computed(
+  () => Boolean(form.value.location) && dates.value?.length === 2,
+)
 
 const loadOptions = async () => {
   const [locs, types] = await Promise.all([
-    pb.collection('ut_locations').getFullList({ filter: 'enabled = true', sort: 'label_fr', expand: 'city' }),
-    pb.collection('ut_event_types').getFullList({ filter: 'enabled = true', sort: 'xid' }),
+    pb
+      .collection('ut_locations')
+      .getFullList({
+        filter: 'enabled = true',
+        sort: 'label_fr',
+        expand: 'city',
+      }),
+    pb
+      .collection('ut_event_types')
+      .getFullList({ filter: 'enabled = true', sort: 'xid' }),
   ])
   locations.value = locs.map(r => ({
     id: r.id,
@@ -165,12 +187,16 @@ const onLocationChange = (locationId: string) => {
 }
 
 const load = async (id: string) => {
-  const record = await pb.collection('ut_events').getOne(id, { expand: 'location,types' })
+  const record = await pb
+    .collection('ut_events')
+    .getOne(id, { expand: 'location,types' })
 
   if (record.location && !locations.value.find(l => l.id === record.location)) {
     const loc = record.expand?.location
     if (loc) {
-      const cityRec = loc.city ? await pb.collection('ut_cities').getOne(loc.city) : null
+      const cityRec = loc.city
+        ? await pb.collection('ut_cities').getOne(loc.city)
+        : null
       locations.value.unshift({
         id: loc.id,
         label: loc.label_fr || loc.label_de || loc.xid || '',
@@ -216,7 +242,7 @@ const save = async () => {
     emit('saved')
     emit('update:modelValue', false)
   } catch {
-    ElMessage.error('Erreur lors de l\'enregistrement')
+    ElMessage.error("Erreur lors de l'enregistrement")
   } finally {
     saving.value = false
   }
@@ -224,7 +250,7 @@ const save = async () => {
 
 watch(
   () => props.modelValue,
-  (value) => {
+  value => {
     open.value = value
     if (value && props.item?.id) {
       load(props.item.id)

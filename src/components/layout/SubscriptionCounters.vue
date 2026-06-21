@@ -20,7 +20,10 @@
         class="counter"
       />
     </div>
-    <div v-if="showCoach" :class="['subscription-counter', { on: coachSessionsCount }]">
+    <div
+      v-if="showCoach"
+      :class="['subscription-counter', { on: coachSessionsCount }]"
+    >
       <a :href="route('my-account') + '#sessions'">
         <Icon name="coach" class="icon coach" />
       </a>

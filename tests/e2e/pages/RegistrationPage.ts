@@ -38,7 +38,9 @@ export class RegistrationPage {
   }
 
   async submit() {
-    await this.page.locator('button', { hasText: 'Envoyer mes informations' }).click()
+    await this.page
+      .locator('button', { hasText: 'Envoyer mes informations' })
+      .click()
   }
 
   async isSuccessVisible(): Promise<boolean> {

@@ -14,16 +14,26 @@
       <el-form-item label="Email" required>
         <el-input v-model="form.email" type="email" />
       </el-form-item>
-      <el-form-item :label="item ? 'Nouveau mdp' : 'Mot de passe'" :required="!item">
+      <el-form-item
+        :label="item ? 'Nouveau mdp' : 'Mot de passe'"
+        :required="!item"
+      >
         <div class="flex items-center gap-2 w-full">
-          <el-input v-model="form.password" :type="showPassword ? 'text' : 'password'" class="flex-1" />
+          <el-input
+            v-model="form.password"
+            :type="showPassword ? 'text' : 'password'"
+            class="flex-1"
+          />
           <el-button size="small" @click="showPassword = !showPassword">
             {{ showPassword ? 'Cacher' : 'Voir' }}
           </el-button>
         </div>
       </el-form-item>
       <el-form-item v-if="form.password" label="Confirmer">
-        <el-input v-model="form.passwordConfirm" :type="showPassword ? 'text' : 'password'" />
+        <el-input
+          v-model="form.passwordConfirm"
+          :type="showPassword ? 'text' : 'password'"
+        />
       </el-form-item>
       <el-form-item label="Rôle">
         <el-select v-model="form.role" style="width: 180px">
@@ -48,7 +58,12 @@
     </el-form>
     <template #footer>
       <el-button @click="emit('update:modelValue', false)">Annuler</el-button>
-      <el-button type="primary" :disabled="!formIsValid" :loading="saving" @click="save">
+      <el-button
+        type="primary"
+        :disabled="!formIsValid"
+        :loading="saving"
+        @click="save"
+      >
         Enregistrer
       </el-button>
     </template>
@@ -80,8 +95,15 @@ const saving = ref(false)
 const showPassword = ref(false)
 
 const emptyForm = () => ({
-  name: '', email: '', password: '', passwordConfirm: '',
-  role: 'user', verified: false, phone: '', city: '', country: '',
+  name: '',
+  email: '',
+  password: '',
+  passwordConfirm: '',
+  role: 'user',
+  verified: false,
+  phone: '',
+  city: '',
+  country: '',
 })
 const form = ref(emptyForm())
 
@@ -92,7 +114,10 @@ const formIsValid = computed(() => {
   if (!props.item && !form.value.password) {
     return false
   }
-  if (form.value.password && form.value.password !== form.value.passwordConfirm) {
+  if (
+    form.value.password &&
+    form.value.password !== form.value.passwordConfirm
+  ) {
     return false
   }
   return true
@@ -134,11 +159,13 @@ const save = async () => {
     } else {
       await pb.collection('ut_users').create(payload)
     }
-    ElMessage.success(props.item?.id ? 'Utilisateur mis à jour' : 'Utilisateur créé')
+    ElMessage.success(
+      props.item?.id ? 'Utilisateur mis à jour' : 'Utilisateur créé',
+    )
     emit('saved')
     emit('update:modelValue', false)
   } catch {
-    ElMessage.error('Erreur lors de l\'enregistrement')
+    ElMessage.error("Erreur lors de l'enregistrement")
   } finally {
     saving.value = false
   }
@@ -146,7 +173,7 @@ const save = async () => {
 
 watch(
   () => props.modelValue,
-  (value) => {
+  value => {
     open.value = value
     showPassword.value = false
     if (value && props.item?.id) {

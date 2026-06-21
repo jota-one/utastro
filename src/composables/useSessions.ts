@@ -21,11 +21,14 @@ import type {
 } from '@/types'
 
 const sessionMatchesCities = (session: Session, filteredCities: City[]) =>
-  !filteredCities.length || filteredCities.map((city: City) => city.id).includes(session.cityId)
+  !filteredCities.length ||
+  filteredCities.map((city: City) => city.id).includes(session.cityId)
 
 const sessionMatchesTags = (session: Session, filteredTags: Tag[]) =>
   !filteredTags.length ||
-  filteredTags.some((tag: Tag) => (session.tags || []).map((t: Tag) => t.id).includes(tag.id))
+  filteredTags.some((tag: Tag) =>
+    (session.tags || []).map((t: Tag) => t.id).includes(tag.id),
+  )
 
 const mapRecordToSession = (r: Record<string, any>, lang: string): Session => {
   const loc = r.expand?.location
@@ -42,7 +45,9 @@ const mapRecordToSession = (r: Record<string, any>, lang: string): Session => {
     start: new Date(r.start_date),
     end: r.end_date ? new Date(r.end_date) : undefined,
     subscriptions: {
-      starting: r.subscription_publish_date ? new Date(r.subscription_publish_date) : undefined,
+      starting: r.subscription_publish_date
+        ? new Date(r.subscription_publish_date)
+        : undefined,
       max: r.max_subscriptions || 0,
       currentCount: r.subscription_count || 0,
       staffCount: r.staff_count || 0,
@@ -97,10 +102,14 @@ export const useSessions = () => {
       filter,
       expand: 'location,types',
     })
-    profileSessions.value = records.map(r => mapRecordToSession(r, currentLangCode.value))
+    profileSessions.value = records.map(r =>
+      mapRecordToSession(r, currentLangCode.value),
+    )
   }
 
-  const loadAttendees = async (_sessionId: string | undefined): Promise<void> => {
+  const loadAttendees = async (
+    _sessionId: string | undefined,
+  ): Promise<void> => {
     // TODO: load from PocketBase once attendance feature is implemented
   }
 
@@ -119,11 +128,17 @@ export const useSessions = () => {
       expand: 'location,types',
     })
 
-    sessions.value = records.map(r => mapRecordToSession(r, currentLangCode.value))
+    sessions.value = records.map(r =>
+      mapRecordToSession(r, currentLangCode.value),
+    )
     sessionsLoaded.value = true
   }
 
-  const updateSessionCount = (sessionId: string, count: number, asStaff?: boolean) => {
+  const updateSessionCount = (
+    sessionId: string,
+    count: number,
+    asStaff?: boolean,
+  ) => {
     if (sessions.value) {
       sessions.value = sessions.value.map(session => {
         if (session.id === sessionId) {
@@ -164,7 +179,10 @@ export const useSessions = () => {
     await useUserProfile().loadUserSubscriptions()
   }
 
-  const unsubscribeFromSession = async (sessionId: string, asStaff?: boolean) => {
+  const unsubscribeFromSession = async (
+    sessionId: string,
+    asStaff?: boolean,
+  ) => {
     const { userId } = useAuth()
     if (!userId.value) {
       return
@@ -191,7 +209,9 @@ export const useSessions = () => {
     }
     const batch = pb.createBatch()
     cityIds.forEach(cityId =>
-      batch.collection('ut_city_watchers').create({ user: userId.value, city: cityId }),
+      batch
+        .collection('ut_city_watchers')
+        .create({ user: userId.value, city: cityId }),
     )
     await batch.send()
     await useUserProfile().loadUserSubscriptions()
@@ -223,7 +243,8 @@ export const useSessions = () => {
   )
 
   const canSubscribe = (session: Session) =>
-    !dayjs(session.subscriptions.starting).isAfter(Date.now()) && !isFull(session)
+    !dayjs(session.subscriptions.starting).isAfter(Date.now()) &&
+    !isFull(session)
 
   const getNextAvailableSession = (city?: City) =>
     sessions.value &&

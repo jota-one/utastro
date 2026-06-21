@@ -38,7 +38,12 @@ const model = reactive({
 })
 
 const isValid = computed(
-  () => model.verified && !model.expired && !model.error && model.token && model.eKey,
+  () =>
+    model.verified &&
+    !model.expired &&
+    !model.error &&
+    model.token &&
+    model.eKey,
 )
 
 const onExpire = () => {

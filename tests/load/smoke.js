@@ -10,7 +10,9 @@ import { thresholds } from './config.js'
 import { anonymousFlow } from './scenarios/anonymous.js'
 import { authenticatedFlow } from './scenarios/authenticated.js'
 
-const users = new SharedArray('test-users', () => JSON.parse(open('./test-users.json')))
+const users = new SharedArray('test-users', () =>
+  JSON.parse(open('./test-users.json')),
+)
 
 export const options = {
   vus: 1,

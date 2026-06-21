@@ -12,7 +12,10 @@
           v-model="showUpcoming"
           active-text="À venir"
           inactive-text="Passées"
-          style="--el-switch-on-color: var(--el-color-success); --el-switch-off-color: var(--el-color-info-light-3)"
+          style="
+            --el-switch-on-color: var(--el-color-success);
+            --el-switch-off-color: var(--el-color-info-light-3);
+          "
           @change="load"
         />
         <el-input
@@ -31,12 +34,22 @@
       <el-table-column label="Lieu" width="200">
         <template #default="{ row }">
           <div class="text-xs text-gray-400">{{ row.expand?.city?.label }}</div>
-          <div>{{ row.expand?.location?.label_fr || row.expand?.location?.label_de || '—' }}</div>
+          <div>
+            {{
+              row.expand?.location?.label_fr ||
+              row.expand?.location?.label_de ||
+              '—'
+            }}
+          </div>
         </template>
       </el-table-column>
       <el-table-column label="Début" width="140" sortable prop="start_date">
         <template #default="{ row }">
-          {{ row.start_date ? dayjs(row.start_date).format('DD.MM.YYYY HH:mm') : '—' }}
+          {{
+            row.start_date
+              ? dayjs(row.start_date).format('DD.MM.YYYY HH:mm')
+              : '—'
+          }}
         </template>
       </el-table-column>
       <el-table-column label="Titre">
@@ -46,7 +59,11 @@
       </el-table-column>
       <el-table-column label="Ouv. inscr." width="140">
         <template #default="{ row }">
-          {{ row.subscription_publish_date ? dayjs(row.subscription_publish_date).format('DD.MM.YYYY HH:mm') : '—' }}
+          {{
+            row.subscription_publish_date
+              ? dayjs(row.subscription_publish_date).format('DD.MM.YYYY HH:mm')
+              : '—'
+          }}
         </template>
       </el-table-column>
       <el-table-column label="Inscrits" width="90" align="center">
@@ -59,7 +76,7 @@
       <el-table-column label="Types" width="160">
         <template #default="{ row }">
           <el-tag
-            v-for="type in (row.expand?.types || [])"
+            v-for="type in row.expand?.types || []"
             :key="type.id"
             size="small"
             class="mr-1"
@@ -78,7 +95,9 @@
       <el-table-column fixed="right" width="150" align="center">
         <template #default="{ row }">
           <el-button size="small" @click="openEdit(row)">Modifier</el-button>
-          <el-button size="small" type="danger" @click="onDelete(row)">Suppr.</el-button>
+          <el-button size="small" type="danger" @click="onDelete(row)"
+            >Suppr.</el-button
+          >
         </template>
       </el-table-column>
     </el-table>
@@ -95,11 +114,7 @@
       />
     </div>
 
-    <EventDialog
-      v-model="dialogOpen"
-      :item="editedItem"
-      @saved="load"
-    />
+    <EventDialog v-model="dialogOpen" :item="editedItem" @saved="load" />
   </div>
 </template>
 
@@ -121,17 +136,31 @@ const activeLang = ref<'fr' | 'de' | 'en'>('fr')
 const dialogOpen = ref(false)
 const editedItem = ref<Record<string, any> | null>(null)
 
-const progressLabel = (p: string) => ({
-  open: 'Ouvert', running: 'En cours', paused: 'Suspendu', cancelled: 'Annulé', over: 'Terminé',
-}[p] ?? p)
+const progressLabel = (p: string) =>
+  ({
+    open: 'Ouvert',
+    running: 'En cours',
+    paused: 'Suspendu',
+    cancelled: 'Annulé',
+    over: 'Terminé',
+  })[p] ?? p
 
-const progressType = (p: string): '' | 'success' | 'warning' | 'danger' | 'info' => ({
-  open: 'success', running: '', paused: 'warning', cancelled: 'danger', over: 'info',
-}[p] as any ?? '')
+const progressType = (
+  p: string,
+): '' | 'success' | 'warning' | 'danger' | 'info' =>
+  (({
+    open: 'success',
+    running: '',
+    paused: 'warning',
+    cancelled: 'danger',
+    over: 'info',
+  })[p] as any) ?? ''
 
 const buildFilter = () => {
   const now = dayjs().format('YYYY-MM-DD HH:mm:ss')
-  const parts: string[] = [showUpcoming.value ? `start_date >= "${now}"` : `start_date < "${now}"`]
+  const parts: string[] = [
+    showUpcoming.value ? `start_date >= "${now}"` : `start_date < "${now}"`,
+  ]
   if (search.value.trim()) {
     const s = search.value.trim().replace(/"/g, '\\"')
     parts.push(`(title_fr ~ "${s}" || title_de ~ "${s}" || title_en ~ "${s}")`)
@@ -142,11 +171,13 @@ const buildFilter = () => {
 const load = async () => {
   loading.value = true
   try {
-    const result = await pb.collection('ut_events').getList(page.value, pageSize.value, {
-      filter: buildFilter(),
-      sort: showUpcoming.value ? 'start_date' : '-start_date',
-      expand: 'location,city,types',
-    })
+    const result = await pb
+      .collection('ut_events')
+      .getList(page.value, pageSize.value, {
+        filter: buildFilter(),
+        sort: showUpcoming.value ? 'start_date' : '-start_date',
+        expand: 'location,city,types',
+      })
     items.value = result.items
     total.value = result.totalItems
   } catch {
@@ -176,7 +207,11 @@ const onDelete = async (row: Record<string, any>) => {
     await ElMessageBox.confirm(
       `Supprimer la session "${row.title_fr || row.title_de || row.id}" ?`,
       'Confirmation',
-      { confirmButtonText: 'Supprimer', cancelButtonText: 'Annuler', type: 'warning' },
+      {
+        confirmButtonText: 'Supprimer',
+        cancelButtonText: 'Annuler',
+        type: 'warning',
+      },
     )
     await pb.collection('ut_events').delete(row.id)
     ElMessage.success('Session supprimée')

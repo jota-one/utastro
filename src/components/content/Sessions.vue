@@ -29,11 +29,17 @@
               />
             </template>
           </SessionAsideWidget>
-          <SessionCityWatchWidget v-if="asideType === 'citySubscription' && city" :city="city" />
+          <SessionCityWatchWidget
+            v-if="asideType === 'citySubscription' && city"
+            :city="city"
+          />
         </div>
       </div>
       <div>
-        <SessionFilters :single-city="city" @empty-period-text-updated="emptyPeriodText = $event" />
+        <SessionFilters
+          :single-city="city"
+          @empty-period-text-updated="emptyPeriodText = $event"
+        />
         <div class="list">
           <SessionList
             :single-city="city"
@@ -115,7 +121,9 @@ const { isInRange } = useDateRange()
 
 const emptyPeriodText = ref('')
 
-const cities = computed(() => (props.city ? [props.city] : filteredCities.value))
+const cities = computed(() =>
+  props.city ? [props.city] : filteredCities.value,
+)
 
 const filteredSessions = computed(() =>
   (sessions.value || []).filter(session => {

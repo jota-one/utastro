@@ -12,7 +12,10 @@
           v-model="showEnabled"
           active-text="Actifs"
           inactive-text="Inactifs"
-          style="--el-switch-on-color: var(--el-color-success); --el-switch-off-color: var(--el-color-info-light-3)"
+          style="
+            --el-switch-on-color: var(--el-color-success);
+            --el-switch-off-color: var(--el-color-info-light-3);
+          "
           @change="load"
         />
         <el-input
@@ -46,7 +49,8 @@
             :href="`https://www.google.com/maps/place/${row.coords}`"
             target="_blank"
             class="text-blue-500 hover:underline"
-          >{{ row.coords }}</a>
+            >{{ row.coords }}</a
+          >
           <span v-else>—</span>
         </template>
       </el-table-column>
@@ -54,7 +58,10 @@
         <template #default="{ row }">
           <el-switch
             v-model="row.enabled"
-            style="--el-switch-on-color: var(--el-color-success); --el-switch-off-color: var(--el-color-info-light-3)"
+            style="
+              --el-switch-on-color: var(--el-color-success);
+              --el-switch-off-color: var(--el-color-info-light-3);
+            "
             @change="toggleEnabled(row)"
           />
         </template>
@@ -62,7 +69,9 @@
       <el-table-column fixed="right" width="150" align="center">
         <template #default="{ row }">
           <el-button size="small" @click="openEdit(row)">Modifier</el-button>
-          <el-button size="small" type="danger" @click="onDelete(row)">Suppr.</el-button>
+          <el-button size="small" type="danger" @click="onDelete(row)"
+            >Suppr.</el-button
+          >
         </template>
       </el-table-column>
     </el-table>
@@ -79,11 +88,7 @@
       />
     </div>
 
-    <LocationDialog
-      v-model="dialogOpen"
-      :item="editedItem"
-      @saved="load"
-    />
+    <LocationDialog v-model="dialogOpen" :item="editedItem" @saved="load" />
   </div>
 </template>
 
@@ -108,7 +113,9 @@ const buildFilter = () => {
   const parts: string[] = [`enabled = ${showEnabled.value}`]
   if (search.value.trim()) {
     const s = search.value.trim().replace(/"/g, '\\"')
-    parts.push(`(xid ~ "${s}" || label_fr ~ "${s}" || label_de ~ "${s}" || address ~ "${s}")`)
+    parts.push(
+      `(xid ~ "${s}" || label_fr ~ "${s}" || label_de ~ "${s}" || address ~ "${s}")`,
+    )
   }
   return parts.join(' && ')
 }
@@ -116,11 +123,13 @@ const buildFilter = () => {
 const load = async () => {
   loading.value = true
   try {
-    const result = await pb.collection('ut_locations').getList(page.value, pageSize.value, {
-      filter: buildFilter(),
-      sort: 'label_fr',
-      expand: 'city',
-    })
+    const result = await pb
+      .collection('ut_locations')
+      .getList(page.value, pageSize.value, {
+        filter: buildFilter(),
+        sort: 'label_fr',
+        expand: 'city',
+      })
     items.value = result.items
     total.value = result.totalItems
   } catch {
@@ -159,7 +168,11 @@ const onDelete = async (row: Record<string, any>) => {
     await ElMessageBox.confirm(
       `Supprimer le lieu "${row.label_fr || row.xid}" ?`,
       'Confirmation',
-      { confirmButtonText: 'Supprimer', cancelButtonText: 'Annuler', type: 'warning' },
+      {
+        confirmButtonText: 'Supprimer',
+        cancelButtonText: 'Annuler',
+        type: 'warning',
+      },
     )
     await pb.collection('ut_locations').delete(row.id)
     ElMessage.success('Lieu supprimé')

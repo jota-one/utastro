@@ -23,7 +23,12 @@
     </el-form>
     <template #footer>
       <el-button @click="emit('update:modelValue', false)">Annuler</el-button>
-      <el-button type="primary" :disabled="!formIsValid" :loading="saving" @click="save">
+      <el-button
+        type="primary"
+        :disabled="!formIsValid"
+        :loading="saving"
+        @click="save"
+      >
         Enregistrer
       </el-button>
     </template>
@@ -56,7 +61,11 @@ const saving = ref(false)
 const emptyForm = () => ({ xid: '', label_fr: '', label_de: '', label_en: '' })
 const form = ref(emptyForm())
 
-const formIsValid = computed(() => Boolean(form.value.xid) && Boolean(form.value.label_fr || form.value.label_de || form.value.label_en))
+const formIsValid = computed(
+  () =>
+    Boolean(form.value.xid) &&
+    Boolean(form.value.label_fr || form.value.label_de || form.value.label_en),
+)
 
 const load = async (id: string) => {
   const record = await pb.collection('ut_event_types').getOne(id)
@@ -74,13 +83,15 @@ const save = async () => {
     if (props.item?.id) {
       await pb.collection('ut_event_types').update(props.item.id, form.value)
     } else {
-      await pb.collection('ut_event_types').create({ ...form.value, enabled: true })
+      await pb
+        .collection('ut_event_types')
+        .create({ ...form.value, enabled: true })
     }
     ElMessage.success(props.item?.id ? 'Type mis à jour' : 'Type créé')
     emit('saved')
     emit('update:modelValue', false)
   } catch (e) {
-    ElMessage.error('Erreur lors de l\'enregistrement')
+    ElMessage.error("Erreur lors de l'enregistrement")
   } finally {
     saving.value = false
   }
@@ -88,7 +99,7 @@ const save = async () => {
 
 watch(
   () => props.modelValue,
-  (value) => {
+  value => {
     open.value = value
     if (value && props.item?.id) {
       load(props.item.id)

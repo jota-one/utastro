@@ -24,7 +24,10 @@ const { unsubscribeFromSession } = useSessions()
 const close = () => closeModal('session-unsubscribe')
 
 const onConfirm = async () => {
-  await unsubscribeFromSession(modalParams.value.sessionId, modalParams.value.asStaff)
+  await unsubscribeFromSession(
+    modalParams.value.sessionId,
+    modalParams.value.asStaff,
+  )
   if (modalParams.value.cb) {
     modalParams.value.cb()
   }

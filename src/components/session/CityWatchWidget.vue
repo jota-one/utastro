@@ -17,7 +17,10 @@
     <template #footer>
       <div class="footer">
         <Icon v-if="subscribed" name="success" class="subscribed-icon" />
-        <button :class="['button primary', { subscribed }]" @click="onButtonClick">
+        <button
+          :class="['button primary', { subscribed }]"
+          @click="onButtonClick"
+        >
           {{ t(`${labelsBase}_button`) }}
         </button>
       </div>
@@ -51,7 +54,8 @@ const { openedModal, openModal } = useModal()
 const subscribeAfterLogin = ref(false)
 
 const labelsBase = computed(
-  () => 'sessions_aside_city_' + (subscribed.value ? 'subscribed' : 'subscription'),
+  () =>
+    'sessions_aside_city_' + (subscribed.value ? 'subscribed' : 'subscription'),
 )
 
 const subscribed = computed(

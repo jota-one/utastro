@@ -95,7 +95,9 @@ routerAdd('POST', '/api/custom/auth/login', e => {
       H4 = add32(H4, e)
     }
 
-    return [H0, H1, H2, H3, H4].map(h => ('00000000' + (h >>> 0).toString(16)).slice(-8)).join('')
+    return [H0, H1, H2, H3, H4]
+      .map(h => ('00000000' + (h >>> 0).toString(16)).slice(-8))
+      .join('')
   }
 
   const body = e.requestInfo().body

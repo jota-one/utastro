@@ -1,6 +1,10 @@
 import { test, expect } from '@playwright/test'
 import { RegistrationPage } from '../../pages/RegistrationPage'
-import { clearMailpit, waitForEmail, extractLinkFromEmail } from '../../fixtures/index'
+import {
+  clearMailpit,
+  waitForEmail,
+  extractLinkFromEmail,
+} from '../../fixtures/index'
 
 /**
  * New user registration flow:
@@ -38,7 +42,9 @@ test('submit button is disabled with empty form', async ({ page }) => {
   await expect(submit).toBeDisabled()
 })
 
-test('full registration creates account and shows success message', async ({ page }) => {
+test('full registration creates account and shows success message', async ({
+  page,
+}) => {
   test.skip(!MAILPIT_AVAILABLE, 'MAILPIT_URL not set — skipping email test')
 
   const reg = new RegistrationPage(page)

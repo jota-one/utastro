@@ -5,12 +5,20 @@
       :session="sessionDetail"
       class="coach-strip"
     />
-    <AngledBoxesRow class="boxes" :boxes="['main', 'map']" :sep-color-theme="colorTheme">
+    <AngledBoxesRow
+      class="boxes"
+      :boxes="['main', 'map']"
+      :sep-color-theme="colorTheme"
+    >
       <template #box="{ item }">
         <div v-if="item === 'main'" class="main">
           <div class="tags">
             <TagList class="tag-list">
-              <Tag v-for="tag in sessionDetail?.tags || []" :key="tag.label" :label="tag.label" />
+              <Tag
+                v-for="tag in sessionDetail?.tags || []"
+                :key="tag.label"
+                :label="tag.label"
+              />
             </TagList>
           </div>
 
@@ -63,7 +71,10 @@
               </template>
             </button>
             <div v-if="!subscribed" class="subscription-info">
-              <span v-if="sessionDetail && isFull(sessionDetail)" v-html="t('session_full')" />
+              <span
+                v-if="sessionDetail && isFull(sessionDetail)"
+                v-html="t('session_full')"
+              />
               <span
                 v-else-if="sessionDetail && isAlmostFull(sessionDetail)"
                 v-html="t('session_almost_full')"
@@ -72,8 +83,12 @@
                 v-else-if="sessionDetail && !canSubscribe(sessionDetail)"
                 v-html="
                   t('sessions_subscription_starting', {
-                    date: dayjs(sessionDetail.subscriptions.starting).format('DD.MM.YYYY'),
-                    time: dayjs(sessionDetail.subscriptions.starting).format('HH:mm'),
+                    date: dayjs(sessionDetail.subscriptions.starting).format(
+                      'DD.MM.YYYY',
+                    ),
+                    time: dayjs(sessionDetail.subscriptions.starting).format(
+                      'HH:mm',
+                    ),
                   })
                 "
               />
@@ -100,31 +115,46 @@
             <div v-if="watching" class="watching-info">
               <Icon name="success" color-theme="success" />
               <div>
-                <div v-html="t('sessions_aside_city_subscribed_text_1', { city: city?.label })" />
+                <div
+                  v-html="
+                    t('sessions_aside_city_subscribed_text_1', {
+                      city: city?.label,
+                    })
+                  "
+                />
                 <p v-html="t('sessions_aside_city_subscribed_text_2')" />
               </div>
             </div>
-            <div v-else v-html="t('session_subscribe_city_info', { city: city?.label })" />
-          </div>
-
-          <div v-if="paused" class="paused-info" v-html="t('sessions_paused_info')" />
-        </div>
-
-          <div v-if="item === 'map'" class="map-container">
-            <Map
-              v-if="sessionDetail"
-              embedded
-              static
-              prevent-center-to-user-position
-              class="map"
-              :session="sessionDetail"
+            <div
+              v-else
+              v-html="t('session_subscribe_city_info', { city: city?.label })"
             />
           </div>
+
+          <div
+            v-if="paused"
+            class="paused-info"
+            v-html="t('sessions_paused_info')"
+          />
+        </div>
+
+        <div v-if="item === 'map'" class="map-container">
+          <Map
+            v-if="sessionDetail"
+            embedded
+            static
+            prevent-center-to-user-position
+            class="map"
+            :session="sessionDetail"
+          />
+        </div>
       </template>
     </AngledBoxesRow>
 
     <TipBox
-      v-if="sessionDetail && !paused && sessionDetail.moreInfo && moreInfoOpened"
+      v-if="
+        sessionDetail && !paused && sessionDetail.moreInfo && moreInfoOpened
+      "
       color-theme="info"
       class="more-infos"
       closeable
@@ -193,7 +223,8 @@ const {
 } = useSessions()
 const { isAuthenticated, isStaffUser } = useAuth()
 const { openedModal, openModal } = useModal()
-const { subscribedSessions, watchingCities, loadUserSubscriptions } = useUserProfile()
+const { subscribedSessions, watchingCities, loadUserSubscriptions } =
+  useUserProfile()
 const { cities, loadCities } = useCities()
 const { route } = useRoutes()
 
@@ -201,7 +232,9 @@ const moreInfoOpened = ref(true)
 const subscribeAfterLogin = ref(false)
 const watchAfterLogin = ref(false)
 
-const city = computed(() => sessionDetail.value && cities.value[sessionDetail.value.cityId])
+const city = computed(
+  () => sessionDetail.value && cities.value[sessionDetail.value.cityId],
+)
 
 const title = computed(() => {
   if (!sessionDetail.value) {
@@ -219,7 +252,9 @@ const subscribed = computed(
   () =>
     sessionDetail.value &&
     isAuthenticated.value &&
-    subscribedSessions.value.map(s => s.eventId).includes(sessionDetail.value.id),
+    subscribedSessions.value
+      .map(s => s.eventId)
+      .includes(sessionDetail.value.id),
 )
 
 const watching = computed(
@@ -230,7 +265,9 @@ const watching = computed(
 )
 
 const colorTheme = computed(() =>
-  !sessionDetail.value || paused.value ? 'neutral' : getSessionTheme(sessionDetail.value),
+  !sessionDetail.value || paused.value
+    ? 'neutral'
+    : getSessionTheme(sessionDetail.value),
 )
 
 const cityBackLink = computed(() => {
@@ -242,13 +279,15 @@ const cityBackLink = computed(() => {
 })
 
 const eventStarted = computed(
-  () => sessionDetail.value && dayjs(sessionDetail.value.start).isBefore(dayjs()),
+  () =>
+    sessionDetail.value && dayjs(sessionDetail.value.start).isBefore(dayjs()),
 )
 
 const displaySubscribeButton = computed(
   () =>
     !eventStarted.value &&
-    (subscribed.value || (sessionDetail.value && canSubscribe(sessionDetail.value))),
+    (subscribed.value ||
+      (sessionDetail.value && canSubscribe(sessionDetail.value))),
 )
 
 const subscribe = async () => {

@@ -1,7 +1,11 @@
 <template>
   <div class="session-filters">
     <div class="bg" />
-    <FormFieldWrapper :label="t('sessions_filter_locations_label')" hide-error class="filter">
+    <FormFieldWrapper
+      :label="t('sessions_filter_locations_label')"
+      hide-error
+      class="filter"
+    >
       <VueMultiselect
         v-if="!singleCity"
         v-model="filteredCities"
@@ -88,7 +92,8 @@ const props = defineProps<Props>()
 
 const { t } = useI36n()
 const { cities, filteredCities } = useCities()
-const { filteredTags, sessionsDateRange, sessionsDateRangeSize, tags } = useSessions()
+const { filteredTags, sessionsDateRange, sessionsDateRangeSize, tags } =
+  useSessions()
 const { getRangeText, isNow } = useDateRange()
 
 const singleCityModel = ref(props.singleCity ? [props.singleCity] : [])
@@ -100,7 +105,11 @@ const sortedCities = computed(() =>
 )
 
 const updateEmptyPeriodText = () => {
-  const text = getRangeText(sessionsDateRange.value, sessionsDateRangeSize.value, true)
+  const text = getRangeText(
+    sessionsDateRange.value,
+    sessionsDateRangeSize.value,
+    true,
+  )
   emit('empty-period-text-updated', text)
 }
 

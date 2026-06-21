@@ -22,7 +22,11 @@
         >
           {{ label('subscription') }}
         </a>
-        <button v-if="isAuthenticated" class="button tertiary" @click="onAuthButtonClick">
+        <button
+          v-if="isAuthenticated"
+          class="button tertiary"
+          @click="onAuthButtonClick"
+        >
           {{ t('common_logout') }}
         </button>
         <button v-else class="button secondary" @click="onAuthButtonClick">
@@ -80,8 +84,12 @@ import { useRoutes } from '@composables/useRoutes'
 const { t } = useI36n()
 const { modalParams, openModal, closeModal } = useModal()
 const { isAuthenticated, isStaffUser, logout } = useAuth()
-const { watchingCities, subscribedSessions, coachingSessions, loadUserSubscriptions } =
-  useUserProfile()
+const {
+  watchingCities,
+  subscribedSessions,
+  coachingSessions,
+  loadUserSubscriptions,
+} = useUserProfile()
 const { cities, loadCities } = useCities()
 const { route, label, navItems: navigationItems } = useRoutes()
 

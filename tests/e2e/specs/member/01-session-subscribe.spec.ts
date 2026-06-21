@@ -29,7 +29,9 @@ test('member can subscribe to an open event', async ({ memberPage }) => {
   await expect(event.subscribeButton()).toBeVisible({ timeout: 8_000 })
 })
 
-test('header event counter increments after subscribing', async ({ memberPage }) => {
+test('header event counter increments after subscribing', async ({
+  memberPage,
+}) => {
   const event = new EventDetailPage(memberPage)
   await event.goto(process.env.TEST_EVENT_ID_OPEN!)
 
@@ -45,7 +47,9 @@ test('header event counter increments after subscribing', async ({ memberPage })
   await event.confirmUnsubscribe()
 })
 
-test('header eventcounter decrements after unsubscribing', async ({ memberPage }) => {
+test('header eventcounter decrements after unsubscribing', async ({
+  memberPage,
+}) => {
   const event = new EventDetailPage(memberPage)
   await event.goto(process.env.TEST_EVENT_ID_OPEN!)
 
@@ -62,7 +66,9 @@ test('header eventcounter decrements after unsubscribing', async ({ memberPage }
   expect(Number(unsubscribed)).toBeLessThan(Number(subscribed))
 })
 
-test('unsubscribe modal shows confirmation dialog before removing', async ({ memberPage }) => {
+test('unsubscribe modal shows confirmation dialog before removing', async ({
+  memberPage,
+}) => {
   const event = new EventDetailPage(memberPage)
   await event.goto(process.env.TEST_EVENT_ID_OPEN!)
 
@@ -71,7 +77,9 @@ test('unsubscribe modal shows confirmation dialog before removing', async ({ mem
 
   // Click unsubscribe — modal must appear
   await event.unsubscribeButton().click()
-  await expect(memberPage.getByText('Es-tu sûr de vouloir te désinscrire')).toBeVisible()
+  await expect(
+    memberPage.getByText('Es-tu sûr de vouloir te désinscrire'),
+  ).toBeVisible()
 
   // Cancel — should still be subscribed
   await memberPage.locator('button', { hasText: 'Annuler' }).click()

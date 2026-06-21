@@ -4,7 +4,8 @@ import type { APIRoute } from 'astro'
 import config from '@/config'
 import { sendEmail } from '@/utils/email'
 
-const validateEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+const validateEmail = (email: string) =>
+  /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
 
 export const POST: APIRoute = async ({ request }) => {
   try {
@@ -18,7 +19,10 @@ export const POST: APIRoute = async ({ request }) => {
     const files = formData.getAll('files') as File[]
 
     if (!firstName || !lastName || !email) {
-      return new Response(JSON.stringify({ error: 'required_fields_missing' }), { status: 400 })
+      return new Response(
+        JSON.stringify({ error: 'required_fields_missing' }),
+        { status: 400 },
+      )
     }
 
     if (!validateEmail(email)) {

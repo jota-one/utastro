@@ -1,5 +1,5 @@
 import { setOptions, importLibrary } from '@googlemaps/js-api-loader'
-import type { CenterCoords, Marker } from "@/types"
+import type { CenterCoords, Marker } from '@/types'
 import config from '@/config'
 
 if (typeof window !== 'undefined') {
@@ -121,8 +121,8 @@ export default function useGMap() {
       return (a.position?.lat || 0) > (b.position?.lat || 0)
         ? -1
         : (a.position?.lat || 0) < (b.position?.lat || 0)
-        ? 1
-        : 0
+          ? 1
+          : 0
     })
   }
 
@@ -152,7 +152,7 @@ export default function useGMap() {
       })
 
       if (gMarker) {
-        (gMarker.content as HTMLImageElement).src = marker.icon
+        ;(gMarker.content as HTMLImageElement).src = marker.icon
       } else {
         const newGMarker = await createGMarker(map, marker)
 

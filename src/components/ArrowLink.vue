@@ -1,7 +1,17 @@
 <template>
-  <a :href="href" :class="['arrow-link', { asButton, noPadding, reverse }]" :target="target">
+  <a
+    :href="href"
+    :class="['arrow-link', { asButton, noPadding, reverse }]"
+    :target="target"
+  >
     <span class="label">{{ label }}</span>
-    <svg class="icon" viewBox="0 0 24 24" width="24" height="24" xmlns="http://www.w3.org/2000/svg">
+    <svg
+      class="icon"
+      viewBox="0 0 24 24"
+      width="24"
+      height="24"
+      xmlns="http://www.w3.org/2000/svg"
+    >
       <path
         d="M17.9317 10.6465L12.7852 5.50004L13.4981 4.78715L20.711 12L13.4981 19.2129L12.7852 18.5L17.9317 13.3536L18.7852 12.5L17.5781 12.5L5.07812 12.5L5.07812 11.5L17.5781 11.5L18.7852 11.5L17.9317 10.6465Z"
         fill="currentColor"

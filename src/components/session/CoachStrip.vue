@@ -64,11 +64,15 @@ const { openModal } = useModal()
 
 const coaching = computed(
   () =>
-    isAuthenticated.value && coachingSessions.value.map(s => s.eventId).includes(props.session.id),
+    isAuthenticated.value &&
+    coachingSessions.value.map(s => s.eventId).includes(props.session.id),
 )
 
 const canCheckAttendees = computed(
-  () => props.session.attendees !== 'disabled' && coaching.value && !props.session.paused,
+  () =>
+    props.session.attendees !== 'disabled' &&
+    coaching.value &&
+    !props.session.paused,
 )
 </script>
 

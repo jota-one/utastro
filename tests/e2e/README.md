@@ -53,11 +53,11 @@ Both `.env` and auth state files are in `.gitignore`.
 
 ### member/
 
-| File                             | What it covers                                                                        |
-| -------------------------------- | ------------------------------------------------------------------------------------- |
-| `01-event-subscribe.spec.ts`   | Subscribe / unsubscribe, header counter increments/decrements, modal cancel           |
+| File                           | What it covers                                                                    |
+| ------------------------------ | --------------------------------------------------------------------------------- |
+| `01-event-subscribe.spec.ts`   | Subscribe / unsubscribe, header counter increments/decrements, modal cancel       |
 | `02-event-constraints.spec.ts` | Full event blocked, past event no button, city watch, anonymous redirect to login |
-| `03-concurrent.spec.ts`          | 3 users race for the last spot — exactly 1 wins                                       |
+| `03-concurrent.spec.ts`        | 3 users race for the last spot — exactly 1 wins                                   |
 
 ### coach/, admin/, superadmin/ — TODO
 

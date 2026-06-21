@@ -77,7 +77,11 @@ import type { City, DateRangeSize, Session } from '@/types'
 
 const { t } = useI36n()
 const { getLocaleDate } = useLocaleDate()
-const { sessionsDateRangeSize, getNextAvailableSession, jumpToNextAvailableSession } = useSessions()
+const {
+  sessionsDateRangeSize,
+  getNextAvailableSession,
+  jumpToNextAvailableSession,
+} = useSessions()
 
 interface Props {
   loading?: boolean
@@ -134,7 +138,10 @@ const nextAvailableSessionDate = computed(() => {
 })
 
 const loadMore = () => {
-  if (props.max > renderListStop.value && props.max - renderListStop.value < LIST_CHUNK_LENGTH) {
+  if (
+    props.max > renderListStop.value &&
+    props.max - renderListStop.value < LIST_CHUNK_LENGTH
+  ) {
     renderListStop.value = props.max
   } else {
     renderListStop.value += LIST_CHUNK_LENGTH

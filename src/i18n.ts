@@ -10,9 +10,12 @@ export function detectLang(): Lang {
   const docLang = document.documentElement.lang
   if ((SUPPORTED as readonly string[]).includes(docLang)) return docLang as Lang
   const stored = localStorage.getItem(STORAGE_KEY)
-  if (stored && (SUPPORTED as readonly string[]).includes(stored)) return stored as Lang
+  if (stored && (SUPPORTED as readonly string[]).includes(stored))
+    return stored as Lang
   const browser = navigator.language.split('-')[0]
-  return (SUPPORTED as readonly string[]).includes(browser) ? (browser as Lang) : 'fr'
+  return (SUPPORTED as readonly string[]).includes(browser)
+    ? (browser as Lang)
+    : 'fr'
 }
 
 export function setLang(lang: Lang) {
@@ -20,7 +23,10 @@ export function setLang(lang: Lang) {
   window.location.reload()
 }
 
-const loaders: Record<Lang, () => Promise<{ default: Record<string, string> }>> = {
+const loaders: Record<
+  Lang,
+  () => Promise<{ default: Record<string, string> }>
+> = {
   fr: () => import('./translations/fr.json'),
   de: () => import('./translations/de.json'),
   en: () => import('./translations/en.json'),

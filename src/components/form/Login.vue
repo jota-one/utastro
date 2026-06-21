@@ -31,7 +31,11 @@
             {{ t('login_tip_reset_password_sent') }}
           </TipBox>
           <div class="buttons">
-            <button class="button tertiary" type="button" @click.prevent="close">
+            <button
+              class="button tertiary"
+              type="button"
+              @click.prevent="close"
+            >
               {{ t('common_close') }}
             </button>
           </div>
@@ -41,7 +45,11 @@
             {{ resetPasswordError }}
           </TipBox>
           <div class="buttons">
-            <button class="button tertiary" type="button" @click.prevent="close">
+            <button
+              class="button tertiary"
+              type="button"
+              @click.prevent="close"
+            >
               {{ t('common_close') }}
             </button>
           </div>
@@ -52,11 +60,19 @@
           </TipBox>
           <ContentBlockSpace size="quarter" />
           <div class="captcha-wrapper">
-            <FormCaptcha v-if="hcaptcha.enabled" ref="captchaEl" v-model="captchaModel" />
+            <FormCaptcha
+              v-if="hcaptcha.enabled"
+              ref="captchaEl"
+              v-model="captchaModel"
+            />
           </div>
           <ContentBlockSpace size="quarter" />
           <div class="buttons">
-            <button class="button tertiary" type="button" @click.prevent="toggleForgotPassword">
+            <button
+              class="button tertiary"
+              type="button"
+              @click.prevent="toggleForgotPassword"
+            >
               {{ t('common_cancel') }}
             </button>
             <button
@@ -71,7 +87,11 @@
       </template>
       <div v-else class="buttons">
         <div class="row">
-          <button class="button tertiary" type="button" @click.prevent="toggleForgotPassword">
+          <button
+            class="button tertiary"
+            type="button"
+            @click.prevent="toggleForgotPassword"
+          >
             {{ t('login_action_password_forgotten') }}
           </button>
           <div style="flex-grow: 1" />

@@ -30,14 +30,24 @@
         </template>
       </Tab>
       <template #outer>
-        <a v-if="isAdminUser" :href="adminLink" class="button primary admin" no-prefetch> Admin </a>
+        <a
+          v-if="isAdminUser"
+          :href="adminLink"
+          class="button primary admin"
+          no-prefetch
+        >
+          Admin
+        </a>
       </template>
     </Tabs>
     <div class="tab-content">
       <div v-if="userProfile && activeTab === 'profile'" class="profile">
         <ContentSubscriptionForm :user-profile="userProfile" />
       </div>
-      <SessionList v-if="activeTab === 'sessions'" :sessions="userSubscribedSessions" />
+      <SessionList
+        v-if="activeTab === 'sessions'"
+        :sessions="userSubscribedSessions"
+      />
       <template v-if="activeTab === 'cities'">
         <div class="watch-city-info" v-html="t('sessions_watch_cities_info')" />
         <div class="watch-city-form">
@@ -69,8 +79,15 @@
         </div>
         <ul v-if="userWatchingCities.length" class="cities-list">
           <li v-for="city in userWatchingCities" :key="city.id" class="city">
-            <ArrowLink :href="getCityPageLink(city)" :label="city.label" class="arrow-link" />
-            <button class="button primary subscribed" @click="unwatchCity(city.id)">
+            <ArrowLink
+              :href="getCityPageLink(city)"
+              :label="city.label"
+              class="arrow-link"
+            />
+            <button
+              class="button primary subscribed"
+              @click="unwatchCity(city.id)"
+            >
               {{ t('sessions_aside_city_subscribed_button') }}
             </button>
           </li>
@@ -117,7 +134,8 @@ const {
   loadUserProfile,
   loadUserSubscriptions,
 } = useUserProfile()
-const { profileSessions, loadSessionsByIds, unwatchCity, watchCities } = useSessions()
+const { profileSessions, loadSessionsByIds, unwatchCity, watchCities } =
+  useSessions()
 const { cities, loadCities } = useCities()
 const { t } = useI36n()
 
@@ -134,7 +152,8 @@ const getTabFromHash = (hash: string) => {
 const activeTab = ref(getTabFromHash(window.location.hash))
 const selectedCities = ref<City[]>([])
 
-const sortCities = (a: City, b: City) => (a.label > b.label ? 1 : a.label === b.label ? 0 : -1)
+const sortCities = (a: City, b: City) =>
+  a.label > b.label ? 1 : a.label === b.label ? 0 : -1
 
 const adminLink = '/admin/'
 
@@ -154,7 +173,8 @@ const unwatchedCities = computed(() =>
 )
 
 const getCityPageLink = (city: City) => {
-  const lang = (window.location.pathname.split('/').filter(Boolean)[0] || 'fr') as LangCode
+  const lang = (window.location.pathname.split('/').filter(Boolean)[0] ||
+    'fr') as LangCode
   return `${getPath('subscription', lang)}/${city.slug}`
 }
 
@@ -166,7 +186,11 @@ const watchCitiesAndClearDropdown = () => {
 const navigateTo = (tab: string) => {
   activeTab.value = tab
   if (tab === 'profile') {
-    history.pushState(null, '', window.location.pathname + window.location.search)
+    history.pushState(
+      null,
+      '',
+      window.location.pathname + window.location.search,
+    )
   } else {
     history.pushState(null, '', `#${tab}`)
   }
@@ -184,7 +208,9 @@ const loadProfileData = () => {
   loadUserSubscriptions().then(() => {
     const ids = [
       ...(subscribedSessions.value || []).map(s => s.eventId),
-      ...(isStaffUser ? (coachingSessions.value || []).map(s => s.eventId) : []),
+      ...(isStaffUser
+        ? (coachingSessions.value || []).map(s => s.eventId)
+        : []),
     ]
     loadSessionsByIds(ids)
   })
@@ -192,7 +218,9 @@ const loadProfileData = () => {
 
 watch(
   () => isAuthenticated.value,
-  value => { if (value) loadProfileData() },
+  value => {
+    if (value) loadProfileData()
+  },
   { immediate: true },
 )
 </script>

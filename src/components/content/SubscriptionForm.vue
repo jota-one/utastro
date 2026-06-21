@@ -28,7 +28,10 @@
 
     <ContentBlockTitle :text="t('subscriptionform_validation_title')" />
     <div class="container superslim">
-      <FormSubscriptionAgreements v-model="model.agreements" :user-profile="userProfile" />
+      <FormSubscriptionAgreements
+        v-model="model.agreements"
+        :user-profile="userProfile"
+      />
     </div>
 
     <ContentBlockSpace size="quarter" />
@@ -46,7 +49,11 @@
         />
       </TipBox>
       <template v-if="!userProfile && !submitted">
-        <FormCaptcha v-if="hcaptcha.enabled" ref="captchaEl" v-model="model.captcha" />
+        <FormCaptcha
+          v-if="hcaptcha.enabled"
+          ref="captchaEl"
+          v-model="model.captcha"
+        />
         <button
           :class="['button primary', { loading: submitting }]"
           type="submit"
@@ -66,9 +73,14 @@
       <TipBox v-if="submitted" color-theme="success">
         <div
           v-html="
-            t(userProfile ? 'profile_update_success' : 'subscriptionform_success_text', {
-              email: model.login.email,
-            })
+            t(
+              userProfile
+                ? 'profile_update_success'
+                : 'subscriptionform_success_text',
+              {
+                email: model.login.email,
+              },
+            )
           "
         />
       </TipBox>
@@ -157,23 +169,34 @@ const requiredFields = ref({
 })
 
 const hasEmptyRequiredFields = computed(() => {
-  return Object.entries(requiredFields.value).reduce((acc, [fieldGroup, keys]) => {
-    for (const key of keys) {
-      const isEmpty = [undefined, ''].includes((model as any)[fieldGroup][key])
-      acc = acc || isEmpty
-    }
-    return acc
-  }, false)
+  return Object.entries(requiredFields.value).reduce(
+    (acc, [fieldGroup, keys]) => {
+      for (const key of keys) {
+        const isEmpty = [undefined, ''].includes(
+          (model as any)[fieldGroup][key],
+        )
+        acc = acc || isEmpty
+      }
+      return acc
+    },
+    false,
+  )
 })
 
 const canSubmit = computed(
   () =>
     !hasEmptyRequiredFields.value &&
-    (props.userProfile ? true : hcaptcha.enabled ? model.captcha.isValid : true),
+    (props.userProfile
+      ? true
+      : hcaptcha.enabled
+        ? model.captcha.isValid
+        : true),
 )
 
 const submitButtonLabel = computed(() =>
-  submitting.value ? 'subscriptionform_submit_button_loading' : 'subscriptionform_submit_button',
+  submitting.value
+    ? 'subscriptionform_submit_button_loading'
+    : 'subscriptionform_submit_button',
 )
 
 const makePasswordRequired = () => {
@@ -209,7 +232,9 @@ const submit = async () => {
     }
 
     if (props.userProfile) {
-      await pb.collection('ut_users').update(String(props.userProfile.id), pbData)
+      await pb
+        .collection('ut_users')
+        .update(String(props.userProfile.id), pbData)
     } else {
       await pb.collection('ut_users').create({
         ...pbData,

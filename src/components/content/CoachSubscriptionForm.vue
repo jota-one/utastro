@@ -53,7 +53,12 @@
           @dragleave.prevent="dragging = false"
           @drop.prevent="onDrop"
         >
-          <input type="file" multiple class="file-input" @change="onFilesChange" />
+          <input
+            type="file"
+            multiple
+            class="file-input"
+            @change="onFilesChange"
+          />
           <svg
             class="upload-icon"
             viewBox="0 0 24 24"
@@ -66,19 +71,32 @@
               fill="currentColor"
             />
           </svg>
-          <div class="file-drop-text" v-html="t('coachsubscriptionform_document_dropzone')" />
+          <div
+            class="file-drop-text"
+            v-html="t('coachsubscriptionform_document_dropzone')"
+          />
           <ul v-if="fileList.length" class="file-list">
             <li v-for="f in fileList" :key="f.name">{{ f.name }}</li>
           </ul>
         </label>
-        <div class="file-tip">{{ t('coachsubscriptionform_document_tip') }}</div>
+        <div class="file-tip">
+          {{ t('coachsubscriptionform_document_tip') }}
+        </div>
       </FormFieldWrapper>
       <ContentBlockSpace size="quarter" />
       <TipBox v-if="submitted" color-theme="success">
-        <div v-html="t('coachsubscriptionform_success_text', { email: model.email })" />
+        <div
+          v-html="
+            t('coachsubscriptionform_success_text', { email: model.email })
+          "
+        />
       </TipBox>
       <template v-else>
-        <FormCaptcha v-if="hcaptcha.enabled" ref="captchaEl" v-model="captchaModel" />
+        <FormCaptcha
+          v-if="hcaptcha.enabled"
+          ref="captchaEl"
+          v-model="captchaModel"
+        />
         <ContentBlockSpace size="quarter" />
         <button
           class="button primary"
@@ -155,7 +173,10 @@ const submit = async () => {
     formData.append('captchaToken', captchaModel.value.token)
     fileList.value.forEach(f => formData.append('files', f))
 
-    const res = await fetch(astroBaseUri + '/app/coaches', { method: 'POST', body: formData })
+    const res = await fetch(astroBaseUri + '/app/coaches', {
+      method: 'POST',
+      body: formData,
+    })
 
     if (!res.ok) {
       throw new Error(`HTTP ${res.status}`)

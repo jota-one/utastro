@@ -9,7 +9,11 @@
   >
     <el-form :model="form" label-position="right" label-width="120px">
       <el-form-item label="Ville" required>
-        <el-select v-model="form.city" placeholder="Sélectionner une ville" class="w-full">
+        <el-select
+          v-model="form.city"
+          placeholder="Sélectionner une ville"
+          class="w-full"
+        >
           <el-option
             v-for="city in cities"
             :key="city.id"
@@ -39,7 +43,12 @@
     </el-form>
     <template #footer>
       <el-button @click="emit('update:modelValue', false)">Annuler</el-button>
-      <el-button type="primary" :disabled="!formIsValid" :loading="saving" @click="save">
+      <el-button
+        type="primary"
+        :disabled="!formIsValid"
+        :loading="saving"
+        @click="save"
+      >
         Enregistrer
       </el-button>
     </template>
@@ -70,13 +79,27 @@ const open = ref(props.modelValue)
 const saving = ref(false)
 const cities = ref<{ id: string; label: string; slug: string }[]>([])
 
-const emptyForm = () => ({ city: '', label_fr: '', label_de: '', label_en: '', xid: '', coords: '', address: '' })
+const emptyForm = () => ({
+  city: '',
+  label_fr: '',
+  label_de: '',
+  label_en: '',
+  xid: '',
+  coords: '',
+  address: '',
+})
 const form = ref(emptyForm())
 
-const formIsValid = computed(() => Boolean(form.value.city) && Boolean(form.value.label_fr || form.value.label_de || form.value.label_en))
+const formIsValid = computed(
+  () =>
+    Boolean(form.value.city) &&
+    Boolean(form.value.label_fr || form.value.label_de || form.value.label_en),
+)
 
 const loadCities = async () => {
-  const result = await pb.collection('ut_cities').getFullList({ sort: 'label', filter: 'enabled = true' })
+  const result = await pb
+    .collection('ut_cities')
+    .getFullList({ sort: 'label', filter: 'enabled = true' })
   cities.value = result.map(r => ({ id: r.id, label: r.label, slug: r.slug }))
 }
 
@@ -99,13 +122,15 @@ const save = async () => {
     if (props.item?.id) {
       await pb.collection('ut_locations').update(props.item.id, form.value)
     } else {
-      await pb.collection('ut_locations').create({ ...form.value, enabled: true })
+      await pb
+        .collection('ut_locations')
+        .create({ ...form.value, enabled: true })
     }
     ElMessage.success(props.item?.id ? 'Lieu mis à jour' : 'Lieu créé')
     emit('saved')
     emit('update:modelValue', false)
   } catch {
-    ElMessage.error('Erreur lors de l\'enregistrement')
+    ElMessage.error("Erreur lors de l'enregistrement")
   } finally {
     saving.value = false
   }
@@ -116,7 +141,10 @@ watch(
   (cityId, prevCityId) => {
     const city = cities.value.find(c => c.id === cityId)
     const prevCity = cities.value.find(c => c.id === prevCityId)
-    if (city && (form.value.xid === '' || form.value.xid === `${prevCity?.slug}-`)) {
+    if (
+      city &&
+      (form.value.xid === '' || form.value.xid === `${prevCity?.slug}-`)
+    ) {
       form.value.xid = `${city.slug}-`
     }
   },
@@ -124,7 +152,7 @@ watch(
 
 watch(
   () => props.modelValue,
-  (value) => {
+  value => {
     open.value = value
     if (value && props.item?.id) {
       load(props.item.id)

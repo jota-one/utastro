@@ -13,7 +13,8 @@ export default function useDateRange() {
 
   const _addWeek = (date: Dayjs): Dayjs => getLocaleDate(date).endOf('week')
 
-  const _getStartOfWeek = (date: Dayjs): Dayjs => getLocaleDate(date).startOf('week').startOf('day')
+  const _getStartOfWeek = (date: Dayjs): Dayjs =>
+    getLocaleDate(date).startOf('week').startOf('day')
 
   const getInitalRange = (): DateRange => {
     return {
@@ -104,7 +105,11 @@ export default function useDateRange() {
   const isInRange = (date: Dayjs, range: DateRange): boolean =>
     date.isAfter(range.from) && date.isBefore(range.to)
 
-  const getRangeText = (range: DateRange, rangeSize: DateRangeSize, withArticle?: boolean) => {
+  const getRangeText = (
+    range: DateRange,
+    rangeSize: DateRangeSize,
+    withArticle?: boolean,
+  ) => {
     const localeFrom = getLocaleDate(range.from)
     const localeTo = getLocaleDate(range.to)
     let text = ''

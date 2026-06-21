@@ -40,7 +40,11 @@ export function authenticatedFlow(email, password) {
   if (TEST_EVENT_ID) {
     res = http.post(
       `${PB_URL}/api/collections/ut_subscriptions/records`,
-      JSON.stringify({ user: userId, event: TEST_EVENT_ID, is_event_admin: false }),
+      JSON.stringify({
+        user: userId,
+        event: TEST_EVENT_ID,
+        is_event_admin: false,
+      }),
       { headers, tags: { type: 'api' } },
     )
     const subscribed = check(res, { 'subscribe 200': r => r.status === 200 })
@@ -50,10 +54,14 @@ export function authenticatedFlow(email, password) {
       randomSleep(0.5, 1.5)
 
       // 5. Unsubscribe (cleanup)
-      res = http.del(`${PB_URL}/api/collections/ut_subscriptions/records/${subId}`, null, {
-        headers,
-        tags: { type: 'api' },
-      })
+      res = http.del(
+        `${PB_URL}/api/collections/ut_subscriptions/records/${subId}`,
+        null,
+        {
+          headers,
+          tags: { type: 'api' },
+        },
+      )
       check(res, { 'unsubscribe 204': r => r.status === 204 })
     }
   }
@@ -74,10 +82,14 @@ export function authenticatedFlow(email, password) {
       randomSleep(0.5, 1)
 
       // 7. Unwatch city (cleanup)
-      res = http.del(`${PB_URL}/api/collections/ut_city_watchers/records/${watchId}`, null, {
-        headers,
-        tags: { type: 'api' },
-      })
+      res = http.del(
+        `${PB_URL}/api/collections/ut_city_watchers/records/${watchId}`,
+        null,
+        {
+          headers,
+          tags: { type: 'api' },
+        },
+      )
       check(res, { 'unwatch city 204': r => r.status === 204 })
     }
   }

@@ -12,7 +12,10 @@
           v-model="showEnabled"
           active-text="Actifs"
           inactive-text="Inactifs"
-          style="--el-switch-on-color: var(--el-color-success); --el-switch-off-color: var(--el-color-info-light-3)"
+          style="
+            --el-switch-on-color: var(--el-color-success);
+            --el-switch-off-color: var(--el-color-info-light-3);
+          "
           @change="load"
         />
         <el-input
@@ -38,7 +41,10 @@
         <template #default="{ row }">
           <el-switch
             v-model="row.enabled"
-            style="--el-switch-on-color: var(--el-color-success); --el-switch-off-color: var(--el-color-info-light-3)"
+            style="
+              --el-switch-on-color: var(--el-color-success);
+              --el-switch-off-color: var(--el-color-info-light-3);
+            "
             @change="toggleEnabled(row)"
           />
         </template>
@@ -46,7 +52,9 @@
       <el-table-column fixed="right" width="160" align="center">
         <template #default="{ row }">
           <el-button size="small" @click="openEdit(row)">Modifier</el-button>
-          <el-button size="small" type="danger" @click="onDelete(row)">Suppr.</el-button>
+          <el-button size="small" type="danger" @click="onDelete(row)"
+            >Suppr.</el-button
+          >
         </template>
       </el-table-column>
     </el-table>
@@ -63,11 +71,7 @@
       />
     </div>
 
-    <EventTypeDialog
-      v-model="dialogOpen"
-      :item="editedItem"
-      @saved="load"
-    />
+    <EventTypeDialog v-model="dialogOpen" :item="editedItem" @saved="load" />
   </div>
 </template>
 
@@ -92,7 +96,9 @@ const buildFilter = () => {
   const parts: string[] = [`enabled = ${showEnabled.value}`]
   if (search.value.trim()) {
     const s = search.value.trim().replace(/"/g, '\\"')
-    parts.push(`(xid ~ "${s}" || label_fr ~ "${s}" || label_de ~ "${s}" || label_en ~ "${s}")`)
+    parts.push(
+      `(xid ~ "${s}" || label_fr ~ "${s}" || label_de ~ "${s}" || label_en ~ "${s}")`,
+    )
   }
   return parts.join(' && ')
 }
@@ -100,10 +106,12 @@ const buildFilter = () => {
 const load = async () => {
   loading.value = true
   try {
-    const result = await pb.collection('ut_event_types').getList(page.value, pageSize.value, {
-      filter: buildFilter(),
-      sort: 'xid',
-    })
+    const result = await pb
+      .collection('ut_event_types')
+      .getList(page.value, pageSize.value, {
+        filter: buildFilter(),
+        sort: 'xid',
+      })
     items.value = result.items
     total.value = result.totalItems
   } catch {
@@ -120,7 +128,9 @@ const onSearch = () => {
 
 const toggleEnabled = async (row: Record<string, any>) => {
   try {
-    await pb.collection('ut_event_types').update(row.id, { enabled: row.enabled })
+    await pb
+      .collection('ut_event_types')
+      .update(row.id, { enabled: row.enabled })
   } catch {
     row.enabled = !row.enabled
     ElMessage.error('Erreur lors de la mise à jour')
@@ -142,7 +152,11 @@ const onDelete = async (row: Record<string, any>) => {
     await ElMessageBox.confirm(
       `Supprimer le type "${row.xid}" ?`,
       'Confirmation',
-      { confirmButtonText: 'Supprimer', cancelButtonText: 'Annuler', type: 'warning' },
+      {
+        confirmButtonText: 'Supprimer',
+        cancelButtonText: 'Annuler',
+        type: 'warning',
+      },
     )
     await pb.collection('ut_event_types').delete(row.id)
     ElMessage.success('Type supprimé')

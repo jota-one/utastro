@@ -7,7 +7,8 @@ import en from '@/translations/en.json'
 const translations: Record<string, Record<string, string>> = { fr, de, en }
 
 export const useI36n = () => {
-  const load = async (langCode: string) => translations[langCode] || translations.fr
+  const load = async (langCode: string) =>
+    translations[langCode] || translations.fr
 
   const initI36n = (langCode: string) => {
     const showKey = ref(false)

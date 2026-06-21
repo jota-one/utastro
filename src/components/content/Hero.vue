@@ -3,7 +3,13 @@
     <AngledBoxesRow class="boxes" :boxes="['main', 'cta']">
       <template #box="{ item }">
         <div v-if="item === 'main'" class="main">
-          <img class="bg-image" decoding="async" src="/img/hero.jpg" width="100%" height="100%" />
+          <img
+            class="bg-image"
+            decoding="async"
+            src="/img/hero.jpg"
+            width="100%"
+            height="100%"
+          />
           <div class="bg-image-color" />
           <div class="bg-image-gradient" />
           <div class="headline">
@@ -139,7 +145,11 @@ const viewVideo = ref(false)
 }
 
 .bg-image-gradient {
-  background-image: linear-gradient(0, rgba(var(--color-black), 0.7), transparent 50%);
+  background-image: linear-gradient(
+    0,
+    rgba(var(--color-black), 0.7),
+    transparent 50%
+  );
   mix-blend-mode: multiply;
 }
 

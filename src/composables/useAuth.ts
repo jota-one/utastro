@@ -10,9 +10,15 @@ if (userJwt.value && !pb.authStore.isValid) {
 }
 
 export function useAuth() {
-  const isAuthenticated = computed(() => userJwt.value.length > 0 && pb.authStore.isValid)
-  const isAdminUser = computed(() => ['admin', 'superadmin'].includes(user.value?.role))
-  const isStaffUser = computed(() => user.value?.role === 'staff' || isAdminUser.value)
+  const isAuthenticated = computed(
+    () => userJwt.value.length > 0 && pb.authStore.isValid,
+  )
+  const isAdminUser = computed(() =>
+    ['admin', 'superadmin'].includes(user.value?.role),
+  )
+  const isStaffUser = computed(
+    () => user.value?.role === 'staff' || isAdminUser.value,
+  )
   const userId = computed(() => user.value?.id)
 
   const login = async (credentials: { email: string; password: string }) => {

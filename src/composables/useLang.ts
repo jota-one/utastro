@@ -4,7 +4,9 @@ import type { LangCode } from '@/routes'
 
 export function useLang() {
   const docLang =
-    typeof document !== 'undefined' ? (document.documentElement.lang as LangCode) : DEFAULT_LANG
+    typeof document !== 'undefined'
+      ? (document.documentElement.lang as LangCode)
+      : DEFAULT_LANG
 
   const lang = ref<LangCode>(LANGS.includes(docLang) ? docLang : DEFAULT_LANG)
 

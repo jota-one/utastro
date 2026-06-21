@@ -28,7 +28,11 @@ const routeConfigs: RouteConfig[] = [
   {
     name: 'home',
     slugs: { fr: '', de: '', en: '' },
-    labels: { fr: 'Urban Training', de: 'Urban Training', en: 'Urban Training' },
+    labels: {
+      fr: 'Urban Training',
+      de: 'Urban Training',
+      en: 'Urban Training',
+    },
     show: 'always',
   },
   {
@@ -58,7 +62,11 @@ const routeConfigs: RouteConfig[] = [
   {
     name: 'subscription-form',
     slugs: { fr: 'formulaire', de: 'formular', en: 'form' },
-    labels: { fr: "Formulaire d'inscription", de: 'Anmeldungsformular', en: 'Subscription form' },
+    labels: {
+      fr: "Formulaire d'inscription",
+      de: 'Anmeldungsformular',
+      en: 'Subscription form',
+    },
     parent: 'subscription',
     show: 'never',
   },

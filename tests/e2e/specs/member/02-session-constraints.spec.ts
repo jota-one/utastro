@@ -6,7 +6,9 @@ import { EventDetailPage } from '../../pages/EventDetailPage'
  * Requires TEST_EVENT_ID_FULL, TEST_EVENT_ID_PAST, TEST_CITY_SLUG.
  */
 
-test('cannot subscribe to a full event — full message is shown', async ({ memberPage }) => {
+test('cannot subscribe to a full event — full message is shown', async ({
+  memberPage,
+}) => {
   test.skip(!process.env.TEST_EVENT_ID_FULL, 'TEST_EVENT_ID_FULL not set')
   await memberPage.goto('/fr')
 
@@ -17,7 +19,9 @@ test('cannot subscribe to a full event — full message is shown', async ({ memb
   await expect(event.subscribeButton()).not.toBeVisible()
 })
 
-test('subscribe button is not shown for a past event', async ({ memberPage }) => {
+test('subscribe button is not shown for a past event', async ({
+  memberPage,
+}) => {
   test.skip(!process.env.TEST_EVENT_ID_PAST, 'TEST_EVENT_ID_PAST not set')
   await memberPage.goto('/fr')
 
@@ -43,16 +47,23 @@ test('member can watch a city for news', async ({ memberPage }) => {
   if (await watchBtn.isVisible()) {
     await watchBtn.click()
     // Confirmation text appears
-    await expect(memberPage.getByText('Reste informé', { exact: false })).toBeVisible({
+    await expect(
+      memberPage.getByText('Reste informé', { exact: false }),
+    ).toBeVisible({
       timeout: 5_000,
     })
   } else {
     // Watch button may not appear if subscriptions are already open — skip gracefully
-    test.skip(true, 'Watch city button not visible on this event (subscriptions open)')
+    test.skip(
+      true,
+      'Watch city button not visible on this event (subscriptions open)',
+    )
   }
 })
 
-test('anonymous user sees login prompt when clicking subscribe', async ({ page }) => {
+test('anonymous user sees login prompt when clicking subscribe', async ({
+  page,
+}) => {
   test.skip(!process.env.TEST_EVENT_ID_OPEN, 'TEST_EVENT_ID_OPEN not set')
 
   const event = new EventDetailPage(page)

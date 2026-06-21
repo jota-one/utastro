@@ -48,7 +48,6 @@ import GMap from '@components/GMap.vue'
 import MapLegends from '@components/MapLegends.vue'
 import type { City, Coords, Link, Marker, Session } from '@/types'
 
-
 interface Props {
   backLink?: Link
   city?: City
@@ -84,12 +83,12 @@ const markers = computed(() => {
       theme === 'error'
         ? 'full'
         : theme === 'success'
-        ? canSubscribe(session)
-          ? 'active'
-          : 'open'
-        : theme === 'warning'
-        ? 'almost-full'
-        : ''
+          ? canSubscribe(session)
+            ? 'active'
+            : 'open'
+          : theme === 'warning'
+            ? 'almost-full'
+            : ''
 
     if (subscribedSessions.value.some(s => s.eventId === session.id)) {
       state += '-subscribed'
@@ -211,7 +210,8 @@ const staticUrl = computed(() => {
 })
 
 const staticLink = computed(
-  () => `${config.gmap.staticLink}?q=${props.session?.location.coords.join(',')}`,
+  () =>
+    `${config.gmap.staticLink}?q=${props.session?.location.coords.join(',')}`,
 )
 
 const onMarkerClicked = (marker: Marker) => {

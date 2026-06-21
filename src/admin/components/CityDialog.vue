@@ -20,7 +20,12 @@
     </el-form>
     <template #footer>
       <el-button @click="emit('update:modelValue', false)">Annuler</el-button>
-      <el-button type="primary" :disabled="!formIsValid" :loading="saving" @click="save">
+      <el-button
+        type="primary"
+        :disabled="!formIsValid"
+        :loading="saving"
+        @click="save"
+      >
         Enregistrer
       </el-button>
     </template>
@@ -76,7 +81,7 @@ const save = async () => {
     emit('saved')
     emit('update:modelValue', false)
   } catch {
-    ElMessage.error('Erreur lors de l\'enregistrement')
+    ElMessage.error("Erreur lors de l'enregistrement")
   } finally {
     saving.value = false
   }
@@ -84,7 +89,7 @@ const save = async () => {
 
 watch(
   () => props.modelValue,
-  (value) => {
+  value => {
     open.value = value
     if (value && props.item?.id) {
       load(props.item.id)
