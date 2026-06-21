@@ -1,7 +1,95 @@
 ---
-import BaseLayout from "./BaseLayout.astro";
+import AuthGuard from '@components/AuthGuard.astro'
+import BaseLayout from './BaseLayout.astro'
 ---
 
+<AuthGuard />
+
+<style>
+  .admin-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 44px;
+    background-color: #1e2432;
+    border-bottom: 1px solid #2d3448;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+  }
+
+  .admin-header__left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .admin-header__logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+  }
+
+  .admin-header__logo:hover .admin-header__logo-name {
+    color: #e2e8f0;
+  }
+
+  .admin-header__logo-ut {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: #f97316;
+  }
+
+  .admin-header__logo-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: #94a3b8;
+    transition: color 0.15s;
+  }
+
+  .admin-header__sep {
+    color: #374151;
+    font-size: 12px;
+  }
+
+  .admin-header__badge {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: #64748b;
+  }
+
+  .admin-header__back {
+    font-size: 11px;
+    color: #4b5563;
+    text-decoration: none;
+    transition: color 0.15s;
+  }
+
+  .admin-header__back:hover {
+    color: #94a3b8;
+  }
+</style>
 <BaseLayout>
-  <slot />
+  <header class="admin-header">
+    <div class="admin-header__left">
+      <a href="/fr/" class="admin-header__logo">
+        <span class="admin-header__logo-ut">UT</span>
+        <span class="admin-header__logo-name">Urban Training</span>
+      </a>
+      <span class="admin-header__sep">|</span>
+      <span class="admin-header__badge">Admin</span>
+    </div>
+    <a href="/fr/" class="admin-header__back">← Site</a>
+  </header>
+  <div style="margin-top: 44px; height: calc(100vh - 44px); overflow: hidden;">
+    <slot />
+  </div>
 </BaseLayout>

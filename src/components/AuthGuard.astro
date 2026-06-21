@@ -1,0 +1,23 @@
+---
+// Redirects to home if not authenticated (checks sessionStorage before hydration)
+---
+
+<style is:inline>
+  html:not(.auth-checked) body {
+    visibility: hidden;
+  }
+</style>
+
+<script is:inline>
+  (function () {
+    const userJwt = sessionStorage.getItem('ut_jwt')
+    const isAuthenticated = userJwt && userJwt.length > 0
+
+    if (!isAuthenticated && window.location.pathname !== '/') {
+      sessionStorage.setItem('returnUrl', window.location.pathname + window.location.search)
+      window.location.href = '/'
+    } else {
+      document.documentElement.classList.add('auth-checked')
+    }
+  })()
+</script>

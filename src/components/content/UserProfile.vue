@@ -136,10 +136,7 @@ const selectedCities = ref<City[]>([])
 
 const sortCities = (a: City, b: City) => (a.label > b.label ? 1 : a.label === b.label ? 0 : -1)
 
-const adminLink = computed(() => {
-  const lang = window.location.pathname.split('/').filter(Boolean)[0] || 'fr'
-  return `/${lang}/admin`
-})
+const adminLink = '/admin/'
 
 const userSubscribedSessions = computed(() => profileSessions.value ?? [])
 
