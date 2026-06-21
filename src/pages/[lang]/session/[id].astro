@@ -3,9 +3,22 @@ export const prerender = false
 
 import PageLayout from '@layouts/PageLayout.astro'
 import SessionDetailView from '@components/session/DetailView.vue'
+import { pb } from '@/pb'
 import type { LangCode } from '@/routes'
 
 const { lang, id } = Astro.params as { lang: LangCode; id: string }
+
+if (/^\d+$/.test(id)) {
+  try {
+    const record = await pb.collection('ut_events').getFirstListItem(
+      `legacy_id="${id}"`,
+      { fields: 'id' },
+    )
+    return Astro.redirect(`/${lang}/session/${record.id}`, 301)
+  } catch {
+    return new Response(null, { status: 404 })
+  }
+}
 ---
 
 <PageLayout lang={lang}>
