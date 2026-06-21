@@ -1,7 +1,7 @@
 {
   "extends": "astro/tsconfigs/strict",
   "compilerOptions": {
-    "types": ["google.maps"],
+    "types": ["google.maps", "astro/client"],
     "paths": {
       "@/*": ["./src/*"],
       "@assets/*": ["./src/assets/*"],
