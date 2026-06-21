@@ -79,10 +79,11 @@
       </template>
     </div>
   </div>
+  <FormLogin v-else class="login" />
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import VueMultiselect from 'vue-multiselect'
 import 'vue-multiselect/dist/vue-multiselect.css'
 import type { City } from '@/types'
@@ -96,6 +97,7 @@ import Counter from '@components/Counter.vue'
 import ArrowLink from '@/components/ArrowLink.vue'
 import EmptyList from '@components/EmptyList.vue'
 import FormFieldWrapper from '@components/form/FieldWrapper.vue'
+import FormLogin from '@components/form/Login.vue'
 import ContentSubscriptionForm from '@components/content/SubscriptionForm.vue'
 import SessionList from '@components/session/List.vue'
 import { useAuth } from '@/composables/useAuth'
@@ -179,7 +181,7 @@ onMounted(() => {
   })
 })
 
-if (isAuthenticated.value) {
+const loadProfileData = () => {
   loadUserProfile()
   loadCities()
   loadUserSubscriptions().then(() => {
@@ -190,12 +192,22 @@ if (isAuthenticated.value) {
     loadSessionsByIds(ids)
   })
 }
+
+watch(
+  () => isAuthenticated.value,
+  value => { if (value) loadProfileData() },
+  { immediate: true },
+)
 </script>
 
 <style lang="postcss" scoped>
 @import '@/assets/styles/_mediaquery.pcss';
 .user-profile {
   padding: 1.5rem;
+}
+
+.login {
+  padding: 2rem 0;
 }
 
 .button.admin {
