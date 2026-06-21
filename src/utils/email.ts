@@ -1,4 +1,3 @@
-import config from '@/config'
 
 type Attachment = {
   name: string

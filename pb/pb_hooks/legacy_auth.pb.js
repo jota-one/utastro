@@ -109,7 +109,7 @@ routerAdd('POST', '/api/custom/auth/login', e => {
   let record
   try {
     record = $app.findAuthRecordByEmail('ut_users', email)
-  } catch (_) {
+  } catch {
     throw new UnauthorizedError('Invalid credentials')
   }
 

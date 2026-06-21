@@ -115,9 +115,9 @@ migrate(
   (app) => {
     try {
       app.delete(app.findCollectionByNameOrId('ut_city_watchers'))
-    } catch (_) {}
+    } catch {}
     try {
       app.delete(app.findCollectionByNameOrId('ut_cities'))
-    } catch (_) {}
+    } catch {}
   },
 )

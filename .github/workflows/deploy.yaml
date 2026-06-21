@@ -84,7 +84,7 @@ jobs:
         run: |
           echo PUBLIC_GMAP_API_KEY=${{ secrets.PUBLIC_GMAP_API_KEY }} > .env
           source .env
-          pnpm build
+          pnpm lint && pnpm tsc && pnpm build
 
       - name: Prepare artifact
         run: |

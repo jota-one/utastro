@@ -143,7 +143,7 @@ migrate(
   },
   (app) => {
     for (const name of ['ut_subscriptions', 'ut_events', 'ut_locations', 'ut_event_types']) {
-      try { app.delete(app.findCollectionByNameOrId(name)) } catch (_) {}
+      try { app.delete(app.findCollectionByNameOrId(name)) } catch {}
     }
   },
 )
