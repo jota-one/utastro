@@ -81,9 +81,11 @@ jobs:
         run: pnpm install
 
       - name: Build app
+        env:
+          PUBLIC_GMAP_API_KEY: ${{ secrets.PUBLIC_GMAP_API_KEY }}
         run: |
-          echo PUBLIC_GMAP_API_KEY=${{ secrets.PUBLIC_GMAP_API_KEY }} > .env
-          source .env
+          # .env.tmp is required because shell redirects can't read and write the same file simultaneously
+          envsubst '${PUBLIC_GMAP_API_KEY}' < .env > .env.tmp && mv .env.tmp .env
           pnpm lint && pnpm tsc && pnpm build
 
       - name: Prepare artifact
