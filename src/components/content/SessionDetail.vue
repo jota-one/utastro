@@ -5,7 +5,7 @@
       :session="sessionDetail"
       class="coach-strip"
     />
-    <AngledBoxesRow class="boxes" :boxes="['main']" :sep-color-theme="colorTheme">
+    <AngledBoxesRow class="boxes" :boxes="['main', 'map']" :sep-color-theme="colorTheme">
       <template #box="{ item }">
         <div v-if="item === 'main'" class="main">
           <div class="tags">
@@ -36,7 +36,7 @@
             class="details"
           />
 
-          <div v-if="sessionDetail" class="location-link">
+          <!-- <div v-if="sessionDetail" class="location-link">
             <a
               :href="`https://www.google.com/maps?q=${sessionDetail.location.coords.join(',')}`"
               target="_blank"
@@ -45,7 +45,7 @@
             >
               {{ t('common_open_map') }}
             </a>
-          </div>
+          </div> -->
 
           <div class="spacer" />
 
@@ -109,6 +109,17 @@
 
           <div v-if="paused" class="paused-info" v-html="t('sessions_paused_info')" />
         </div>
+
+          <div v-if="item === 'map'" class="map-container">
+            <Map
+              v-if="sessionDetail"
+              embedded
+              static
+              prevent-center-to-user-position
+              class="map"
+              :session="sessionDetail"
+            />
+          </div>
       </template>
     </AngledBoxesRow>
 
@@ -161,6 +172,7 @@ import ArrowLink from '@/components/ArrowLink.vue'
 import Modal from '@/components/Modal.vue'
 import Icon from '@/components/Icon.vue'
 import DateDisplay from '@/components/Date.vue'
+import Map from '@/components/content/Map.vue'
 
 type Props = {
   sessionId?: string
@@ -505,6 +517,27 @@ onMounted(async () => {
 
 .watch-button {
   flex-shrink: 0;
+}
+
+.map-container {
+  position: relative;
+  width: 100%;
+  height: 25rem;
+
+  @media (--l) {
+    height: 100%;
+  }
+
+  .map {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    padding: 0;
+  }
 }
 
 .city-back-link {

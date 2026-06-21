@@ -2,7 +2,7 @@
 export const prerender = false
 
 import PageLayout from '@layouts/PageLayout.astro'
-import SessionDetailView from '@components/session/DetailView.vue'
+import SessionDetail from '@components/content/SessionDetail.vue'
 import { pb } from '@/pb'
 import type { LangCode } from '@/routes'
 
@@ -22,5 +22,5 @@ if (/^\d+$/.test(id)) {
 ---
 
 <PageLayout lang={lang}>
-  <SessionDetailView client:only="vue" session-id={id} />
+  <SessionDetail client:only="vue" session-id={id} />
 </PageLayout>
