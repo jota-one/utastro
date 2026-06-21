@@ -2,7 +2,9 @@ import { setOptions, importLibrary } from '@googlemaps/js-api-loader'
 import type { CenterCoords, Marker } from "@/types"
 import config from '@/config'
 
-setOptions({ apiKey: config.gmap.apiKey, version: 'weekly' })
+if (typeof window !== 'undefined') {
+  setOptions({ key: config.gmap.apiKey, version: 'weekly' })
+}
 
 type MapUpdateProps = {
   zoom?: number
@@ -26,6 +28,7 @@ type MapUrlProps = {
 
 let map: google.maps.Map
 const gMarkers: google.maps.marker.AdvancedMarkerElement[] = []
+let onMarkerClick: (marker: Marker) => void = () => {}
 
 const createMarkerIcon = (marker: Marker) => {
   const markerIconImg = document.createElement('img')
@@ -99,8 +102,9 @@ export default function useGMap() {
 
   const loadMarkers = async (
     markers: Marker[],
-    onMarkerClick: (marker: Marker) => void,
+    onClick: (marker: Marker) => void,
   ) => {
+    onMarkerClick = onClick
     for (const marker of markers) {
       const gMarker = await createGMarker(map, marker)
 
@@ -153,6 +157,9 @@ export default function useGMap() {
         const newGMarker = await createGMarker(map, marker)
 
         if (newGMarker) {
+          newGMarker.element.addEventListener('click', () => {
+            onMarkerClick(marker)
+          })
           gMarkers.push(newGMarker)
         }
       }

@@ -59,7 +59,7 @@ interface Props {
   static?: boolean
 }
 
-const { route, label, navItems: navigationItems } = useRoutes()
+const { route, label, lang, navItems: navigationItems } = useRoutes()
 const { cities, filteredCities } = useCities()
 const { sessions, canSubscribe, getSessionTheme } = useSessions()
 const { coords } = useGeolocation()
@@ -214,30 +214,12 @@ const staticLink = computed(
   () => `${config.gmap.staticLink}?q=${props.session?.location.coords.join(',')}`,
 )
 
-const onMarkerClicked = (marker: any) => {
-  // if (props.city) {
-  //   const sessionDetailPage = Object.values(pages.value).find(
-  //     page => page.name === 'session-detail',
-  //   )
-
-  //   const path = sessionDetailPage?.path.replace(':session.id', marker.slug)
-
-  //   if (path) {
-  //     router.push({ path })
-  //   }
-  // }
-
-  // if (!props.city && !props.session) {
-  //   const cityPage = Object.values(pages.value).find(
-  //     page => page.name === 'city',
-  //   )
-
-  //   const path = cityPage?.path.replace(':city.slug', marker.slug)
-
-  //   if (path) {
-  //     router.push({ path })
-  //   }
-  // }
+const onMarkerClicked = (marker: Marker) => {
+  if (props.city && marker.slug) {
+    window.location.href = route('session-detail').replace(':id', marker.slug)
+  } else if (!props.session && marker.slug) {
+    window.location.href = route('city').replace(':city', marker.slug)
+  }
 }
 
 watch(
