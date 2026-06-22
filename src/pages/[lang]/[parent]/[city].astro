@@ -2,11 +2,13 @@
 export const prerender = false
 
 import SiteLayout from '@layouts/SiteLayout.astro'
+import PageLayout from '@layouts/PageLayout.astro'
 import ContentBlockTitle from '@components/content/BlockTitle.vue'
 import ContentBlockSpace from '@components/content/BlockSpace.vue'
 import Map from '@/components/content/Map.vue'
 import SessionsView from '@/components/content/Sessions.vue'
 import ArrowLink from '@/components/ArrowLink.vue'
+import SubscriptionFormPage from '@components/pages/SubscriptionFormPage.astro'
 import { getPath, LANGS } from '@/routes'
 import { pb } from '@/pb'
 import type { LangCode } from '@/routes'
@@ -29,31 +31,36 @@ if (parent !== expectedParent) {
   return new Response(null, { status: 404 })
 }
 
-let city: City | null = null
-try {
-  const record = await pb.collection('ut_cities').getFirstListItem(
-    `slug="${citySlug}" && enabled=true`,
-    { fields: 'id,label,slug,coords' },
-  )
-  const [lat, lng] = (record.coords || '').split(',').map(Number)
-  city = {
-    id: record.id,
-    label: record.label,
-    slug: record.slug,
-    coords: [lat || 0, lng || 0] as Coords,
-    sponsors: [],
+// [parent]/[city] is more specific than [...slug] in Astro's router, so it
+// intercepts sub-pages like /fr/inscription/formulaire. Detect and render them.
+const subscriptionFormSlug = getPath('subscription-form', lang).split('/').pop()!
+const isSubscriptionForm = citySlug === subscriptionFormSlug
+
+let city: City | undefined = undefined
+if (!isSubscriptionForm) {
+  try {
+    const record = await pb.collection('ut_cities').getFirstListItem(
+      `slug="${citySlug}" && enabled=true`,
+      { fields: 'id,label,slug,coords' },
+    )
+    const [lat, lng] = (record.coords || '').split(',').map(Number)
+    city = {
+      id: record.id,
+      label: record.label,
+      slug: record.slug,
+      coords: [lat || 0, lng || 0] as Coords,
+      sponsors: [],
+    }
+  } catch {
+    return new Response(null, { status: 404 })
   }
-} catch {
-  return new Response(null, { status: 404 })
 }
 
 const pageTitles: Record<LangCode, string> = {
-  fr: `Prochaines sessions à ${city.label}`,
-  de: `Nächste Sessions in ${city.label}`,
-  en: `Next sessions in ${city.label}`,
+  fr: `Prochaines sessions à ${city?.label}`,
+  de: `Nächste Sessions in ${city?.label}`,
+  en: `Next sessions in ${city?.label}`,
 }
-
-const mapsUrl = `https://www.google.com/maps?q=${city.coords.join(',')}`
 
 const backLinkLabels: Record<LangCode, string> = {
   fr: 'Toutes les sessions',
@@ -62,13 +69,13 @@ const backLinkLabels: Record<LangCode, string> = {
 }
 ---
 
+{isSubscriptionForm ? (
+  <PageLayout {lang}>
+    <SubscriptionFormPage {lang} />
+  </PageLayout>
+) : (
 <SiteLayout {lang}>
   <ContentBlockTitle text={pageTitles[lang]} />
-  <!-- <div class="maps-link container slim">
-    <a href={mapsUrl} target="_blank" rel="noopener noreferrer" class="button secondary">
-      {lang === 'fr' ? 'Voir sur la carte' : lang === 'de' ? 'Auf der Karte anzeigen' : 'Open on map'}
-    </a>
-  </div> -->
   <Map client:only="vue" city={city} backLink={{label: "Toutes les villes", href: "/fr/inscription"}} />
   <ContentBlockSpace size="half" />
   <SessionsView client:only="vue" asideType="citySubscription" city={city} />
@@ -78,6 +85,7 @@ const backLinkLabels: Record<LangCode, string> = {
   </div>
   <ContentBlockSpace size="half" />
 </SiteLayout>
+)}
 
 <style>
 .maps-link {

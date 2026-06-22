@@ -4,7 +4,8 @@
       <span class="header">
         {{ label }}
         <FormOptional v-if="optional" />
-        <FormRequired v-if="required" />
+        <FormFilled v-else-if="required && filled" />
+        <FormRequired v-else-if="required" />
       </span>
       <slot />
     </label>
@@ -15,6 +16,7 @@
 <script setup lang="ts">
 import FormOptional from '@components/form/Optional.vue'
 import FormRequired from '@components/form/Required.vue'
+import FormFilled from '@components/form/Filled.vue'
 
 defineProps({
   icon: {
@@ -30,6 +32,10 @@ defineProps({
   },
   required: {
     type: Boolean,
+  },
+  filled: {
+    type: Boolean,
+    default: false,
   },
   error: {
     type: String,

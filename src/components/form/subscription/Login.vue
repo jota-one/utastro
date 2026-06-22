@@ -1,5 +1,10 @@
 <template>
-  <FormFieldWrapper :label="t('subscriptionform_email_label')" required>
+  <FormFieldWrapper
+    :label="t('subscriptionform_email_label')"
+    required
+    :filled="Boolean(model.email) && !errors.email"
+    :error="errors.email"
+  >
     <input
       v-model="model.email"
       type="text"
@@ -9,7 +14,6 @@
       class="input"
       :disabled="Boolean(userProfile)"
       :placeholder="t('subscriptionform_email_placeholder')"
-      :error="errors.email"
     />
   </FormFieldWrapper>
   <button
@@ -35,6 +39,7 @@
       "
       :error="errors.password"
       required
+      :filled="Boolean(model.password) && !errors.password"
     >
       <input
         v-model="model.password"
@@ -56,6 +61,7 @@
       "
       :error="errors.passwordConfirm"
       required
+      :filled="Boolean(model.passwordConfirm) && !errors.passwordConfirm"
     >
       <input
         v-model="model.passwordConfirm"
@@ -75,7 +81,7 @@ import { ref, reactive, watch } from 'vue'
 import { useI36n } from '@jota-one/i36n'
 import FormFieldWrapper from '@/components/form/FieldWrapper.vue'
 import AppErrorCode from '@/AppErrorCode'
-import { validatePassword } from '@/utils/validate'
+import { validateEmail, validatePassword } from '@/utils/validate'
 import type { UserProfile, UserProfileLogin } from '@/types'
 
 interface Props {
@@ -116,10 +122,18 @@ watch(
 watch(
   () => model.value,
   value => {
+    delete errors.email
+    delete errors.password
+    delete errors.passwordConfirm
+
+    try {
+      validateEmail(value.email || '')
+    } catch {
+      errors.email = t('ERROR_HC_INVALID_EMAIL_ADDRESS')
+    }
+
     try {
       validatePassword(value.password || '', value.passwordConfirm || '')
-      delete errors.password
-      delete errors.passwordConfirm
     } catch (e: any) {
       if (e.cause === AppErrorCode.ERROR_HC_PASSWORD_POLICY_NOT_MATCHED) {
         errors.password = t('ERROR_HC_PASSWORD_POLICY_NOT_MATCHED')

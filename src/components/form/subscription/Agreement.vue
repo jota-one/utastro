@@ -8,7 +8,9 @@
       :disabled="disabled"
     />
     <div class="text">
-      <template v-if="required"> <FormRequired />&nbsp; </template>
+      <template v-if="required">
+        <FormFilled v-if="model" /><FormRequired v-else />&nbsp;
+      </template>
       <slot />
     </div>
   </label>
@@ -17,6 +19,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import FormRequired from '@/components/form/Required.vue'
+import FormFilled from '@/components/form/Filled.vue'
 interface Props {
   modelValue?: boolean
   name: string

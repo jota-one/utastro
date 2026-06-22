@@ -3,9 +3,21 @@ import BlockSpace from '@/components/content/BlockSpace.vue'
 import BlockTitle from '@/components/content/BlockTitle.vue'
 import Map from '@/components/content/Map.vue'
 import SessionsView from '@/components/content/Sessions.vue'
+import type { LangCode } from '@/routes'
 
+interface Props {
+  lang: LangCode
+}
+
+const { lang } = Astro.props
+
+const titles: Record<LangCode, string> = {
+  fr: 'Inscription à Urban Training',
+  de: 'Anmeldung bei Urban Training',
+  en: 'Subscribe to Urban Training',
+}
 ---
-<BlockTitle text="Inscription à Urban Training" />
+<BlockTitle text={titles[lang]} />
 <Map client:only="vue" />
 <BlockSpace size="half" />
 <SessionsView client:only="vue" asideType="facebookLink" initialDateRangeSize="month" />

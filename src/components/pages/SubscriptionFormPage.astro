@@ -1,0 +1,22 @@
+---
+import ContentBlockTitle from '@components/content/BlockTitle.vue'
+import ContentBlockSpace from '@components/content/BlockSpace.vue'
+import SubscriptionForm from '@components/content/SubscriptionForm.vue'
+import type { LangCode } from '@/routes'
+
+interface Props {
+  lang: LangCode
+}
+
+const { lang } = Astro.props
+
+const titles: Record<LangCode, string> = {
+  fr: "Crée ton compte Urban Training",
+  de: 'Anmeldungsformular',
+  en: 'Registration form',
+}
+---
+
+<ContentBlockTitle text={titles[lang]} />
+<SubscriptionForm client:only="vue" />
+<ContentBlockSpace size="half" />

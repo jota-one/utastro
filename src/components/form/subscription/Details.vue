@@ -1,5 +1,10 @@
 <template>
-  <FormFieldWrapper :label="t('subscriptionform_name_label')" required>
+  <FormFieldWrapper
+    :label="t('subscriptionform_name_label')"
+    required
+    :filled="Boolean(model.name) && !errors.name"
+    :error="errors.name"
+  >
     <input
       v-model="model.name"
       type="text"
@@ -20,7 +25,12 @@
       :placeholder="t('subscriptionform_street_placeholder')"
     />
   </FormFieldWrapper>
-  <FormFieldWrapper :label="t('subscriptionform_zip_label')" required>
+  <FormFieldWrapper
+    :label="t('subscriptionform_zip_label')"
+    required
+    :filled="Boolean(model.zip) && !errors.zip"
+    :error="errors.zip"
+  >
     <input
       v-model="model.zip"
       type="text"
@@ -31,7 +41,12 @@
       :placeholder="t('subscriptionform_zip_placeholder')"
     />
   </FormFieldWrapper>
-  <FormFieldWrapper :label="t('subscriptionform_city_label')" required>
+  <FormFieldWrapper
+    :label="t('subscriptionform_city_label')"
+    required
+    :filled="Boolean(model.city) && !errors.city"
+    :error="errors.city"
+  >
     <input
       v-model="model.city"
       type="text"
@@ -42,8 +57,15 @@
       :placeholder="t('subscriptionform_city_placeholder')"
     />
   </FormFieldWrapper>
-  <FormFieldWrapper :label="t('subscriptionform_region_label')" required>
+  <FormFieldWrapper
+    :label="t('subscriptionform_region_label')"
+    required
+    :filled="Boolean(model.regionId)"
+  >
     <select v-model="model.regionId" class="dropdown" required>
+      <option value="" disabled>
+        {{ t('subscriptionform_region_placeholder') }}
+      </option>
       <option
         v-for="canton in SWISS_CANTONS"
         :key="canton.value"
@@ -58,12 +80,16 @@
       v-model="model.country"
       type="text"
       name="country"
-      autocomplete="on"
       class="input"
-      :placeholder="t('subscriptionform_country_placeholder')"
+      disabled
     />
   </FormFieldWrapper>
-  <FormFieldWrapper :label="t('subscriptionform_phone_label')" required>
+  <FormFieldWrapper
+    :label="t('subscriptionform_phone_label')"
+    required
+    :filled="Boolean(model.phone) && !errors.phone"
+    :error="errors.phone"
+  >
     <input
       v-model="model.phone"
       type="text"
@@ -74,8 +100,15 @@
       required
     />
   </FormFieldWrapper>
-  <FormFieldWrapper :label="t('subscriptionform_gender_label')" required>
+  <FormFieldWrapper
+    :label="t('subscriptionform_gender_label')"
+    required
+    :filled="Boolean(model.gender)"
+  >
     <select v-model="model.gender" class="dropdown" required>
+      <option value="" disabled>
+        {{ t('subscriptionform_gender_placeholder') }}
+      </option>
       <option
         v-for="gender in genders"
         :key="gender.value"
@@ -85,7 +118,12 @@
       </option>
     </select>
   </FormFieldWrapper>
-  <FormFieldWrapper :label="t('subscriptionform_birthdate_label')" required>
+  <FormFieldWrapper
+    :label="t('subscriptionform_birthdate_label')"
+    required
+    :filled="Boolean(model.birthdate) && !errors.birthdate"
+    :error="errors.birthdate"
+  >
     <input
       v-model="model.birthdate"
       type="number"
@@ -93,16 +131,24 @@
       name="birthdate"
       autocomplete="on"
       class="input"
-      min="1900"
-      max="2020"
+      :min="currentYear - 100"
+      :max="currentYear - 5"
     />
   </FormFieldWrapper>
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, reactive, watch, computed } from 'vue'
 import { useI36n } from '@jota-one/i36n'
 import FormFieldWrapper from '@/components/form/FieldWrapper.vue'
+import AppErrorCode from '@/AppErrorCode'
+import {
+  validateName,
+  validatePhone,
+  validateBirthYear,
+  validateCity,
+  validateZip,
+} from '@/utils/validate'
 import type { UserProfileDetails } from '@/types'
 
 const SWISS_CANTONS = [
@@ -142,14 +188,34 @@ const { t } = useI36n()
 const emit = defineEmits(['update:modelValue'])
 const props = defineProps<Props>()
 const model = ref(props.modelValue)
-const genders = [
+const errors = reactive<Record<string, string>>({})
+const currentYear = computed(() => new Date().getFullYear())
+
+const genders = computed(() => [
   { label: t('subscriptionform_gender_female_label'), value: 'female' },
   { label: t('subscriptionform_gender_male_label'), value: 'male' },
   { label: t('subscriptionform_gender_other_label'), value: 'other' },
-]
+])
+
+const applyError = (fn: () => void, key: string) => {
+  try {
+    fn()
+    delete errors[key]
+  } catch (e: any) {
+    errors[key] = t(AppErrorCode[e.cause] as string)
+  }
+}
 
 watch(
   () => model.value,
-  value => emit('update:modelValue', value),
+  value => {
+    applyError(() => validateName(value.name || ''), 'name')
+    applyError(() => validatePhone(value.phone || ''), 'phone')
+    applyError(() => validateBirthYear(value.birthdate), 'birthdate')
+    applyError(() => validateCity(value.city || ''), 'city')
+    applyError(() => validateZip(value.zip), 'zip')
+    emit('update:modelValue', value)
+  },
+  { deep: true },
 )
 </script>

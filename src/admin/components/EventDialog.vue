@@ -159,13 +159,11 @@ const formIsValid = computed(
 
 const loadOptions = async () => {
   const [locs, types] = await Promise.all([
-    pb
-      .collection('ut_locations')
-      .getFullList({
-        filter: 'enabled = true',
-        sort: 'label_fr',
-        expand: 'city',
-      }),
+    pb.collection('ut_locations').getFullList({
+      filter: 'enabled = true',
+      sort: 'label_fr',
+      expand: 'city',
+    }),
     pb
       .collection('ut_event_types')
       .getFullList({ filter: 'enabled = true', sort: 'xid' }),

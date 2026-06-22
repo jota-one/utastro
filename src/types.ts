@@ -200,7 +200,7 @@ export type UserProfileDetails = {
   country?: string
   phone?: string
   gender: string
-  birthdate: number
+  birthdate?: number
 }
 
 export type UserProfileAgreements = {

@@ -103,6 +103,15 @@ import FormSubscriptionDetails from '@/components/form/subscription/Details.vue'
 import FormSubscriptionAgreements from '@/components/form/subscription/Agreements.vue'
 import FormCaptcha from '@/components/form/Captcha.vue'
 import config from '@/config'
+import {
+  validateEmail,
+  validatePassword,
+  validateName,
+  validatePhone,
+  validateBirthYear,
+  validateCity,
+  validateZip,
+} from '@/utils/validate'
 import type {
   CaptchaModel,
   UserProfile,
@@ -143,10 +152,10 @@ const model = reactive<Model>({
     zip: undefined,
     city: '',
     regionId: undefined,
-    country: '',
+    country: 'Suisse',
     phone: '',
     gender: '',
-    birthdate: 0,
+    birthdate: undefined,
   },
   agreements: {
     risks: undefined,
@@ -172,7 +181,7 @@ const hasEmptyRequiredFields = computed(() => {
   return Object.entries(requiredFields.value).reduce(
     (acc, [fieldGroup, keys]) => {
       for (const key of keys) {
-        const isEmpty = [undefined, ''].includes(
+        const isEmpty = [undefined, '', false].includes(
           (model as any)[fieldGroup][key],
         )
         acc = acc || isEmpty
@@ -183,9 +192,37 @@ const hasEmptyRequiredFields = computed(() => {
   )
 })
 
+const hasLoginErrors = computed(() => {
+  try {
+    validateEmail(model.login.email || '')
+    validatePassword(
+      model.login.password || '',
+      model.login.passwordConfirm || '',
+    )
+    return false
+  } catch {
+    return true
+  }
+})
+
+const hasDetailsErrors = computed(() => {
+  try {
+    validateName(model.details.name || '')
+    validatePhone(model.details.phone || '')
+    validateBirthYear(model.details.birthdate)
+    validateCity(model.details.city || '')
+    validateZip(model.details.zip)
+    return false
+  } catch {
+    return true
+  }
+})
+
 const canSubmit = computed(
   () =>
     !hasEmptyRequiredFields.value &&
+    !hasLoginErrors.value &&
+    !hasDetailsErrors.value &&
     (props.userProfile
       ? true
       : hcaptcha.enabled
@@ -236,12 +273,19 @@ const submit = async () => {
         .collection('ut_users')
         .update(String(props.userProfile.id), pbData)
     } else {
+      const chars = 'abcdefghijklmnopqrstuvwxyz0123456789'
+      const id = Array.from(crypto.getRandomValues(new Uint8Array(15)))
+        .map(n => chars[n % chars.length])
+        .join('')
       await pb.collection('ut_users').create({
+        id,
         ...pbData,
         email: model.login.email,
+        emailVisibility: true,
         password: model.login.password,
         passwordConfirm: model.login.passwordConfirm,
       })
+      await pb.collection('ut_users').requestVerification(model.login.email)
     }
 
     submitted.value = true
