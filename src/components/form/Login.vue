@@ -115,7 +115,7 @@
 import { nextTick, onMounted, reactive, ref } from 'vue'
 import { useI36n } from '@jota-one/i36n'
 import { useAuth } from '@composables/useAuth'
-import AppErrorCode from '@/AppErrorCode'
+import { pb } from '@/pb'
 import ContentBlockTitle from '@components/content/BlockTitle.vue'
 import FormFieldWrapper from '@components/form/FieldWrapper.vue'
 import TipBox from '@components/TipBox.vue'
@@ -168,29 +168,21 @@ const close = () => {
 async function onLogin() {
   if (passwordForgotten.value) {
     try {
-      // await generateResetPasswordLink(
-      //   credentials.email,
-      //   captchaModel.value.token,
-      //   currentLangCode.value,
-      // )
+      await pb.collection('ut_users').requestPasswordReset(credentials.email)
       passwordResetEmailSent.value = true
-    } catch (e: any) {
+    } catch {
       if (captchaEl.value) {
         ;(captchaEl.value as any).reset()
       }
-
-      if (e.data?.data?.code) {
-        const code = e.data?.data?.code
-        resetPasswordError.value = t(AppErrorCode[code])
-      }
+      resetPasswordError.value = t('ERROR_UT_EMAIL_COULD_NOT_BE_SENT')
     }
   } else {
     try {
       await login(credentials)
       emit('authenticated')
     } catch (e: any) {
-      if (e.data?.data?.code) {
-        error.value = t(AppErrorCode[e.data.data.code])
+      if (e.status === 403) {
+        error.value = t('ERROR_HC_USER_PENDING')
       } else {
         error.value = t('login_invalid_credentials')
       }

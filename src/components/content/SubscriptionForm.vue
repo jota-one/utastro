@@ -277,15 +277,29 @@ const submit = async () => {
       const id = Array.from(crypto.getRandomValues(new Uint8Array(15)))
         .map(n => chars[n % chars.length])
         .join('')
-      await pb.collection('ut_users').create({
-        id,
-        ...pbData,
-        email: model.login.email,
-        emailVisibility: true,
-        password: model.login.password,
-        passwordConfirm: model.login.passwordConfirm,
-      })
-      await pb.collection('ut_users').requestVerification(model.login.email)
+
+      try {
+        await pb.collection('ut_users').create({
+          id,
+          ...pbData,
+          email: model.login.email,
+          emailVisibility: true,
+          password: model.login.password,
+          passwordConfirm: model.login.passwordConfirm,
+          role: 'user',
+        })
+      } catch (createErr: any) {
+        if (createErr?.data?.email?.code === 'validation_not_unique') {
+          throw new Error(t('ERROR_HC_USER_ALREADY_EXISTS'))
+        }
+        throw new Error(t('ERROR_HC_ACCOUNT_CREATION_FAILED'))
+      }
+
+      try {
+        await pb.collection('ut_users').requestVerification(model.login.email)
+      } catch {
+        throw new Error(t('ERROR_UT_EMAIL_COULD_NOT_BE_SENT'))
+      }
     }
 
     submitted.value = true
@@ -293,7 +307,7 @@ const submit = async () => {
     if (captchaEl.value) {
       ;(captchaEl.value as any).reset()
     }
-    submitError.value = e?.message || t('subscriptionform_generic_error')
+    submitError.value = e?.message || t('ERROR_HC_ACCOUNT_CREATION_FAILED')
   } finally {
     submitting.value = false
   }

@@ -130,6 +130,9 @@ routerAdd('POST', '/api/custom/auth/login', e => {
     if (!record.validatePassword(password)) {
       throw new UnauthorizedError('Invalid credentials')
     }
+    if (!record.getBool('verified')) {
+      throw new ForbiddenError('Account not verified')
+    }
   }
 
   return $apis.recordAuthResponse(e, record, 'password')

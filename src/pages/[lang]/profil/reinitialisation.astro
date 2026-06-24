@@ -1,0 +1,16 @@
+---
+import PageLayout from '@layouts/PageLayout.astro'
+import PasswordResetPage from '@components/pages/PasswordResetPage.vue'
+import { LANGS } from '@/routes'
+import type { LangCode } from '@/routes'
+
+export function getStaticPaths() {
+  return LANGS.map(lang => ({ params: { lang }, props: { lang } }))
+}
+
+const { lang } = Astro.props as { lang: LangCode }
+---
+
+<PageLayout {lang}>
+  <PasswordResetPage client:only="vue" />
+</PageLayout>

@@ -6,7 +6,7 @@ import ContentBlockSpace from '@components/content/BlockSpace.vue'
 import ContentBlockTitle from '@components/content/BlockTitle.vue'
 import SessionsView from '@/components/content/Sessions.vue'
 import ArrowLink from '@/components/ArrowLink.vue'
-// import Teasers from '@components/Teasers.vue'
+import Teasers from '@components/Teasers.vue'
 import { LANGS, getPath } from '@/routes'
 import type { LangCode } from '@/routes'
 import type { Teaser } from '@/types'
@@ -87,7 +87,7 @@ const textColumns = {
     <ArrowLink as-button href={subscriptionPath} label={allSessionsLabels[lang]} />
   </div>
   <ContentBlockSpace size='half' />
-  <!-- <Teasers client:only="vue" teasers={coachTeasers} /> -->
+  <Teasers client:only="vue" teasers={coachTeasers} />
 </SiteLayout>
 
 <style>
