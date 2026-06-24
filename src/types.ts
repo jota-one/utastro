@@ -187,6 +187,7 @@ export interface Attendee {
 
 export type UserProfileLogin = {
   email: string
+  oldPassword?: string
   password?: string
   passwordConfirm?: string
 }

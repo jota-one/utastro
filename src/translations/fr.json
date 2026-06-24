@@ -254,6 +254,7 @@
   "profile_my_profile": "Mon profil",
   "profile_my_sessions": "Mes sessions",
   "profile_sessions_as_staff": "comme coach",
+  "profile_old_password_label": "Mot de passe actuel",
   "profile_update_password_button": "Modifier le mot de passe",
   "profile_update_password_button_cancel": "Annuler",
   "profile_update_success": "Modifications enregistrées!",

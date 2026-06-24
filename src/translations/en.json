@@ -149,6 +149,7 @@
   "profile_my_profile": "My profile",
   "profile_my_sessions": "My sessions",
   "profile_sessions_as_staff": "as coach",
+  "profile_old_password_label": "Current password",
   "profile_update_password_button": "Update password",
   "profile_update_password_button_cancel": "Cancel",
   "profile_update_success": "Changes saved!",

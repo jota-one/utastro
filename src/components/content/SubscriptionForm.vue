@@ -143,6 +143,7 @@ const submitError = ref('')
 const model = reactive<Model>({
   login: {
     email: '',
+    oldPassword: '',
     password: '',
     passwordConfirm: '',
   },
@@ -237,7 +238,7 @@ const submitButtonLabel = computed(() =>
 )
 
 const makePasswordRequired = () => {
-  requiredFields.value.login = ['email', 'password', 'passwordConfirm']
+  requiredFields.value.login = ['email', 'oldPassword', 'password', 'passwordConfirm']
 }
 
 const makePasswordOptional = () => {
@@ -269,9 +270,15 @@ const submit = async () => {
     }
 
     if (props.userProfile) {
+      const updateData: Record<string, unknown> = { ...pbData }
+      if (model.login.password) {
+        updateData.oldPassword = model.login.oldPassword
+        updateData.password = model.login.password
+        updateData.passwordConfirm = model.login.passwordConfirm
+      }
       await pb
         .collection('ut_users')
-        .update(String(props.userProfile.id), pbData)
+        .update(String(props.userProfile.id), updateData)
     } else {
       const chars = 'abcdefghijklmnopqrstuvwxyz0123456789'
       const id = Array.from(crypto.getRandomValues(new Uint8Array(15)))

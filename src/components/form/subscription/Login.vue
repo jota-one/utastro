@@ -30,6 +30,22 @@
   <div v-else class="empty" />
   <template v-if="!userProfile || updatePassword">
     <FormFieldWrapper
+      v-if="updatePassword"
+      :label="t('profile_old_password_label')"
+      required
+      :filled="Boolean(model.oldPassword)"
+    >
+      <input
+        v-model="model.oldPassword"
+        type="password"
+        required
+        name="old_password"
+        autocomplete="current-password"
+        class="input"
+        placeholder="******"
+      />
+    </FormFieldWrapper>
+    <FormFieldWrapper
       :label="
         t(
           updatePassword
@@ -109,6 +125,7 @@ const onUpdatePasswordClick = () => {
     emit('show-update-password')
   } else {
     emit('hide-update-password')
+    model.value.oldPassword = undefined
     model.value.password = undefined
     model.value.passwordConfirm = undefined
   }
