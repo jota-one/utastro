@@ -69,6 +69,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
+import { init as initPlausible } from '@plausible-analytics/tracker'
 import { useI36n } from '@jota-one/i36n'
 import Logo from '@components/Logo.vue'
 import LayoutHamburger from '@components/layout/Hamburger.vue'
@@ -80,6 +81,12 @@ import { useAuth } from '@composables/useAuth'
 import { useUserProfile } from '@composables/useUserProfile'
 import { useCities } from '@composables/useCities'
 import { useRoutes } from '@composables/useRoutes'
+
+initPlausible({
+  domain: 'urban-training.ch'
+})
+
+console.log('initplausible')
 
 const { t } = useI36n()
 const { modalParams, openModal, closeModal } = useModal()

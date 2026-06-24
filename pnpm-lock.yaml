@@ -23,6 +23,9 @@ importers:
       '@jota-one/i36n':
         specifier: ^3.0.0
         version: 3.0.0(vue@3.5.38(typescript@6.0.3))
+      '@plausible-analytics/tracker':
+        specifier: ^0.4.5
+        version: 0.4.5
       '@tailwindcss/vite':
         specifier: ^4.3.1
         version: 4.3.1(vite@7.3.5(@types/node@24.13.2)(jiti@2.7.0)(lightningcss@1.32.0)(yaml@2.9.0))
@@ -956,6 +959,9 @@ packages:
     engines: {node: ^20.19.0 || >=22.12.0}
     cpu: [x64]
     os: [win32]
+
+  '@plausible-analytics/tracker@0.4.5':
+    resolution: {integrity: sha512-6BfAGejXY+YA3Cw6LYT2Zpn4hTxDtPQAawFsYUsQCOg78wIS5C4deAGXTfJffa5VleMWITv5lpJ/EYuQBl1tPA==}
 
   '@playwright/test@1.61.0':
     resolution: {integrity: sha512-cKA5B6lpFEMyMGjxF54QihfYpB4FkEGH+qZhtArDEG+wezQAJY8Pq6C7T1SjWz+FFzt3TbyoXBQYk/0292TdJA==}
@@ -3462,6 +3468,8 @@ snapshots:
 
   '@oxlint/binding-win32-x64-msvc@1.69.0':
     optional: true
+
+  '@plausible-analytics/tracker@0.4.5': {}
 
   '@playwright/test@1.61.0':
     dependencies:
