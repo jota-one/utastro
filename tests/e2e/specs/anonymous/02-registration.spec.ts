@@ -59,7 +59,7 @@ test('full registration creates account and shows success message', async ({
     phone: '+41 79 000 00 00',
     birthYear: '1990',
     gender: 'Masculin',
-    canton: 'Vaud',
+    canton: 'VD',
   })
 
   await reg.submit()
@@ -99,7 +99,7 @@ test('duplicate email shows an error', async ({ page }) => {
     phone: '+41 79 000 00 00',
     birthYear: '1985',
     gender: 'Féminin',
-    canton: 'Vaud',
+    canton: 'VD',
   })
 
   await reg.submit()

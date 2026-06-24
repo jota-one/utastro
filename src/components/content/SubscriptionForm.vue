@@ -152,7 +152,7 @@ const model = reactive<Model>({
     zip: undefined,
     city: '',
     regionId: undefined,
-    country: 'Suisse',
+    country: 'CH',
     phone: '',
     gender: '',
     birthdate: undefined,
@@ -173,7 +173,7 @@ const model = reactive<Model>({
 
 const requiredFields = ref({
   login: ['email', 'password', 'passwordConfirm'],
-  details: ['name', 'zip', 'city', 'phone', 'gender', 'birthdate'],
+  details: ['name', 'zip', 'city', 'regionId', 'phone', 'gender', 'birthdate'],
   agreements: ['risks'],
 })
 

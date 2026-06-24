@@ -58,11 +58,31 @@
     />
   </FormFieldWrapper>
   <FormFieldWrapper
-    :label="t('subscriptionform_region_label')"
+    :label="t('subscriptionform_country_label')"
     required
+    :filled="Boolean(model.country)"
+  >
+    <select v-model="model.country" class="dropdown" required>
+      <option
+        v-for="country in countries"
+        :key="country.value"
+        :value="country.value"
+      >
+        {{ country.label }}
+      </option>
+    </select>
+  </FormFieldWrapper>
+  <FormFieldWrapper
+    :label="t('subscriptionform_region_label')"
+    :required="model.country === 'CH'"
     :filled="Boolean(model.regionId)"
   >
-    <select v-model="model.regionId" class="dropdown" required>
+    <select
+      v-model="model.regionId"
+      class="dropdown"
+      :required="model.country === 'CH'"
+      :disabled="model.country !== 'CH'"
+    >
       <option value="" disabled>
         {{ t('subscriptionform_region_placeholder') }}
       </option>
@@ -74,15 +94,6 @@
         {{ canton.label }}
       </option>
     </select>
-  </FormFieldWrapper>
-  <FormFieldWrapper :label="t('subscriptionform_country_label')">
-    <input
-      v-model="model.country"
-      type="text"
-      name="country"
-      class="input"
-      disabled
-    />
   </FormFieldWrapper>
   <FormFieldWrapper
     :label="t('subscriptionform_phone_label')"
@@ -191,6 +202,16 @@ const model = ref(props.modelValue)
 const errors = reactive<Record<string, string>>({})
 const currentYear = computed(() => new Date().getFullYear())
 
+const countries = computed(() => [
+  { value: 'CH', label: t('subscriptionform_country_ch') },
+  { value: 'AT', label: t('subscriptionform_country_at') },
+  { value: 'DE', label: t('subscriptionform_country_de') },
+  { value: 'FR', label: t('subscriptionform_country_fr') },
+  { value: 'IT', label: t('subscriptionform_country_it') },
+  { value: 'LI', label: t('subscriptionform_country_li') },
+  { value: 'OTHER', label: t('subscriptionform_country_other') },
+])
+
 const genders = computed(() => [
   { label: t('subscriptionform_gender_female_label'), value: 'female' },
   { label: t('subscriptionform_gender_male_label'), value: 'male' },
@@ -217,5 +238,16 @@ watch(
     emit('update:modelValue', value)
   },
   { deep: true },
+)
+
+watch(
+  () => model.value.country,
+  country => {
+    if (country !== 'CH') {
+      model.value.regionId = 'OUTSIDE'
+    } else if (model.value.regionId === 'OUTSIDE') {
+      model.value.regionId = undefined
+    }
+  },
 )
 </script>

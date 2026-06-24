@@ -11,7 +11,7 @@ export interface NewUserData {
   phone: string
   birthYear: string
   gender: 'Féminin' | 'Masculin' | 'Autre'
-  canton: string // e.g. 'Vaud'
+  canton: string // 2-char canton code, e.g. 'VD'
 }
 
 export class RegistrationPage {
@@ -31,7 +31,7 @@ export class RegistrationPage {
     await this.page.getByLabel('Téléphone').fill(data.phone)
     await this.page.getByLabel('Genre').selectOption({ label: data.gender })
     await this.page.getByLabel('Année de naissance').fill(data.birthYear)
-    await this.page.getByLabel('Canton').selectOption({ label: data.canton })
+    await this.page.getByLabel('Canton').selectOption({ value: data.canton })
     // Accept risks checkbox (required)
     const risksCheckbox = this.page.locator('input[type="checkbox"]').first()
     await risksCheckbox.check()

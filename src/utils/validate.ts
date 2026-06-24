@@ -33,8 +33,7 @@ export const validatePassword = (password: string, passwordConfirm: string) => {
 
 export const validateName = (name: string) => {
   if (!name.trim()) return true
-  const parts = name.trim().split(/\s+/)
-  if (parts.length < 2 || parts.some(p => p.length < 2)) {
+  if (name.length < 2) {
     throw new Error('Invalid name', {
       cause: AppErrorCode.ERROR_UT_INVALID_NAME,
     })
@@ -88,9 +87,8 @@ export const validateCity = (city: string) => {
 
 export const validateZip = (zip: string | number | undefined) => {
   if (zip === undefined || zip === null || zip === '' || zip === 0) return true
-  const str = String(zip).replace(/\s/g, '')
-  const num = Number(str)
-  if (!/^\d{4}$/.test(str) || num < 1000 || num > 9999) {
+  const digits = String(zip).replace(/\D/g, '')
+  if (digits.length < 4) {
     throw new Error('Invalid zip', { cause: AppErrorCode.ERROR_UT_INVALID_ZIP })
   }
   return true
