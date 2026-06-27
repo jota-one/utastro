@@ -2,11 +2,13 @@ import { computed, ref } from 'vue'
 import { useSessionStorage } from '@vueuse/core'
 import { pb } from '@/pb'
 
-const user = ref<Record<string, any> | null>(pb.authStore.record)
 const userJwt = useSessionStorage('ut_jwt', '')
+const user = ref<Record<string, any> | null>(userJwt.value ? pb.authStore.record : null)
 
 if (userJwt.value && !pb.authStore.isValid) {
   pb.authStore.save(userJwt.value, user.value as any)
+} else if (!userJwt.value) {
+  pb.authStore.clear()
 }
 
 export function useAuth() {
