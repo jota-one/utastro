@@ -42,7 +42,7 @@ test('submit button is disabled with empty form', async ({ page }) => {
   await expect(submit).toBeDisabled()
 })
 
-test('full registration creates account and shows success message', async ({
+test('full registration sends an activation email whose link works', async ({
   page,
 }) => {
   test.skip(!MAILPIT_AVAILABLE, 'MAILPIT_URL not set — skipping email test')
@@ -67,11 +67,9 @@ test('full registration creates account and shows success message', async ({
   expect(await reg.isSuccessVisible()).toBe(true)
   // Success message must contain the submitted email address
   await expect(page.getByText(testEmail)).toBeVisible()
-})
 
-test('activation email is received and link works', async ({ page }) => {
-  test.skip(!MAILPIT_AVAILABLE, 'MAILPIT_URL not set — skipping email test')
-
+  // Activation email must arrive (same test: the beforeEach clears Mailpit,
+  // so a separate test would never see this message)
   const email = await waitForEmail(testEmail)
   expect(email.Subject).toMatch(/activ/i)
 

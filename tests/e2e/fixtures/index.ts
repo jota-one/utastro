@@ -106,12 +106,17 @@ export async function clearMailpit() {
   await fetch(`${MAILPIT_URL}/api/v1/messages`, { method: 'DELETE' })
 }
 
-/** Extracts the first URL from an email body (HTML or text). */
+/** Extracts the first action URL from an email body (HTML or text). */
 export function extractLinkFromEmail(message: MailpitMessage): string {
   const source = message.HTML || message.Text
-  const match = source.match(/https?:\/\/[^\s"<>]+/)
-  if (!match) throw new Error('No link found in email body')
-  return match[0]
+  const matches = source.match(/https?:\/\/[^\s"<>]+/g) ?? []
+  // Prefer the action link carrying a token; skip boilerplate URLs such as
+  // the xhtml DOCTYPE or embedded images
+  const link =
+    matches.find(url => url.includes('token=')) ??
+    matches.find(url => !url.includes('www.w3.org'))
+  if (!link) throw new Error('No link found in email body')
+  return link
 }
 
 // ─── Event discovery helpers ─────────────────────────────────────────────────
@@ -154,6 +159,224 @@ export async function findPastEvent(auth: Auth) {
     auth,
     `end_date != "" && end_date < "${pbDate(horizon)}" && start_date > "2020-01-01 00:00:00"`,
   )
+}
+
+/** An upcoming event whose subscription window has not opened yet. */
+export async function findUnopenedEvent(auth: Auth) {
+  const now = pbDate(new Date())
+  return findEvent(
+    auth,
+    `start_date > "${now}" && subscription_publish_date > "${now}" && progress = "open"`,
+  )
+}
+
+/** An upcoming event with no participant spot left. */
+export async function findFullEvent(auth: Auth) {
+  const now = pbDate(new Date())
+  return findEvent(
+    auth,
+    `start_date > "${now}" && subscription_publish_date < "${now}" && max_subscriptions > 0 && subscription_count >= max_subscriptions`,
+  )
+}
+
+/**
+ * Returns a full upcoming event, faking one if needed: when no event is
+ * genuinely full, the most subscribed upcoming event gets its
+ * max_subscriptions lowered to its current count (requires an admin test
+ * user). Always await `restore()` afterwards.
+ */
+export async function ensureFullEvent(
+  auth: Auth,
+): Promise<{ id: string; restore: () => Promise<void> } | null> {
+  const existing = await findFullEvent(auth)
+  if (existing) {
+    return { id: existing, restore: async () => {} }
+  }
+
+  const now = pbDate(new Date())
+  const params = new URLSearchParams({
+    filter: `start_date > "${now}" && subscription_publish_date < "${now}" && subscription_count > 0`,
+    sort: '-subscription_count',
+    fields: 'id,max_subscriptions,subscription_count',
+    perPage: '1',
+    skipTotal: '1',
+  })
+  const res = await fetch(
+    `${PB_URL}/api/collections/ut_events/records?${params}`,
+    { headers: { Authorization: `Bearer ${auth.token}` } },
+  )
+  const data = (await res.json()) as {
+    items: { id: string; max_subscriptions: number; subscription_count: number }[]
+  }
+  const candidate = data.items[0]
+  if (!candidate) {
+    return null
+  }
+
+  const patch = async (maxSubscriptions: number) => {
+    const patchRes = await fetch(
+      `${PB_URL}/api/collections/ut_events/records/${candidate.id}`,
+      {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${auth.token}`,
+        },
+        body: JSON.stringify({ max_subscriptions: maxSubscriptions }),
+      },
+    )
+    return patchRes.ok
+  }
+
+  if (!(await patch(candidate.subscription_count))) {
+    // non-admin test user cannot update events
+    return null
+  }
+  return {
+    id: candidate.id,
+    restore: async () => {
+      await patch(candidate.max_subscriptions)
+    },
+  }
+}
+
+/**
+ * Returns an upcoming open event with exactly one participant spot left,
+ * none of the given participants being subscribed to it: the event's
+ * max_subscriptions is temporarily lowered to subscription_count + 1
+ * (requires an admin test user). Always await `restore()` afterwards.
+ */
+export async function ensureLastSpotEvent(
+  admin: Auth,
+  participants: Auth[],
+): Promise<{ id: string; restore: () => Promise<void> } | null> {
+  const now = pbDate(new Date())
+  const params = new URLSearchParams({
+    filter: `start_date > "${now}" && subscription_publish_date < "${now}" && progress = "open" && max_subscriptions > subscription_count`,
+    fields: 'id,max_subscriptions,subscription_count',
+    perPage: '20',
+    skipTotal: '1',
+  })
+  const res = await fetch(
+    `${PB_URL}/api/collections/ut_events/records?${params}`,
+    { headers: { Authorization: `Bearer ${admin.token}` } },
+  )
+  const data = (await res.json()) as {
+    items: { id: string; max_subscriptions: number; subscription_count: number }[]
+  }
+
+  const userFilter = participants
+    .map(p => `user = "${p.record.id}"`)
+    .join(' || ')
+
+  for (const candidate of data.items) {
+    const subParams = new URLSearchParams({
+      filter: `event = "${candidate.id}" && (${userFilter})`,
+      fields: 'id',
+      perPage: '1',
+      skipTotal: '1',
+    })
+    const existing = (await fetch(
+      `${PB_URL}/api/collections/ut_subscriptions/records?${subParams}`,
+      { headers: { Authorization: `Bearer ${admin.token}` } },
+    ).then(r => r.json())) as { items: unknown[] }
+    if (existing.items.length > 0) {
+      continue
+    }
+
+    const patch = async (maxSubscriptions: number) => {
+      const patchRes = await fetch(
+        `${PB_URL}/api/collections/ut_events/records/${candidate.id}`,
+        {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${admin.token}`,
+          },
+          body: JSON.stringify({ max_subscriptions: maxSubscriptions }),
+        },
+      )
+      return patchRes.ok
+    }
+
+    if (!(await patch(candidate.subscription_count + 1))) {
+      return null
+    }
+    return {
+      id: candidate.id,
+      restore: async () => {
+        await patch(candidate.max_subscriptions)
+      },
+    }
+  }
+  return null
+}
+
+/**
+ * Logs a test member in, creating and activating the account first when it
+ * does not exist yet (full registration flow: create → verification email
+ * via Mailpit → confirm). Requires Mailpit for the creation path.
+ */
+export async function ensureMemberAccount(
+  email: string,
+  password: string,
+): Promise<Auth> {
+  try {
+    return await fetchAuthToken(email, password)
+  } catch {
+    // account missing (or wrong password) — try to create it
+  }
+
+  const chars = 'abcdefghijklmnopqrstuvwxyz0123456789'
+  const id = Array.from({ length: 15 })
+    .map(() => chars[Math.floor(Math.random() * chars.length)])
+    .join('')
+  await fetch(`${PB_URL}/api/collections/ut_users/records`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      id,
+      email,
+      emailVisibility: true,
+      password,
+      passwordConfirm: password,
+      role: 'user',
+      name: `E2E ${email.split('@')[0]}`,
+    }),
+  })
+
+  await fetch(`${PB_URL}/api/collections/ut_users/request-verification`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email }),
+  })
+  const message = await waitForEmail(email)
+  const token = new URL(extractLinkFromEmail(message)).searchParams.get('token')
+  await fetch(`${PB_URL}/api/collections/ut_users/confirm-verification`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ token }),
+  })
+
+  return fetchAuthToken(email, password)
+}
+
+/** Deletes the participant subscription of a user on an event, if any. */
+export async function deleteSubscription(auth: Auth, eventId: string) {
+  const params = new URLSearchParams({
+    filter: `event = "${eventId}" && user = "${auth.record.id}" && is_event_admin = false`,
+    fields: 'id',
+  })
+  const subs = (await fetch(
+    `${PB_URL}/api/collections/ut_subscriptions/records?${params}`,
+    { headers: { Authorization: `Bearer ${auth.token}` } },
+  ).then(r => r.json())) as { items: { id: string }[] }
+  for (const sub of subs.items) {
+    await fetch(`${PB_URL}/api/collections/ut_subscriptions/records/${sub.id}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${auth.token}` },
+    })
+  }
 }
 
 // ─── Custom fixtures ──────────────────────────────────────────────────────────

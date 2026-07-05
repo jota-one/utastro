@@ -1,18 +1,24 @@
 import { test, expect } from '@playwright/test'
-import { createAuthContext } from '../../fixtures/index'
+import {
+  createAuthContext,
+  deleteSubscription,
+  ensureLastSpotEvent,
+  ensureMemberAccount,
+  type Auth,
+} from '../../fixtures/index'
 import { EventDetailPage } from '../../pages/EventDetailPage'
 
 /**
  * Race condition test: 3 members try to grab the last available spot simultaneously.
  * Only 1 should succeed; the other 2 must see the "full" message.
  *
- * Setup required:
- *   - TEST_EVENT_ID_LAST_SPOT: a event with exactly 1 spot remaining
- *     (set subscription_count = max_subscriptions - 1 in PocketBase admin before running)
- *   - TEST_MEMBER_EMAIL / PASSWORD, TEST_MEMBER_2_EMAIL / PASSWORD, TEST_MEMBER_3_EMAIL / PASSWORD
- *     (3 distinct accounts, none already subscribed to this event)
+ * The target event is prepared dynamically: an upcoming open event none of the
+ * three members is subscribed to gets its max_subscriptions temporarily
+ * lowered to leave exactly one spot, and everything (event and winning
+ * subscription) is restored after the run.
  *
- * After a run: reset the event count in PocketBase admin for the next run.
+ * Requires TEST_MEMBER_EMAIL / PASSWORD, TEST_MEMBER_2_EMAIL / PASSWORD,
+ * TEST_MEMBER_3_EMAIL / PASSWORD (3 distinct accounts).
  */
 
 const USERS = [
@@ -31,12 +37,21 @@ const USERS = [
 ]
 
 test('only one user gets the last available spot', async ({ browser }) => {
-  const eventId = process.env.TEST_EVENT_ID_LAST_SPOT
-  test.skip(!eventId, 'TEST_EVENT_ID_LAST_SPOT not set')
   test.skip(
     USERS.some(u => !u.email || !u.password),
     'All 3 member credentials must be set',
   )
+
+  // Members 2 and 3 are created on the fly when missing (needs Mailpit)
+  const auths: Auth[] = await Promise.all(
+    USERS.map(u => ensureMemberAccount(u.email, u.password)),
+  )
+  const lastSpotEvent = await ensureLastSpotEvent(auths[0], auths)
+  test.skip(
+    !lastSpotEvent,
+    'no suitable event found or user cannot update events',
+  )
+  const eventId = lastSpotEvent!.id
 
   // Create 3 authenticated browser contexts
   const contexts = await Promise.all(
@@ -62,7 +77,7 @@ test('only one user gets the last available spot', async ({ browser }) => {
     // All 3 click subscribe at the same time
     await Promise.all(
       contexts.map(({ page }) =>
-        page.locator('button', { hasText: "Je m'inscris!" }).click(),
+        new EventDetailPage(page).subscribeButton().click(),
       ),
     )
 
@@ -91,5 +106,8 @@ test('only one user gets the last available spot', async ({ browser }) => {
     expect(fullCount).toBe(2)
   } finally {
     await Promise.all(contexts.map(({ context }) => context.close()))
+    // Remove the winning subscription and restore the event capacity
+    await Promise.all(auths.map(auth => deleteSubscription(auth, eventId)))
+    await lastSpotEvent!.restore()
   }
 })

@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test'
+import { fetchAuthToken, findOpenEvent } from '../../fixtures/index'
 
 /**
  * Verifies that all public static pages load without errors.
@@ -44,11 +45,17 @@ test('Dynamic city page loads', async ({ page }) => {
 })
 
 test('Dynamic event detail page loads', async ({ page }) => {
-  const eventId = process.env.TEST_EVENT_ID_OPEN
-  test.skip(!eventId, 'TEST_EVENT_ID_OPEN not set')
+  test.skip(!process.env.TEST_MEMBER_EMAIL, 'TEST_MEMBER_EMAIL not set')
+  const auth = await fetchAuthToken(
+    process.env.TEST_MEMBER_EMAIL!,
+    process.env.TEST_MEMBER_PASSWORD!,
+  )
+  const eventId = await findOpenEvent(auth)
+  test.skip(!eventId, 'no event with an open subscription window')
   const response = await page.goto(`/fr/session/${eventId}`)
   expect(response?.status()).toBeLessThan(400)
   await page.waitForLoadState('networkidle')
-  // Event title or date must appear
-  await expect(page.locator('h1')).not.toBeEmpty()
+  // Event title or date must appear (scoped: the Astro dev toolbar injects
+  // its own h1 elements)
+  await expect(page.locator('.session-detail h1')).not.toBeEmpty()
 })

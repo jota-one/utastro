@@ -24,7 +24,7 @@ export class RegistrationPage {
   async fill(data: NewUserData) {
     await this.page.getByLabel('E-mail').fill(data.email)
     await this.page.getByLabel('Mot de passe').first().fill(data.password)
-    await this.page.getByLabel('Confirmer').fill(data.password)
+    await this.page.getByLabel('Confirmation du mot de passe').fill(data.password)
     await this.page.getByLabel('Nom complet').fill(data.name)
     await this.page.getByLabel('NPA').fill(data.zip)
     await this.page.getByLabel('Ville').fill(data.city)
@@ -38,9 +38,7 @@ export class RegistrationPage {
   }
 
   async submit() {
-    await this.page
-      .locator('button', { hasText: 'Envoyer mes informations' })
-      .click()
+    await this.page.locator('button', { hasText: 'Envoyer mes informations' }).click()
   }
 
   async isSuccessVisible(): Promise<boolean> {
