@@ -10,10 +10,9 @@ interface Modals {
 }
 
 const modals = ref<Modals>({})
+const modalParams = ref<any>({})
 
 export default function useModal() {
-  const modalParams = ref<any>({})
-
   const registerModal = (id: string) => {
     if (!modals.value[id]) {
       modals.value[id] = { open: false }
