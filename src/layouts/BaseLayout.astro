@@ -1,5 +1,6 @@
 ---
 // import '@fontsource-variable/oswald'
+import '@styles/tailwind.css'
 import '@styles/main.pcss'
 import type { LangCode } from '@/routes'
 
@@ -19,7 +20,7 @@ const { lang = 'fr' } = Astro.props
     <meta name="generator" content={Astro.generator} />
     <title>Urban Training</title>
   </head>
-  <body class="flex flex-col min-h-screen">
+  <body>
     <slot />
   </body>
 </html>
