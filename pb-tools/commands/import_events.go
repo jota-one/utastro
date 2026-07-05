@@ -143,6 +143,12 @@ func ImportEventsCommand(app *pocketbase.PocketBase) *cobra.Command {
 
 			// Step 5: subscriptions
 			fmt.Println("\n📥 Step 5: Importing subscriptions...")
+			// The capacity trigger would abort the bulk insert on legacy
+			// over-booked events — drop it during the import and recreate it
+			// afterwards (keep in sync with the trigger migration).
+			if _, err := app.DB().NewQuery("DROP TRIGGER IF EXISTS ut_subscriptions_capacity").Execute(); err != nil {
+				return fmt.Errorf("drop capacity trigger failed: %w", err)
+			}
 			subscriptionsSQL := `
 				INSERT OR IGNORE INTO ut_subscriptions (id, "user", event, presence, is_event_admin, legacy_user_id, legacy_event_id)
 				SELECT
@@ -163,6 +169,21 @@ func ImportEventsCommand(app *pocketbase.PocketBase) *cobra.Command {
 			var subCount int64
 			if err := app.DB().NewQuery("SELECT COUNT(*) FROM ut_subscriptions").Row(&subCount); err == nil {
 				fmt.Printf("✅ Imported %d subscriptions\n", subCount)
+			}
+
+			recreateTriggerSQL := `
+				CREATE TRIGGER IF NOT EXISTS ut_subscriptions_capacity
+				BEFORE INSERT ON ut_subscriptions
+				FOR EACH ROW WHEN NEW.is_event_admin = 0 AND (
+					SELECT COUNT(*) FROM ut_subscriptions
+					WHERE event = NEW.event AND is_event_admin = 0
+				) >= (SELECT max_subscriptions FROM ut_events WHERE id = NEW.event)
+				BEGIN
+					SELECT RAISE(ABORT, 'No more subscription accepted on this event');
+				END
+			`
+			if _, err := app.DB().NewQuery(recreateTriggerSQL).Execute(); err != nil {
+				return fmt.Errorf("recreate capacity trigger failed: %w", err)
 			}
 
 			// Step 6: recompute the denormalized counters from the subscriptions

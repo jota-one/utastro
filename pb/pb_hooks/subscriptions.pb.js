@@ -23,10 +23,22 @@ onRecordCreateRequest(e => {
     if (startDate < now) {
       throw new BadRequestError('Subscriptions closed')
     }
+
+    const publishDate = parseDate(event.getString('subscription_publish_date'))
+    if (publishDate > now) {
+      throw new BadRequestError('Subscriptions not open yet')
+    }
   }
 
   e.next()
 }, 'ut_subscriptions')
+
+// The capacity limit is enforced by the ut_subscriptions_capacity SQLite
+// trigger (see the corresponding migration): concurrent create requests
+// share PocketBase's writer connection through savepoints, so any
+// hook-level count sees the uncommitted inserts of the other requests and
+// races in both directions. A trigger is evaluated per statement and is
+// strictly sequential.
 
 // Keep the denormalized counters on ut_events in sync with the actual
 // subscription records (the legacy Nuxt API computed them per request).
