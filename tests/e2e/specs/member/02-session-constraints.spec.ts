@@ -1,10 +1,29 @@
-import { test, expect } from '../../fixtures/index'
+import {
+  test,
+  expect,
+  fetchAuthToken,
+  findOpenEvent,
+  findPastEvent,
+  type Auth,
+} from '../../fixtures/index'
 import { EventDetailPage } from '../../pages/EventDetailPage'
 
 /**
  * Edge cases: full events, past events, city watch.
- * Requires TEST_EVENT_ID_FULL, TEST_EVENT_ID_PAST, TEST_CITY_SLUG.
+ * Open and past events are discovered dynamically; a full event cannot be
+ * expressed as a PocketBase filter so TEST_EVENT_ID_FULL is still required
+ * for that single test.
  */
+
+let auth: Auth
+
+test.beforeEach(async () => {
+  test.skip(!process.env.TEST_MEMBER_EMAIL, 'TEST_MEMBER_EMAIL not set')
+  auth = await fetchAuthToken(
+    process.env.TEST_MEMBER_EMAIL!,
+    process.env.TEST_MEMBER_PASSWORD!,
+  )
+})
 
 test('cannot subscribe to a full event — full message is shown', async ({
   memberPage,
@@ -22,11 +41,12 @@ test('cannot subscribe to a full event — full message is shown', async ({
 test('subscribe button is not shown for a past event', async ({
   memberPage,
 }) => {
-  test.skip(!process.env.TEST_EVENT_ID_PAST, 'TEST_EVENT_ID_PAST not set')
+  const pastEventId = await findPastEvent(auth)
+  test.skip(!pastEventId, 'no terminated event found')
   await memberPage.goto('/fr')
 
   const event = new EventDetailPage(memberPage)
-  await event.goto(process.env.TEST_EVENT_ID_PAST!)
+  await event.goto(pastEventId!)
 
   await expect(event.subscribeButton()).not.toBeVisible()
   await expect(event.unsubscribeButton()).not.toBeVisible()
@@ -34,13 +54,14 @@ test('subscribe button is not shown for a past event', async ({
 
 test('member can watch a city for news', async ({ memberPage }) => {
   test.skip(!process.env.TEST_CITY_SLUG, 'TEST_CITY_SLUG not set')
-  test.skip(!process.env.TEST_EVENT_ID_OPEN, 'TEST_EVENT_ID_OPEN not set')
+  const openEventId = await findOpenEvent(auth)
+  test.skip(!openEventId, 'no event with an open subscription window')
   await memberPage.goto('/fr')
 
   // Watch city button only appears on event detail when subscriptions aren't open yet
   // or when the city block is visible — navigate to the open event page
   const event = new EventDetailPage(memberPage)
-  await event.goto(process.env.TEST_EVENT_ID_OPEN!)
+  await event.goto(openEventId!)
 
   const watchBtn = event.watchCityButton()
   // If the watch button is visible, click it
@@ -64,13 +85,16 @@ test('member can watch a city for news', async ({ memberPage }) => {
 test('anonymous user sees login prompt when clicking subscribe', async ({
   page,
 }) => {
-  test.skip(!process.env.TEST_EVENT_ID_OPEN, 'TEST_EVENT_ID_OPEN not set')
+  const openEventId = await findOpenEvent(auth)
+  test.skip(!openEventId, 'no event with an open subscription window')
 
   const event = new EventDetailPage(page)
-  await event.goto(process.env.TEST_EVENT_ID_OPEN!)
+  await event.goto(openEventId!)
 
   await event.subscribe()
 
   // Login modal or login form should appear
-  await expect(page.getByText('Connexion')).toBeVisible({ timeout: 5_000 })
+  await expect(
+    page.getByRole('heading', { name: 'Connexion' }),
+  ).toBeVisible({ timeout: 5_000 })
 })

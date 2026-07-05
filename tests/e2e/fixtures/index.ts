@@ -5,12 +5,12 @@ import {
   type BrowserContext,
 } from '@playwright/test'
 
-const PB_URL = process.env.PB_URL || 'http://localhost:8091'
+export const PB_URL = process.env.PB_URL || 'http://localhost:8091'
 const MAILPIT_URL = process.env.MAILPIT_URL || 'http://localhost:8025'
 
 // ─── Auth helpers ────────────────────────────────────────────────────────────
 
-async function fetchAuthToken(email: string, password: string) {
+export async function fetchAuthToken(email: string, password: string) {
   const res = await fetch(`${PB_URL}/api/custom/auth/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -112,6 +112,48 @@ export function extractLinkFromEmail(message: MailpitMessage): string {
   const match = source.match(/https?:\/\/[^\s"<>]+/)
   if (!match) throw new Error('No link found in email body')
   return match[0]
+}
+
+// ─── Event discovery helpers ─────────────────────────────────────────────────
+// Discover events dynamically instead of relying on aging TEST_EVENT_ID_*
+// fixtures.
+
+export type Auth = { token: string; record: Record<string, unknown> }
+
+async function findEvent(auth: Auth, filter: string): Promise<string | null> {
+  const params = new URLSearchParams({
+    filter,
+    fields: 'id',
+    perPage: '1',
+    skipTotal: '1',
+  })
+  const res = await fetch(
+    `${PB_URL}/api/collections/ut_events/records?${params}`,
+    { headers: { Authorization: `Bearer ${auth.token}` } },
+  )
+  const data = (await res.json()) as { items: { id: string }[] }
+  return data.items[0]?.id ?? null
+}
+
+const pbDate = (date: Date) => date.toISOString().replace('T', ' ').slice(0, 19)
+
+/** An event whose subscription window is open right now. */
+export async function findOpenEvent(auth: Auth) {
+  const now = pbDate(new Date())
+  return findEvent(
+    auth,
+    `start_date > "${now}" && subscription_publish_date < "${now}" && progress = "open"`,
+  )
+}
+
+/** An event terminated for more than the one-week staff grace window. */
+export async function findPastEvent(auth: Auth) {
+  const horizon = new Date()
+  horizon.setDate(horizon.getDate() - 8)
+  return findEvent(
+    auth,
+    `end_date != "" && end_date < "${pbDate(horizon)}" && start_date > "2020-01-01 00:00:00"`,
+  )
 }
 
 // ─── Custom fixtures ──────────────────────────────────────────────────────────

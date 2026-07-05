@@ -10,7 +10,8 @@ export class EventDetailPage {
   }
 
   subscribeButton() {
-    return this.page.locator('button', { hasText: "Je m'inscris!" })
+    // tolerate straight and typographic apostrophes in the label
+    return this.page.locator('button', { hasText: /Je m['’]inscris!/ })
   }
 
   unsubscribeButton() {

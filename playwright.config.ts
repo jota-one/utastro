@@ -6,6 +6,8 @@ import { defineConfig, devices } from '@playwright/test'
 export default defineConfig({
   testDir: './tests/e2e/specs',
   fullyParallel: false,
+  // member specs share the same test user and events — parallel files interfere
+  workers: 1,
   retries: process.env.CI ? 2 : 0,
   reporter: [
     ['html', { outputFolder: 'tests/e2e/reports', open: 'never' }],

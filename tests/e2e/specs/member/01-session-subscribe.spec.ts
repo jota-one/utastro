@@ -1,21 +1,35 @@
-import { test, expect } from '../../fixtures/index'
+import {
+  test,
+  expect,
+  fetchAuthToken,
+  findOpenEvent,
+} from '../../fixtures/index'
 import { EventDetailPage } from '../../pages/EventDetailPage'
 
 /**
  * Authenticated member: subscribe / unsubscribe flows and counter updates.
- * Requires TEST_MEMBER_EMAIL, TEST_MEMBER_PASSWORD, TEST_EVENT_ID_OPEN.
+ * Requires TEST_MEMBER_EMAIL and TEST_MEMBER_PASSWORD. The target event is
+ * discovered dynamically so the spec does not depend on aging
+ * TEST_EVENT_ID_* fixtures.
  */
 
+let openEventId: string | null = null
+
 test.beforeEach(async ({ memberPage }) => {
-  test.skip(!process.env.TEST_EVENT_ID_OPEN, 'TEST_EVENT_ID_OPEN not set')
   test.skip(!process.env.TEST_MEMBER_EMAIL, 'TEST_MEMBER_EMAIL not set')
+  const auth = await fetchAuthToken(
+    process.env.TEST_MEMBER_EMAIL!,
+    process.env.TEST_MEMBER_PASSWORD!,
+  )
+  openEventId = await findOpenEvent(auth)
+  test.skip(!openEventId, 'no event with an open subscription window')
   // Navigate to homepage to establish event before going to detail
   await memberPage.goto('/fr')
 })
 
 test('member can subscribe to an open event', async ({ memberPage }) => {
   const event = new EventDetailPage(memberPage)
-  await event.goto(process.env.TEST_EVENT_ID_OPEN!)
+  await event.goto(openEventId!)
 
   await expect(event.subscribeButton()).toBeVisible()
   await event.subscribe()
@@ -33,7 +47,7 @@ test('header event counter increments after subscribing', async ({
   memberPage,
 }) => {
   const event = new EventDetailPage(memberPage)
-  await event.goto(process.env.TEST_EVENT_ID_OPEN!)
+  await event.goto(openEventId!)
 
   const before = await event.eventCounterText()
 
@@ -51,7 +65,7 @@ test('header eventcounter decrements after unsubscribing', async ({
   memberPage,
 }) => {
   const event = new EventDetailPage(memberPage)
-  await event.goto(process.env.TEST_EVENT_ID_OPEN!)
+  await event.goto(openEventId!)
 
   // Subscribe first
   await event.subscribe()
@@ -70,7 +84,7 @@ test('unsubscribe modal shows confirmation dialog before removing', async ({
   memberPage,
 }) => {
   const event = new EventDetailPage(memberPage)
-  await event.goto(process.env.TEST_EVENT_ID_OPEN!)
+  await event.goto(openEventId!)
 
   await event.subscribe()
   await expect(event.unsubscribeButton()).toBeVisible({ timeout: 8_000 })
