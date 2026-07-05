@@ -157,7 +157,13 @@ const sortCities = (a: City, b: City) =>
 
 const adminLink = '/admin/'
 
-const userSubscribedSessions = computed(() => profileSessions.value ?? [])
+const userSubscribedSessions = computed(() => {
+  // match the production API which only returns upcoming events
+  const now = new Date()
+  return (profileSessions.value ?? []).filter(
+    session => session.start > now && (!session.end || session.end > now),
+  )
+})
 
 const userWatchingCities = computed(() =>
   watchingCities.value

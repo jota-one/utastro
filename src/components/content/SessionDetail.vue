@@ -173,9 +173,6 @@
       />
     </div>
 
-    <Modal id="session-unsubscribe">
-      <SessionUnsubscribeConfirm />
-    </Modal>
   </div>
 </template>
 
@@ -191,7 +188,6 @@ import { useRoutes } from '@/composables/useRoutes'
 import useModal from '@/composables/useModal'
 import SessionCoachStrip from '@/components/session/CoachStrip.vue'
 import SessionTimeAndPlace from '@/components/session/TimeAndPlace.vue'
-import SessionUnsubscribeConfirm from '@/components/session/UnsubscribeConfirm.vue'
 import AngledBoxesRow from '@/components/AngledBoxesRow.vue'
 import ContentBlockSpace from '@components/content/BlockSpace.vue'
 import EmptyListIcon from '@/components/EmptyListIcon.vue'
@@ -199,7 +195,6 @@ import TagList from '@/components/TagList.vue'
 import Tag from '@/components/Tag.vue'
 import TipBox from '@/components/TipBox.vue'
 import ArrowLink from '@/components/ArrowLink.vue'
-import Modal from '@/components/Modal.vue'
 import Icon from '@/components/Icon.vue'
 import DateDisplay from '@/components/Date.vue'
 import Map from '@/components/content/Map.vue'

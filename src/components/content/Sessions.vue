@@ -63,9 +63,6 @@
         </SessionCityWatchWidget>
       </div>
     </div>
-    <Modal id="session-unsubscribe">
-      <SessionUnsubscribeConfirm />
-    </Modal>
   </div>
 </template>
 
@@ -80,9 +77,7 @@ import SessionFilters from '@/components/session/Filters.vue'
 import SessionList from '@/components/session/List.vue'
 import SessionAsideWidget from '@/components/session/AsideWidget.vue'
 import SessionCityWatchWidget from '@/components/session/CityWatchWidget.vue'
-import SessionUnsubscribeConfirm from '@/components/session/UnsubscribeConfirm.vue'
 import FacebookWidget from '@/components/FacebookWidget.vue'
-import Modal from '@/components/Modal.vue'
 import Badge from '@/components/Badge.vue'
 import ArrowLink from '@/components/ArrowLink.vue'
 import type { City, DateRangeSize } from '@/types'

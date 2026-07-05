@@ -24,7 +24,7 @@ const userSubscriptions = ref<UserSubscriptions | null>(null)
 let loadSubscriptionsPromise: Promise<void> | null = null
 
 export const useUserProfile = () => {
-  const { isAuthenticated, userId } = useAuth()
+  const { isAuthenticated, isStaffUser, userId } = useAuth()
 
   const loadUserSubscriptions = (): Promise<void> => {
     if (!userId.value) {
@@ -33,13 +33,20 @@ export const useUserProfile = () => {
     if (loadSubscriptionsPromise) {
       return loadSubscriptionsPromise
     }
+    // match the production API: only subscriptions to events that are not
+    // terminated yet — staff users keep seeing events ended less than a week ago
+    const horizon = new Date()
+    if (isStaffUser.value) {
+      horizon.setDate(horizon.getDate() - 7)
+    }
+    const minEndDate = horizon.toISOString().replace('T', ' ').slice(0, 19)
     loadSubscriptionsPromise = Promise.all([
       pb.collection('ut_city_watchers').getFullList({
         filter: `user="${userId.value}"`,
         fields: 'id,city',
       }),
       pb.collection('ut_subscriptions').getFullList({
-        filter: `user="${userId.value}"`,
+        filter: `user="${userId.value}" && event.end_date > "${minEndDate}"`,
         fields: 'id,event,is_event_admin',
       }),
     ])

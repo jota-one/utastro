@@ -19,7 +19,7 @@ export function useAuth() {
     ['admin', 'superadmin'].includes(user.value?.role),
   )
   const isStaffUser = computed(
-    () => user.value?.role === 'staff' || isAdminUser.value,
+    () => user.value?.role === 'coach' || isAdminUser.value,
   )
   const userId = computed(() => user.value?.id)
 
