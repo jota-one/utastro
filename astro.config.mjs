@@ -1,5 +1,6 @@
 // @ts-check
 /// <reference types="node" />
+import { fileURLToPath } from 'node:url'
 import tailwindcss from '@tailwindcss/vite'
 import { defineConfig } from 'astro/config'
 import { loadEnv } from 'vite'
@@ -14,6 +15,17 @@ import node from '@astrojs/node'
 // https://astro.build/config
 export default defineConfig({
   vite: {
+    resolve: {
+      alias: {
+        '@': fileURLToPath(new URL('./src', import.meta.url)),
+        '@assets': fileURLToPath(new URL('./src/assets', import.meta.url)),
+        '@components': fileURLToPath(new URL('./src/components', import.meta.url)),
+        '@composables': fileURLToPath(new URL('./src/composables', import.meta.url)),
+        '@config': fileURLToPath(new URL('./src/config', import.meta.url)),
+        '@layouts': fileURLToPath(new URL('./src/layouts', import.meta.url)),
+        '@styles': fileURLToPath(new URL('./src/styles', import.meta.url)),
+      },
+    },
     plugins: [tailwindcss()],
     ...(process.env.NODE_ENV === 'production'
       ? {
