@@ -27,3 +27,47 @@ onRecordCreateRequest(e => {
 
   e.next()
 }, 'ut_subscriptions')
+
+// Keep the denormalized counters on ut_events in sync with the actual
+// subscription records (the legacy Nuxt API computed them per request).
+onRecordAfterCreateSuccess(e => {
+  const eventId = e.record.getString('event')
+  const event = e.app.findRecordById('ut_events', eventId)
+  event.set(
+    'subscription_count',
+    e.app.countRecords(
+      'ut_subscriptions',
+      $dbx.hashExp({ event: eventId, is_event_admin: false }),
+    ),
+  )
+  event.set(
+    'staff_count',
+    e.app.countRecords(
+      'ut_subscriptions',
+      $dbx.hashExp({ event: eventId, is_event_admin: true }),
+    ),
+  )
+  e.app.save(event)
+  e.next()
+}, 'ut_subscriptions')
+
+onRecordAfterDeleteSuccess(e => {
+  const eventId = e.record.getString('event')
+  const event = e.app.findRecordById('ut_events', eventId)
+  event.set(
+    'subscription_count',
+    e.app.countRecords(
+      'ut_subscriptions',
+      $dbx.hashExp({ event: eventId, is_event_admin: false }),
+    ),
+  )
+  event.set(
+    'staff_count',
+    e.app.countRecords(
+      'ut_subscriptions',
+      $dbx.hashExp({ event: eventId, is_event_admin: true }),
+    ),
+  )
+  e.app.save(event)
+  e.next()
+}, 'ut_subscriptions')

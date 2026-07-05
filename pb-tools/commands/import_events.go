@@ -165,6 +165,27 @@ func ImportEventsCommand(app *pocketbase.PocketBase) *cobra.Command {
 				fmt.Printf("✅ Imported %d subscriptions\n", subCount)
 			}
 
+			// Step 6: recompute the denormalized counters from the subscriptions
+			// actually imported (step 3 counted the raw legacy rows, but step 5
+			// drops orphans through its JOINs). A PocketBase hook keeps these
+			// counters in sync afterwards.
+			fmt.Println("\n📥 Step 6: Recomputing event subscription counters...")
+			recountSQL := `
+				UPDATE ut_events SET
+					subscription_count = (
+						SELECT COUNT(*) FROM ut_subscriptions s
+						WHERE s.event = ut_events.id AND s.is_event_admin = 0
+					),
+					staff_count = (
+						SELECT COUNT(*) FROM ut_subscriptions s
+						WHERE s.event = ut_events.id AND s.is_event_admin = 1
+					)
+			`
+			if _, err := app.DB().NewQuery(recountSQL).Execute(); err != nil {
+				return fmt.Errorf("recompute subscription counters failed: %w", err)
+			}
+			fmt.Println("✅ Subscription counters recomputed")
+
 			fmt.Println("\n🎉 Events import complete!")
 			return nil
 		},
