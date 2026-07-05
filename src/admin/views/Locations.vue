@@ -1,34 +1,27 @@
 <template>
-  <div>
-    <div class="flex items-center justify-between mb-4 gap-3 flex-wrap">
-      <h1 class="text-xl font-bold m-0">Lieux</h1>
-      <div class="flex items-center gap-3 flex-wrap">
-        <el-radio-group v-model="activeLang" size="small">
-          <el-radio-button value="fr">FR</el-radio-button>
-          <el-radio-button value="de">DE</el-radio-button>
-          <el-radio-button value="en">EN</el-radio-button>
-        </el-radio-group>
-        <el-switch
-          v-model="showEnabled"
-          active-text="Actifs"
-          inactive-text="Inactifs"
-          style="
-            --el-switch-on-color: var(--el-color-success);
-            --el-switch-off-color: var(--el-color-info-light-3);
-          "
-          @change="load"
-        />
-        <el-input
-          v-model="search"
-          placeholder="Rechercher..."
-          clearable
-          style="width: 200px"
-          @input="onSearch"
-          @clear="onSearch"
-        />
-        <el-button type="primary" @click="openCreate">+ Créer</el-button>
-      </div>
-    </div>
+  <EntityView
+    title="Lieux"
+    v-model:search="search"
+    v-model:page="page"
+    v-model:page-size="pageSize"
+    v-model:lang="activeLang"
+    :total="total"
+    @create="openCreate"
+    @load="load"
+    @search="onSearch"
+  >
+    <template #extra-start>
+      <el-switch
+        v-model="showEnabled"
+        active-text="Activé(s)"
+        inactive-text="Désactivé(s)"
+        style="
+          --el-switch-on-color: var(--el-color-success);
+          --el-switch-off-color: var(--el-color-info-light-3);
+        "
+        @change="load"
+      />
+    </template>
 
     <el-table v-loading="loading" :data="items" stripe style="width: 100%">
       <el-table-column label="Ville" width="140">
@@ -36,13 +29,13 @@
           {{ row.expand?.city?.label || '—' }}
         </template>
       </el-table-column>
-      <el-table-column label="Label">
+      <el-table-column label="Label" sortable>
         <template #default="{ row }">
           {{ row[`label_${activeLang}`] || row.label_fr || '—' }}
         </template>
       </el-table-column>
-      <el-table-column label="XID" prop="xid" width="160" />
-      <el-table-column label="Coords" width="160">
+      <el-table-column label="Code (imports)" prop="xid" width="160" />
+      <el-table-column label="Coords" width="180">
         <template #default="{ row }">
           <a
             v-if="row.coords"
@@ -54,48 +47,41 @@
           <span v-else>—</span>
         </template>
       </el-table-column>
-      <el-table-column label="Actif" width="70" align="center">
+      <el-table-column fixed="right" width="180" align="center">
         <template #default="{ row }">
           <el-switch
             v-model="row.enabled"
+            class="mr-2"
+            inline-prompt
+            :active-icon="Check"
+            :inactive-icon="Close"
             style="
               --el-switch-on-color: var(--el-color-success);
               --el-switch-off-color: var(--el-color-info-light-3);
             "
             @change="toggleEnabled(row)"
           />
-        </template>
-      </el-table-column>
-      <el-table-column fixed="right" width="150" align="center">
-        <template #default="{ row }">
-          <el-button size="small" @click="openEdit(row)">Modifier</el-button>
-          <el-button size="small" type="danger" @click="onDelete(row)"
-            >Suppr.</el-button
-          >
+          <el-button size="small" :icon="EditPen" @click="openEdit(row)" />
+          <el-button
+            size="small"
+            type="danger"
+            :icon="Delete"
+            @click="onDelete(row)"
+          />
         </template>
       </el-table-column>
     </el-table>
+  </EntityView>
 
-    <div class="flex justify-end mt-4">
-      <el-pagination
-        v-model:current-page="page"
-        v-model:page-size="pageSize"
-        :total="total"
-        :page-sizes="[10, 50, 100]"
-        layout="total, sizes, prev, pager, next"
-        @size-change="load"
-        @current-change="load"
-      />
-    </div>
-
-    <LocationDialog v-model="dialogOpen" :item="editedItem" @saved="load" />
-  </div>
+  <LocationDialog v-model="dialogOpen" :item="editedItem" @saved="load" />
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { Check, Close, Delete, EditPen } from '@element-plus/icons-vue'
 import { pb } from '@/pb'
+import EntityView from '../components/EntityView.vue'
 import LocationDialog from '../components/LocationDialog.vue'
 
 const loading = ref(false)

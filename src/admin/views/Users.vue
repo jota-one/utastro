@@ -1,31 +1,28 @@
 <template>
-  <div>
-    <div class="flex items-center justify-between mb-4 gap-3 flex-wrap">
-      <h1 class="text-xl font-bold m-0">Utilisateurs</h1>
-      <div class="flex items-center gap-3 flex-wrap">
-        <el-select
-          v-model="roleFilter"
-          placeholder="Tous les rôles"
-          clearable
-          style="width: 160px"
-          @change="load"
-        >
-          <el-option value="user" label="Utilisateur" />
-          <el-option value="coach" label="Coach" />
-          <el-option value="admin" label="Admin" />
-          <el-option value="superadmin" label="Super Admin" />
-        </el-select>
-        <el-input
-          v-model="search"
-          placeholder="Rechercher..."
-          clearable
-          style="width: 220px"
-          @input="onSearch"
-          @clear="onSearch"
-        />
-        <el-button type="primary" @click="openCreate">+ Créer</el-button>
-      </div>
-    </div>
+  <EntityView
+    title="Utilisateurs"
+    v-model:search="search"
+    v-model:page="page"
+    v-model:page-size="pageSize"
+    :total="total"
+    @create="openCreate"
+    @load="load"
+    @search="onSearch"
+  >
+    <template #extra-start>
+      <el-select
+        v-model="roleFilter"
+        placeholder="Tous les rôles"
+        clearable
+        style="width: 160px"
+        @change="load"
+      >
+        <el-option value="user" label="Utilisateur" />
+        <el-option value="coach" label="Coach" />
+        <el-option value="admin" label="Admin" />
+        <el-option value="superadmin" label="Super Admin" />
+      </el-select>
+    </template>
 
     <el-table v-loading="loading" :data="items" stripe style="width: 100%">
       <el-table-column label="Rôle" width="110" align="center">
@@ -58,36 +55,29 @@
         </template>
       </el-table-column>
       <el-table-column label="Tél." prop="phone" width="130" />
-      <el-table-column fixed="right" width="150" align="center">
+      <el-table-column fixed="right" width="130" align="center">
         <template #default="{ row }">
-          <el-button size="small" @click="openEdit(row)">Modifier</el-button>
-          <el-button size="small" type="danger" @click="onDelete(row)"
-            >Suppr.</el-button
-          >
+          <el-button size="small" :icon="EditPen" @click="openEdit(row)" />
+          <el-button
+            size="small"
+            type="danger"
+            :icon="Delete"
+            @click="onDelete(row)"
+          />
         </template>
       </el-table-column>
     </el-table>
+  </EntityView>
 
-    <div class="flex justify-end mt-4">
-      <el-pagination
-        v-model:current-page="page"
-        v-model:page-size="pageSize"
-        :total="total"
-        :page-sizes="[10, 50, 100]"
-        layout="total, sizes, prev, pager, next"
-        @size-change="load"
-        @current-change="load"
-      />
-    </div>
-
-    <UserDialog v-model="dialogOpen" :item="editedItem" @saved="load" />
-  </div>
+  <UserDialog v-model="dialogOpen" :item="editedItem" @saved="load" />
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { Delete, EditPen } from '@element-plus/icons-vue'
 import { pb } from '@/pb'
+import EntityView from '../components/EntityView.vue'
 import UserDialog from '../components/UserDialog.vue'
 
 const loading = ref(false)
