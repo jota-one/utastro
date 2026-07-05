@@ -158,10 +158,20 @@ const sortCities = (a: City, b: City) =>
 const adminLink = '/admin/'
 
 const userSubscribedSessions = computed(() => {
-  // match the production API which only returns upcoming events
+  // match production: only upcoming events, restricted to the sessions the
+  // user is currently subscribed to (reactive to unsubscriptions)
   const now = new Date()
+  const subscribedIds = new Set([
+    ...subscribedSessions.value.map(s => s.eventId),
+    ...(isStaffUser.value
+      ? coachingSessions.value.map(s => s.eventId)
+      : []),
+  ])
   return (profileSessions.value ?? []).filter(
-    session => session.start > now && (!session.end || session.end > now),
+    session =>
+      subscribedIds.has(session.id) &&
+      session.start > now &&
+      (!session.end || session.end > now),
   )
 })
 
