@@ -1,4 +1,7 @@
 .container {
+  /* cancel the max-width breakpoints of Tailwind's `container` utility,
+     which collides with this class name */
+  max-width: none;
   width: min(100%, var(--size-container-max-width));
   margin: 0 auto;
   padding-left: var(--size-gap-20);
