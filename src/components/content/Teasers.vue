@@ -71,7 +71,7 @@ withDefaults(defineProps<Props>(), {
 </script>
 
 <style lang="postcss" scoped>
-@import '@/assets/styles/_mediaquery.pcss';
+@import '@styles/_mediaquery.pcss';
 
 .teasers-list {
   &:not(.single) {

@@ -125,7 +125,7 @@ const onRangeSizeUpdate = (rangeSize: DateRangeSize) => {
 </script>
 
 <style lang="postcss" scoped>
-@import '@/assets/styles/_mediaquery.pcss';
+@import '@styles/_mediaquery.pcss';
 
 .session-filters {
   position: relative;

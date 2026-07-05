@@ -193,7 +193,7 @@ const submit = async () => {
 </script>
 
 <style lang="postcss" scoped>
-@import '@/assets/styles/_mediaquery.pcss';
+@import '@styles/_mediaquery.pcss';
 
 .block {
   display: flex;

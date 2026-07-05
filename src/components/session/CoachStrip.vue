@@ -77,7 +77,7 @@ const canCheckAttendees = computed(
 </script>
 
 <style lang="postcss" scoped>
-@import '@/assets/styles/_mediaquery.pcss';
+@import '@styles/_mediaquery.pcss';
 
 .coach-strip {
   padding: 0.75rem var(--size-gap-20);

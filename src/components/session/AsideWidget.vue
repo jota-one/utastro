@@ -37,7 +37,7 @@ const collapsed = ref(props.collapsed)
 </script>
 
 <style lang="postcss" scoped>
-@import '@/assets/styles/_mediaquery.pcss';
+@import '@styles/_mediaquery.pcss';
 
 .session-aside-widget {
   position: relative;
