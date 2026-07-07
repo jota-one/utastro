@@ -24,6 +24,12 @@
       </el-select>
     </template>
 
+    <template #extra-end>
+      <el-button :icon="Download" :loading="exporting" @click="exportAllUsers">
+        Exporter
+      </el-button>
+    </template>
+
     <el-table v-loading="loading" :data="items" stripe style="width: 100%">
       <el-table-column label="Rôle" width="110" align="center">
         <template #default="{ row }">
@@ -74,13 +80,16 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import dayjs from 'dayjs'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Delete, EditPen } from '@element-plus/icons-vue'
+import { Delete, Download, EditPen } from '@element-plus/icons-vue'
 import { pb } from '@/pb'
+import { downloadCsv, type CsvRow } from '@/utils/csv'
 import EntityView from '../components/EntityView.vue'
 import UserDialog from '../components/UserDialog.vue'
 
 const loading = ref(false)
+const exporting = ref(false)
 const items = ref<Record<string, any>[]>([])
 const total = ref(0)
 const page = ref(1)
@@ -133,6 +142,41 @@ const load = async () => {
 const onSearch = () => {
   page.value = 1
   load()
+}
+
+const exportAllUsers = async () => {
+  exporting.value = true
+  try {
+    const records = await pb.collection('ut_users').getFullList({
+      filter: buildFilter(),
+      sort: 'name',
+    })
+
+    const emailCounts = records.reduce<Record<string, number>>((acc, record) => {
+      acc[record.email] = (acc[record.email] || 0) + 1
+      return acc
+    }, {})
+
+    const rows: CsvRow[] = records.map(record => ({
+      email: record.email,
+      role: record.role || 'user',
+      name: record.name,
+      npa: record.npa,
+      city: record.city,
+      region: record.region,
+      gender: record.gender,
+      birthdate: record.birthdate,
+      accept_newsletter: record.accept_newsletter,
+      accept_promo: record.accept_promo,
+      duplicates: emailCounts[record.email],
+    }))
+
+    downloadCsv(`${dayjs().format('YYYY-MM-DD_HH-mm-ss')}-users.csv`, rows)
+  } catch {
+    ElMessage.error("Erreur lors de l'export")
+  } finally {
+    exporting.value = false
+  }
 }
 
 const openCreate = () => {
