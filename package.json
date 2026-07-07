@@ -16,7 +16,10 @@
     "migrate:up": "cd pb && ./pocketbase migrate up",
     "pb:build": "cd pb-tools && go build -o ../pb/pb-custom",
     "pb:import-all": "cd pb && ./pb-custom import-all-data",
-    "ut:import-users": "cd pb && ./pb-custom import-users"
+    "ut:import-users": "cd pb && ./pb-custom import-users",
+    "ut:import-cities": "cd pb && ./pb-custom import-cities",
+    "ut:import-events": "cd pb && ./pb-custom import-events",
+    "ut:import": "cd pb && ./pb-custom import-all-data && ./pb-custom import-users && ./pb-custom import-cities && ./pb-custom import-events"
   },
   "dependencies": {
     "@astrojs/node": "^11.0.2",
