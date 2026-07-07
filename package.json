@@ -8,6 +8,7 @@
     "preview": "astro preview",
     "astro": "astro",
     "db": "cd pb && ./pocketbase serve --http=127.0.0.1:8091",
+    "test:unit": "node --test \"tests/unit/**/*.test.ts\"",
     "test:e2e": "bash tests/e2e/run.sh",
     "test:e2e:ui": "bash tests/e2e/run.sh --ui",
     "lint": "oxlint --type-aware",
