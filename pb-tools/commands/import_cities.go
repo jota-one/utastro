@@ -13,6 +13,10 @@ func ImportCitiesCommand(app *pocketbase.PocketBase) *cobra.Command {
 		Use:   "import-cities",
 		Short: "Import cities and city watchers from sisi__ legacy tables into ut_cities and ut_city_watchers",
 		RunE: func(cmd *cobra.Command, args []string) error {
+			if err := ensureServerStopped(); err != nil {
+				return err
+			}
+
 			fmt.Println("Starting cities import process...")
 
 			// Clear existing data for idempotent re-runs

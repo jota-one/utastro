@@ -13,6 +13,10 @@ func ImportEventsCommand(app *pocketbase.PocketBase) *cobra.Command {
 		Use:   "import-events",
 		Short: "Import event types, locations, events and subscriptions from sisi__ legacy tables",
 		RunE: func(cmd *cobra.Command, args []string) error {
+			if err := ensureServerStopped(); err != nil {
+				return err
+			}
+
 			fmt.Println("Starting events import process...")
 
 			fmt.Println("🧹 Clearing existing data...")

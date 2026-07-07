@@ -21,11 +21,16 @@ func ImportAllDataCommand(app *pocketbase.PocketBase) *cobra.Command {
 		Short:   "Bulk import all JSON files from a directory into their respective tables",
 		Example: `  pb-custom import-all-data --input=sql_import_sources`,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			if err := ensureServerStopped(); err != nil {
+				return err
+			}
+
 			entries, err := os.ReadDir(dir)
 			if err != nil {
 				return fmt.Errorf("failed to read directory %s: %w", dir, err)
 			}
 
+			skipped := []string{}
 			for _, entry := range entries {
 				if entry.IsDir() || filepath.Ext(entry.Name()) != ".json" {
 					continue
@@ -34,10 +39,20 @@ func ImportAllDataCommand(app *pocketbase.PocketBase) *cobra.Command {
 				table := strings.TrimSuffix(entry.Name(), ".json")
 				file := filepath.Join(dir, entry.Name())
 
+				if !tableExists(app, table) {
+					fmt.Printf("\n⏭  Skipping %s — no table %q (create a migration first)\n", entry.Name(), table)
+					skipped = append(skipped, table)
+					continue
+				}
+
 				fmt.Printf("\n→ Importing %s into table %s\n", entry.Name(), table)
 				if err := importTableFromFile(app, table, file, chunkSize); err != nil {
 					return fmt.Errorf("failed to import %s: %w", entry.Name(), err)
 				}
+			}
+
+			if len(skipped) > 0 {
+				fmt.Printf("\n⚠️  Skipped %d file(s) with no matching table: %s\n", len(skipped), strings.Join(skipped, ", "))
 			}
 
 			return nil

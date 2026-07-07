@@ -18,6 +18,10 @@ func ImportUsersCommand(app *pocketbase.PocketBase) *cobra.Command {
 		Example: `  pb-custom import-users
   pb-custom import-users --skip-userinfos`,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			if err := ensureServerStopped(); err != nil {
+				return err
+			}
+
 			fmt.Println("Starting user import process...")
 
 			// Step 1: Import from hypercontent__users → ut_users

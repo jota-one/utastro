@@ -10,6 +10,17 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// tableExists reports whether a table (or view) with the given name exists in
+// the SQLite schema. Used to skip JSON files that have no target table.
+func tableExists(app *pocketbase.PocketBase, table string) bool {
+	var count int64
+	err := app.DB().
+		NewQuery("SELECT COUNT(*) FROM sqlite_master WHERE type IN ('table','view') AND name = {:name}").
+		Bind(map[string]interface{}{"name": table}).
+		Row(&count)
+	return err == nil && count > 0
+}
+
 func importTableFromFile(app *pocketbase.PocketBase, table, file string, chunkSize int) error {
 	data, err := os.ReadFile(file)
 	if err != nil {
