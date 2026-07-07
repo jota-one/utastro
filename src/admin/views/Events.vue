@@ -85,8 +85,15 @@
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column fixed="right" width="130" align="center">
+      <el-table-column fixed="right" width="170" align="center">
         <template #default="{ row }">
+          <el-button
+            size="small"
+            :icon="Download"
+            :loading="exportingId === row.id"
+            title="Exporter les inscrits"
+            @click="exportSubscribers(row)"
+          />
           <el-button size="small" :icon="EditPen" @click="openEdit(row)" />
           <el-button
             size="small"
@@ -106,12 +113,14 @@
 import { ref, onMounted } from 'vue'
 import dayjs from 'dayjs'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Delete, EditPen } from '@element-plus/icons-vue'
+import { Delete, Download, EditPen } from '@element-plus/icons-vue'
 import { pb } from '@/pb'
+import { downloadCsv, type CsvRow } from '@/utils/csv'
 import EntityView from '../components/EntityView.vue'
 import EventDialog from '../components/EventDialog.vue'
 
 const loading = ref(false)
+const exportingId = ref<string | null>(null)
 const items = ref<Record<string, any>[]>([])
 const total = ref(0)
 const page = ref(1)
@@ -176,6 +185,48 @@ const load = async () => {
 const onSearch = () => {
   page.value = 1
   load()
+}
+
+const exportSubscribers = async (row: Record<string, any>) => {
+  exportingId.value = row.id
+  try {
+    const subs = await pb.collection('ut_subscriptions').getFullList({
+      filter: `event = "${row.id}"`,
+      expand: 'user',
+    })
+    const rows: CsvRow[] = subs
+      .filter(sub => sub.expand?.user)
+      .sort((a, b) =>
+        String(a.expand!.user.name || '').localeCompare(
+          String(b.expand!.user.name || ''),
+        ),
+      )
+      .map(sub => {
+        const user = sub.expand!.user
+        return {
+          email: user.email,
+          role: user.role || 'user',
+          name: user.name,
+          npa: user.npa,
+          city: user.city,
+          region: user.region,
+          gender: user.gender,
+          birthdate: user.birthdate,
+          accept_newsletter: user.accept_newsletter,
+          accept_promo: user.accept_promo,
+          presence: sub.presence,
+          coach: sub.is_event_admin,
+        }
+      })
+    downloadCsv(
+      `${dayjs().format('YYYY-MM-DD_HH-mm-ss')}-event-${row.id}-subscribers.csv`,
+      rows,
+    )
+  } catch {
+    ElMessage.error("Erreur lors de l'export")
+  } finally {
+    exportingId.value = null
+  }
 }
 
 const openCreate = () => {
