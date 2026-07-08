@@ -66,11 +66,11 @@ test.describe('Admin CSV exports', () => {
   test('exports all city watchers', async ({ memberPage }) => {
     await memberPage.goto('/admin/cities')
 
-    // Open the global export dropdown, then pick "Tous les observateurs".
+    // Open the global export dropdown, then pick "Pers. intéressées".
     await memberPage.getByRole('button', { name: 'Exporter' }).click()
     const download = await triggerDownload(memberPage, () =>
       memberPage
-        .getByRole('menuitem', { name: 'Tous les observateurs', exact: true })
+        .getByRole('menuitem', { name: 'Pers. intéressées', exact: true })
         .click(),
     )
 

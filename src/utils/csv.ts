@@ -2,6 +2,10 @@ type CsvValue = string | number | boolean | null | undefined
 export type CsvRow = Record<string, CsvValue>
 
 const escapeCell = (value: CsvValue, delimiter: string): string => {
+  // Match legacy export format: booleans render as "1" or empty.
+  if (typeof value === 'boolean') {
+    return value ? '1' : ''
+  }
   const str = value === null || value === undefined ? '' : String(value)
   if (str.includes(delimiter) || str.includes('"') || str.includes('\n')) {
     return `"${str.replace(/"/g, '""')}"`

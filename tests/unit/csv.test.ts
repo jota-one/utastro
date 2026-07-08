@@ -42,9 +42,14 @@ test('renders null and undefined as empty cells', () => {
   assert.equal(csv, 'a;b;c\n;;x')
 })
 
-test('stringifies numbers and booleans', () => {
-  const csv = toCsv([{ count: 0, active: false, ratio: 1.5 }])
-  assert.equal(csv, 'count;active;ratio\n0;false;1.5')
+test('stringifies numbers', () => {
+  const csv = toCsv([{ count: 0, ratio: 1.5 }])
+  assert.equal(csv, 'count;ratio\n0;1.5')
+})
+
+test('renders booleans as 1 or empty (legacy format)', () => {
+  const csv = toCsv([{ active: true, banned: false }])
+  assert.equal(csv, 'active;banned\n1;')
 })
 
 test('keeps column order stable across rows', () => {

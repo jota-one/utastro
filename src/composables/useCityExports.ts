@@ -67,7 +67,7 @@ const fetchSubscriptions = async (cityId?: string): Promise<PbRecord[]> => {
   }
   const records = await pb.collection('ut_subscriptions').getFullList({
     filter: parts.join(' && '),
-    expand: 'user,event.city',
+    expand: 'user,event.city,event.location,event.types',
   })
   return records.filter(record => record.expand?.user && record.expand?.event)
 }
@@ -162,6 +162,8 @@ export function useCityExports() {
       .map(s => {
         const event = s.expand.event
         const user = s.expand.user
+        const location = event.expand?.location
+        const types = (event.expand?.types ?? []) as PbRecord[]
         return {
           start_date: fmt(event.start_date, 'DD.MM.YYYY HH:mm'),
           end_date: fmt(event.end_date, 'DD.MM.YYYY HH:mm'),
@@ -170,9 +172,13 @@ export function useCityExports() {
             'DD.MM.YYYY HH:mm',
           ),
           max_subscriptions: event.max_subscriptions,
+          location: location?.label_fr ?? '',
+          address: location?.address ?? '',
           title: event.title_fr,
+          event_type: types.map(type => type.label_fr).join(', '),
           email: user.email,
           name: user.name,
+          street: user.street,
           npa: user.npa,
           city: user.city,
           presence: s.presence,
@@ -188,7 +194,8 @@ export function useCityExports() {
   ) => {
     const subs = await fetchSubscriptions(cityId)
 
-    // Aggregate per event. Staff (event admins) are excluded from the counts.
+    // Aggregate per event. Staff (event admins) are counted separately and
+    // excluded from the participant/presence counts.
     const events = new Map<string, PbRecord>()
     const stats = new Map<string, Record<string, number>>()
 
@@ -198,6 +205,7 @@ export function useCityExports() {
         events.set(event.id, event)
         stats.set(event.id, {
           count_subscriptions: 0,
+          count_staff_subscriptions: 0,
           count_male_subscriptions: 0,
           count_male_presence: 0,
           count_female_subscriptions: 0,
@@ -206,10 +214,11 @@ export function useCityExports() {
           count_neutral_presence: 0,
         })
       }
+      const bucket = stats.get(event.id)!
       if (sub.is_event_admin) {
+        bucket.count_staff_subscriptions += 1
         continue
       }
-      const bucket = stats.get(event.id)!
       const gender = sub.expand.user.gender
       const group =
         gender === 'male' || gender === 'female' ? gender : 'neutral'
@@ -237,6 +246,7 @@ export function useCityExports() {
           start_date: fmt(event.start_date),
           max_subscriptions: event.max_subscriptions,
           count_subscriptions: s.count_subscriptions,
+          count_staff_subscriptions: s.count_staff_subscriptions,
           count_male_subscriptions: s.count_male_subscriptions,
           count_male_presence: s.count_male_presence,
           count_female_subscriptions: s.count_female_subscriptions,

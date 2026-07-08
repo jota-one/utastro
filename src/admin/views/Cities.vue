@@ -30,13 +30,13 @@
         <template #dropdown>
           <el-dropdown-menu>
             <el-dropdown-item command="allWatchers">
-              Tous les observateurs
+              Pers. intéressées
             </el-dropdown-item>
             <el-dropdown-item command="allSubscribers">
-              Tous les inscrits
+              Inscrit(s)
             </el-dropdown-item>
             <el-dropdown-item command="allWatchersOrSubscribers">
-              Tous les observateurs ou inscrits
+              Intéressé(s) ou inscrit(s)
             </el-dropdown-item>
           </el-dropdown-menu>
         </template>
@@ -82,19 +82,19 @@
             <template #dropdown>
               <el-dropdown-menu>
                 <el-dropdown-item command="watchers">
-                  Observateurs
+                  Pers. intéressées
                 </el-dropdown-item>
                 <el-dropdown-item command="subscribers">
-                  Inscrits
+                  Inscrit(s)
                 </el-dropdown-item>
                 <el-dropdown-item command="watchersOrSubscribers">
-                  Observateurs ou inscrits
+                  Intéressé(s) ou inscrit(s)
                 </el-dropdown-item>
                 <el-dropdown-item command="statistics">
-                  Statistiques de présence
+                  Statistiques par session
                 </el-dropdown-item>
                 <el-dropdown-item command="all">
-                  Inscriptions détaillées
+                  Inscriptions
                 </el-dropdown-item>
               </el-dropdown-menu>
             </template>
