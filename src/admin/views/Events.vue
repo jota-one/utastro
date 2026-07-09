@@ -23,6 +23,12 @@
       />
     </template>
 
+    <template #extra-end>
+      <el-button :icon="Upload" @click="importDialogOpen = true">
+        Importer
+      </el-button>
+    </template>
+
     <el-table v-loading="loading" :data="items" stripe style="width: 100%">
       <el-table-column label="Lieu" width="200">
         <template #default="{ row }">
@@ -107,17 +113,19 @@
   </EntityView>
 
   <EventDialog v-model="dialogOpen" :item="editedItem" @saved="load" />
+  <EventsImportDialog v-model="importDialogOpen" @imported="load" />
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import dayjs from 'dayjs'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Delete, Download, EditPen } from '@element-plus/icons-vue'
+import { Delete, Download, EditPen, Upload } from '@element-plus/icons-vue'
 import { pb } from '@/pb'
 import { downloadCsv, type CsvRow } from '@/utils/csv'
 import EntityView from '../components/EntityView.vue'
 import EventDialog from '../components/EventDialog.vue'
+import EventsImportDialog from '../components/EventsImportDialog.vue'
 
 const loading = ref(false)
 const exportingId = ref<string | null>(null)
@@ -129,6 +137,7 @@ const search = ref('')
 const showUpcoming = ref(true)
 const activeLang = ref<'fr' | 'de' | 'en'>('fr')
 const dialogOpen = ref(false)
+const importDialogOpen = ref(false)
 const editedItem = ref<Record<string, any> | null>(null)
 
 const progressLabel = (p: string) =>

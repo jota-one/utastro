@@ -43,11 +43,13 @@ import { pb } from '@/pb'
 type Props = {
   modelValue?: boolean
   item?: Record<string, any> | null
+  prefill?: Record<string, any> | null
 }
 
 const props = withDefaults(defineProps<Props>(), {
   modelValue: false,
   item: null,
+  prefill: null,
 })
 
 const emit = defineEmits<{
@@ -104,7 +106,7 @@ watch(
     if (value && props.item?.id) {
       load(props.item.id)
     } else {
-      form.value = emptyForm()
+      form.value = { ...emptyForm(), ...props.prefill }
     }
   },
 )
