@@ -47,7 +47,7 @@
           <span v-else>—</span>
         </template>
       </el-table-column>
-      <el-table-column fixed="right" width="180" align="center">
+      <el-table-column fixed="right" width="220" align="center">
         <template #default="{ row }">
           <el-switch
             v-model="row.enabled"
@@ -60,6 +60,12 @@
               --el-switch-off-color: var(--el-color-info-light-3);
             "
             @change="toggleEnabled(row)"
+          />
+          <el-button
+            size="small"
+            :icon="Connection"
+            title="Fusionner vers un autre lieu"
+            @click="openMerge(row)"
           />
           <el-button size="small" :icon="EditPen" @click="openEdit(row)" />
           <el-button
@@ -74,15 +80,27 @@
   </EntityView>
 
   <LocationDialog v-model="dialogOpen" :item="editedItem" @saved="load" />
+  <MergeLocationsDialog
+    v-model="mergeDialogOpen"
+    :item="mergedItem"
+    @merged="load"
+  />
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Check, Close, Delete, EditPen } from '@element-plus/icons-vue'
+import {
+  Check,
+  Close,
+  Connection,
+  Delete,
+  EditPen,
+} from '@element-plus/icons-vue'
 import { pb } from '@/pb'
 import EntityView from '../components/EntityView.vue'
 import LocationDialog from '../components/LocationDialog.vue'
+import MergeLocationsDialog from '../components/MergeLocationsDialog.vue'
 
 const loading = ref(false)
 const items = ref<Record<string, any>[]>([])
@@ -93,7 +111,9 @@ const search = ref('')
 const showEnabled = ref(true)
 const activeLang = ref<'fr' | 'de' | 'en'>('fr')
 const dialogOpen = ref(false)
+const mergeDialogOpen = ref(false)
 const editedItem = ref<Record<string, any> | null>(null)
+const mergedItem = ref<Record<string, any> | null>(null)
 
 const buildFilter = () => {
   const parts: string[] = [`enabled = ${showEnabled.value}`]
@@ -147,6 +167,11 @@ const openCreate = () => {
 const openEdit = (row: Record<string, any>) => {
   editedItem.value = row
   dialogOpen.value = true
+}
+
+const openMerge = (row: Record<string, any>) => {
+  mergedItem.value = row
+  mergeDialogOpen.value = true
 }
 
 const onDelete = async (row: Record<string, any>) => {
