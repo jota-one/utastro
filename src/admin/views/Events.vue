@@ -67,7 +67,12 @@
       </el-table-column>
       <el-table-column label="Inscrits" width="90" align="center">
         <template #default="{ row }">
-          <el-tag size="small" effect="plain">
+          <el-tag
+            size="small"
+            effect="plain"
+            :class="{ 'cursor-pointer': (row.subscription_count ?? 0) > 0 }"
+            @click="onShowSubscribers(row)"
+          >
             {{ row.subscription_count ?? 0 }} / {{ row.max_subscriptions ?? 0 }}
           </el-tag>
         </template>
@@ -114,6 +119,7 @@
 
   <EventDialog v-model="dialogOpen" :item="editedItem" @saved="load" />
   <EventsImportDialog v-model="importDialogOpen" @imported="load" />
+  <SubscribersDialog v-model="subscribersDialogOpen" :item="subscribersItem" />
 </template>
 
 <script setup lang="ts">
@@ -122,10 +128,13 @@ import dayjs from 'dayjs'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Delete, Download, EditPen, Upload } from '@element-plus/icons-vue'
 import { pb } from '@/pb'
-import { downloadCsv, type CsvRow } from '@/utils/csv'
+import { useEventExports } from '@/composables/useEventExports'
 import EntityView from '../components/EntityView.vue'
 import EventDialog from '../components/EventDialog.vue'
 import EventsImportDialog from '../components/EventsImportDialog.vue'
+import SubscribersDialog from '../components/SubscribersDialog.vue'
+
+const eventExports = useEventExports()
 
 const loading = ref(false)
 const exportingId = ref<string | null>(null)
@@ -138,7 +147,9 @@ const showUpcoming = ref(true)
 const activeLang = ref<'fr' | 'de' | 'en'>('fr')
 const dialogOpen = ref(false)
 const importDialogOpen = ref(false)
+const subscribersDialogOpen = ref(false)
 const editedItem = ref<Record<string, any> | null>(null)
+const subscribersItem = ref<Record<string, any> | null>(null)
 
 const progressLabel = (p: string) =>
   ({
@@ -199,42 +210,18 @@ const onSearch = () => {
 const exportSubscribers = async (row: Record<string, any>) => {
   exportingId.value = row.id
   try {
-    const subs = await pb.collection('ut_subscriptions').getFullList({
-      filter: `event = "${row.id}"`,
-      expand: 'user',
-    })
-    const rows: CsvRow[] = subs
-      .filter(sub => sub.expand?.user)
-      .sort((a, b) =>
-        String(a.expand!.user.name || '').localeCompare(
-          String(b.expand!.user.name || ''),
-        ),
-      )
-      .map(sub => {
-        const user = sub.expand!.user
-        return {
-          email: user.email,
-          role: user.role || 'user',
-          name: user.name,
-          npa: user.npa,
-          city: user.city,
-          region: user.region,
-          gender: user.gender,
-          birthdate: user.birthdate,
-          accept_newsletter: user.accept_newsletter,
-          accept_promo: user.accept_promo,
-          presence: sub.presence,
-          coach: sub.is_event_admin,
-        }
-      })
-    downloadCsv(
-      `${dayjs().format('YYYY-MM-DD_HH-mm-ss')}-event-${row.id}-subscribers.csv`,
-      rows,
-    )
+    await eventExports.exportSubscribers(row)
   } catch {
     ElMessage.error("Erreur lors de l'export")
   } finally {
     exportingId.value = null
+  }
+}
+
+const onShowSubscribers = (row: Record<string, any>) => {
+  if ((row.subscription_count ?? 0) > 0) {
+    subscribersItem.value = row
+    subscribersDialogOpen.value = true
   }
 }
 
