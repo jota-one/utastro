@@ -7,6 +7,7 @@
         <el-menu-item index="/cities">Villes</el-menu-item>
         <el-menu-item index="/locations">Lieux</el-menu-item>
         <el-menu-item index="/event-types">Types</el-menu-item>
+        <el-menu-item index="/event-proposers">Proposants</el-menu-item>
         <el-menu-item index="/users">Utilisateurs</el-menu-item>
         <el-menu-item index="__back" @click="goToSite"
           >← Retour au site</el-menu-item
