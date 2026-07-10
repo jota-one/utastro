@@ -175,13 +175,16 @@ func ImportEventsCommand(app *pocketbase.PocketBase) *cobra.Command {
 					return fmt.Errorf("build user mapping failed: %w", err)
 				}
 			}
+			// presence is tri-state in the legacy table (null = not checked
+			// yet): presence_checked keeps that information.
 			subscriptionsSQL := `
-				INSERT OR IGNORE INTO ut_subscriptions (id, "user", event, presence, is_event_admin, legacy_user_id, legacy_event_id)
+				INSERT OR IGNORE INTO ut_subscriptions (id, "user", event, presence, presence_checked, is_event_admin, legacy_user_id, legacy_event_id)
 				SELECT
 					lower(substr(hex(randomblob(10)), 1, 15)),
 					m.user_id,
 					ev.id,
 					MAX(CASE s.presence WHEN 1 THEN 1 ELSE 0 END),
+					MAX(CASE WHEN s.presence IS NOT NULL THEN 1 ELSE 0 END),
 					MAX(CASE s.is_event_admin WHEN 1 THEN 1 ELSE 0 END),
 					COALESCE(MAX(CASE WHEN s.user_id = m.survivor_legacy_id THEN s.user_id END), MAX(s.user_id)),
 					s.event_id

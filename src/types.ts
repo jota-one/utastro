@@ -178,11 +178,9 @@ export interface Person {
 }
 
 export interface Attendee {
-  subscriptionId: number
+  subscriptionId: string
   presence: boolean | null
-  firstName: string
-  lastName: string
-  gender: 'male' | 'female' | 'other'
+  name: string
 }
 
 export type UserProfileLogin = {

@@ -63,3 +63,4 @@ Certaines tâches doivent être faites en 1er lieu et ensebmle pour que tout le 
 - [2026-07-10] Fix création d'utilisateur — le champ `id` de `ut_users` n'était plus auto-généré, toute création échouait (admin inclus)
 - [2026-07-10] Admin — gestion des proposants de sessions (CRUD, activation/désactivation)
 - [2026-07-10] Import users — fusion des comptes legacy en doublon d'email (survivant = compte à l'inscription la plus récente, rôle le plus élevé conservé) ; les inscriptions et villes suivies des comptes fusionnés sont récupérées (~8000 inscriptions perdues auparavant)
+- [2026-07-10] Feuille de présence (coach) — modal de pointage des inscrits sur la page session (présent/absent, compteur, validation), routes PB dédiées réservées staff/admin ; l'état "non pointé" legacy est préservé (`presence_checked`)

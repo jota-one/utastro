@@ -108,9 +108,41 @@ export const useSessions = () => {
   }
 
   const loadAttendees = async (
-    _sessionId: string | undefined,
+    sessionId: string | undefined,
   ): Promise<void> => {
-    // TODO: load from PocketBase once attendance feature is implemented
+    if (!sessionId) {
+      return
+    }
+    const data = await pb.send(`/api/custom/events/${sessionId}/attendees`, {
+      method: 'GET',
+    })
+    sessionAttendees.value = data.list.map(
+      (attendee: Record<string, any>): Attendee => ({
+        subscriptionId: attendee.subscription_id,
+        name: attendee.name,
+        presence: attendee.presence,
+      }),
+    )
+    sessionAttendeesStatus.value = data.status
+  }
+
+  const setAttendeePresence = async (
+    attendee: Attendee,
+    presence: boolean,
+  ): Promise<void> => {
+    await pb.send(
+      `/api/custom/subscriptions/${attendee.subscriptionId}/presence`,
+      {
+        method: 'PUT',
+        body: { presence },
+      },
+    )
+  }
+
+  const validateAttendees = async (sessionId: string): Promise<void> => {
+    await pb.send(`/api/custom/events/${sessionId}/attendees-checked`, {
+      method: 'PUT',
+    })
   }
 
   const loadSessions = async () => {
@@ -307,9 +339,11 @@ export const useSessions = () => {
     loadSessionsByIds,
     sessionMatchesCities,
     sessionMatchesTags,
+    setAttendeePresence,
     subscribeToSession,
     unsubscribeFromSession,
     unwatchCity,
+    validateAttendees,
     watchCities,
   }
 }
