@@ -67,3 +67,4 @@ Certaines tâches doivent être faites en 1er lieu et ensebmle pour que tout le 
 - [2026-07-10] Sponsors — gestion en DB via l'admin (logo, lien, global ou par villes, activation) et bandeau de logos en bas des pages ville ; import des sponsors legacy avec leurs logos (`ut:import-sponsors`) ; la page Sponsors dédiée est abandonnée
 - [2026-07-10] Impersonation admin — bouton "se connecter en tant que" dans la liste des utilisateurs, bannière sur le site avec retour au compte admin en un clic (repersonate, impossible dans l'ancien système)
 - [2026-07-10] Fix recherche par email dans l'admin Utilisateurs — le filtre email était silencieusement ignoré (`emailVisibility` requis par PocketBase pour filtrer le champ email)
+- [2026-07-10] Admin sponsors — limite de 150 Ko sur les logos uploadés (refus immédiat dans le dialog + validation serveur)

@@ -115,8 +115,16 @@ const formIsValid = computed(
   () => !!form.value.name && (!!props.item || !!logoFile.value),
 )
 
+const MAX_LOGO_SIZE = 150 * 1024
+
 const onLogoChange = (file: UploadFile) => {
   if (!file.raw) {
+    return
+  }
+  if (file.raw.size > MAX_LOGO_SIZE) {
+    ElMessage.error(
+      `Logo trop lourd (${Math.round(file.raw.size / 1024)} Ko) — maximum 150 Ko`,
+    )
     return
   }
   logoFile.value = file.raw
