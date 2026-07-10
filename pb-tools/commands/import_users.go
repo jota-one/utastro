@@ -25,31 +25,66 @@ func ImportUsersCommand(app *pocketbase.PocketBase) *cobra.Command {
 			fmt.Println("Starting user import process...")
 
 			// Step 1: Import from hypercontent__users → ut_users
+			// The legacy table allows several accounts on the same email while
+			// ut_users enforces a unique email. Import one survivor per email:
+			// prefer non-soft-deleted accounts, then the one whose latest
+			// subscription targets the most recent session (people who forgot
+			// an old account keep using the new one), then the newest account.
+			// The survivor gets the highest role found in its email group so a
+			// duplicated coach/admin account doesn't lose its privileges.
 			fmt.Println("\n📥 Step 1: Importing from hypercontent__users...")
-            importSQL := `
+			importSQL := `
     INSERT OR IGNORE INTO ut_users (
       email, name, role, legacy_id, legacy_password_sha1,
       soft_deleted, verified, emailVisibility, password, tokenKey
     )
-    SELECT 
-      email,
-      TRIM(COALESCE(first_name, '') || ' ' || COALESCE(last_name, '')),
-      CASE role_id
+    WITH last_subscription AS (
+      SELECT s.user_id, MAX(e.start_date) AS last_event_date
+      FROM sisi__subscriptions s
+      JOIN sisi__events e ON e.id = s.event_id
+      GROUP BY s.user_id
+    ),
+    ranked AS (
+      SELECT
+        h.*,
+        ROW_NUMBER() OVER (
+          PARTITION BY lower(h.email)
+          ORDER BY
+            COALESCE(h.soft_deleted, 0) ASC,
+            COALESCE(ls.last_event_date, '') DESC,
+            h.id DESC
+        ) AS rn
+      FROM hypercontent__users h
+      LEFT JOIN last_subscription ls ON ls.user_id = h.id
+      WHERE h.email IS NOT NULL AND h.email != ''
+    ),
+    group_role AS (
+      SELECT
+        lower(email) AS lemail,
+        MIN(CASE role_id WHEN 1 THEN 1 WHEN 2 THEN 2 WHEN 4 THEN 3 ELSE 4 END) AS role_rank
+      FROM hypercontent__users
+      WHERE email IS NOT NULL AND email != ''
+      GROUP BY lower(email)
+    )
+    SELECT
+      r.email,
+      TRIM(COALESCE(r.first_name, '') || ' ' || COALESCE(r.last_name, '')),
+      CASE gr.role_rank
         WHEN 1 THEN 'superadmin'
         WHEN 2 THEN 'admin'
-        WHEN 3 THEN 'user'
-        WHEN 4 THEN 'coach'
+        WHEN 3 THEN 'coach'
         ELSE 'user'
       END,
-      id,
-      password,
-      COALESCE(soft_deleted, 0),
+      r.id,
+      r.password,
+      COALESCE(r.soft_deleted, 0),
       0,
       0,
-      'Temp#' || id || '!2025',
+      'Temp#' || r.id || '!2025',
       hex(randomblob(16))
-    FROM hypercontent__users
-    WHERE email IS NOT NULL AND email != ''
+    FROM ranked r
+    JOIN group_role gr ON gr.lemail = lower(r.email)
+    WHERE r.rn = 1
   `
 
 			if _, err := app.DB().NewQuery(importSQL).Execute(); err != nil {

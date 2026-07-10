@@ -153,22 +153,48 @@ func ImportEventsCommand(app *pocketbase.PocketBase) *cobra.Command {
 			if _, err := app.DB().NewQuery("DROP TRIGGER IF EXISTS ut_subscriptions_capacity").Execute(); err != nil {
 				return fmt.Errorf("drop capacity trigger failed: %w", err)
 			}
+			// Legacy duplicate accounts (same email) are collapsed into a single
+			// survivor by import-users, so subscriptions are mapped through the
+			// email instead of the legacy user id: every duplicate's subscription
+			// lands on the surviving account. Subscriptions of the same survivor
+			// on the same event are merged into one row (any presence/staff flag
+			// wins, legacy_user_id keeps the survivor's own id when it is part of
+			// the group). The mapping is materialized with an index first — a
+			// direct join on lower(email) cannot use any index and takes hours.
+			mappingSQL := []string{
+				`DROP TABLE IF EXISTS tmp_user_map`,
+				`CREATE TABLE tmp_user_map AS
+					SELECT h.id AS legacy_id, u.id AS user_id, u.legacy_id AS survivor_legacy_id
+					FROM hypercontent__users h
+					JOIN (SELECT id, lower(email) AS lemail, legacy_id FROM ut_users) u
+						ON u.lemail = lower(h.email)`,
+				`CREATE INDEX idx_tmp_user_map_legacy ON tmp_user_map (legacy_id)`,
+			}
+			for _, q := range mappingSQL {
+				if _, err := app.DB().NewQuery(q).Execute(); err != nil {
+					return fmt.Errorf("build user mapping failed: %w", err)
+				}
+			}
 			subscriptionsSQL := `
 				INSERT OR IGNORE INTO ut_subscriptions (id, "user", event, presence, is_event_admin, legacy_user_id, legacy_event_id)
 				SELECT
 					lower(substr(hex(randomblob(10)), 1, 15)),
-					u.id,
+					m.user_id,
 					ev.id,
-					CASE s.presence WHEN 1 THEN 1 ELSE 0 END,
-					CASE s.is_event_admin WHEN 1 THEN 1 ELSE 0 END,
-					s.user_id,
+					MAX(CASE s.presence WHEN 1 THEN 1 ELSE 0 END),
+					MAX(CASE s.is_event_admin WHEN 1 THEN 1 ELSE 0 END),
+					COALESCE(MAX(CASE WHEN s.user_id = m.survivor_legacy_id THEN s.user_id END), MAX(s.user_id)),
 					s.event_id
 				FROM sisi__subscriptions s
-				JOIN ut_users u  ON u.legacy_id  = s.user_id
-				JOIN ut_events ev ON ev.legacy_id = s.event_id
+				JOIN tmp_user_map m ON m.legacy_id = s.user_id
+				JOIN ut_events ev ON ev.legacy_id = s.event_id AND ev.legacy_id != 0
+				GROUP BY m.user_id, ev.id
 			`
 			if _, err := app.DB().NewQuery(subscriptionsSQL).Execute(); err != nil {
 				return fmt.Errorf("import subscriptions failed: %w", err)
+			}
+			if _, err := app.DB().NewQuery(`DROP TABLE IF EXISTS tmp_user_map`).Execute(); err != nil {
+				return fmt.Errorf("drop user mapping failed: %w", err)
 			}
 			var subCount int64
 			if err := app.DB().NewQuery("SELECT COUNT(*) FROM ut_subscriptions").Row(&subCount); err == nil {

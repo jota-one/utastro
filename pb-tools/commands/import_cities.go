@@ -46,22 +46,45 @@ func ImportCitiesCommand(app *pocketbase.PocketBase) *cobra.Command {
 				fmt.Printf("✅ Imported %d cities\n", citiesCount)
 			}
 
-			// Step 2: sisi__city_watchers → ut_city_watchers (resolve PB IDs via legacy_id)
+			// Step 2: sisi__city_watchers → ut_city_watchers
+			// Users are resolved through the email so watchers of legacy
+			// duplicate accounts land on the surviving account (see
+			// import-users), deduplicated per (user, city). The mapping is
+			// materialized with an index — a direct join on lower(email)
+			// cannot use any index.
 			fmt.Println("\n📥 Step 2: Importing city watchers...")
+			mappingSQL := []string{
+				`DROP TABLE IF EXISTS tmp_user_map`,
+				`CREATE TABLE tmp_user_map AS
+					SELECT h.id AS legacy_id, u.id AS user_id, u.legacy_id AS survivor_legacy_id
+					FROM hypercontent__users h
+					JOIN (SELECT id, lower(email) AS lemail, legacy_id FROM ut_users) u
+						ON u.lemail = lower(h.email)`,
+				`CREATE INDEX idx_tmp_user_map_legacy ON tmp_user_map (legacy_id)`,
+			}
+			for _, q := range mappingSQL {
+				if _, err := app.DB().NewQuery(q).Execute(); err != nil {
+					return fmt.Errorf("build user mapping failed: %w", err)
+				}
+			}
 			watchersSQL := `
 				INSERT OR IGNORE INTO ut_city_watchers (id, "user", city, legacy_user_id, legacy_city_id)
 				SELECT
 					lower(substr(hex(randomblob(10)), 1, 15)),
-					u.id,
+					m.user_id,
 					c.id,
-					w.user_id,
+					COALESCE(MAX(CASE WHEN w.user_id = m.survivor_legacy_id THEN w.user_id END), MAX(w.user_id)),
 					w.city_id
 				FROM sisi__city_watchers w
-				JOIN ut_users u ON u.legacy_id = w.user_id
+				JOIN tmp_user_map m ON m.legacy_id = w.user_id
 				JOIN ut_cities c ON c.legacy_id = w.city_id
+				GROUP BY m.user_id, c.id
 			`
 			if _, err := app.DB().NewQuery(watchersSQL).Execute(); err != nil {
 				return fmt.Errorf("import city watchers failed: %w", err)
+			}
+			if _, err := app.DB().NewQuery(`DROP TABLE IF EXISTS tmp_user_map`).Execute(); err != nil {
+				return fmt.Errorf("drop user mapping failed: %w", err)
 			}
 
 			var watchersCount int64
