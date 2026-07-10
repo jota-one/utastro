@@ -1,4 +1,10 @@
 <template>
+  <div v-if="isImpersonating" class="impersonation-banner">
+    <span v-html="t('impersonation_banner_text', { name: user?.name || '' })" />
+    <button class="button small" @click="onStopImpersonation">
+      {{ t('impersonation_banner_button') }}
+    </button>
+  </div>
   <header class="header">
     <div class="container">
       <a :href="route('home')" class="logo" no-prefetch>
@@ -83,14 +89,21 @@ import { useCities } from '@composables/useCities'
 import { useRoutes } from '@composables/useRoutes'
 
 initPlausible({
-  domain: 'urban-training.ch'
+  domain: 'urban-training.ch',
 })
 
 console.log('initplausible')
 
 const { t } = useI36n()
 const { modalParams, openModal, closeModal } = useModal()
-const { isAuthenticated, isStaffUser, logout } = useAuth()
+const {
+  isAuthenticated,
+  isImpersonating,
+  isStaffUser,
+  logout,
+  stopImpersonation,
+  user,
+} = useAuth()
 const {
   watchingCities,
   subscribedSessions,
@@ -165,10 +178,29 @@ const onAuthButtonClick = async () => {
 const closeMobileOverlay = () => {
   menuOpened.value = false
 }
+
+const onStopImpersonation = () => {
+  stopImpersonation()
+  window.location.href = '/admin/'
+}
 </script>
 
 <style lang="postcss" scoped>
 @import '@styles/_mediaquery.pcss';
+
+.impersonation-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: var(--size-gap-15);
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  color: rgb(var(--color-white));
+  background: rgb(var(--color-warning-text));
+  position: relative;
+  z-index: var(--z-index-page-header);
+}
 
 .header {
   position: relative;

@@ -121,6 +121,8 @@
   "hc_website_teaser_title": "Title",
   "hc_website_teaser_update_success": "Teaser successfully updated",
   "hc_website_teasers": "Teasers",
+  "impersonation_banner_button": "Back to admin account",
+  "impersonation_banner_text": "Logged in as <b>{name}</b>",
   "login_action_password_forgotten": "Password forgotten?",
   "login_action_reset_password": "Reset",
   "login_action_signup": "Create account",

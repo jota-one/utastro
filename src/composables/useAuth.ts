@@ -3,7 +3,11 @@ import { useSessionStorage } from '@vueuse/core'
 import { pb } from '@/pb'
 
 const userJwt = useSessionStorage('ut_jwt', '')
-const user = ref<Record<string, any> | null>(userJwt.value ? pb.authStore.record : null)
+// admin session backup while impersonating a user ("se connecter en tant que")
+const impersonatorBackup = useSessionStorage('ut_impersonator', '')
+const user = ref<Record<string, any> | null>(
+  userJwt.value ? pb.authStore.record : null,
+)
 
 if (userJwt.value && !pb.authStore.isValid) {
   pb.authStore.save(userJwt.value, user.value as any)
@@ -40,15 +44,46 @@ export function useAuth() {
     pb.authStore.clear()
     userJwt.value = ''
     user.value = null
+    impersonatorBackup.value = ''
+  }
+
+  const isImpersonating = computed(() => impersonatorBackup.value.length > 0)
+
+  const impersonate = async (impersonatedUserId: string) => {
+    const data = await pb.send(
+      `/api/custom/users/${impersonatedUserId}/impersonate`,
+      { method: 'POST' },
+    )
+    impersonatorBackup.value = JSON.stringify({
+      token: userJwt.value,
+      record: user.value,
+    })
+    pb.authStore.save(data.token, data.record)
+    userJwt.value = data.token
+    user.value = data.record
+  }
+
+  const stopImpersonation = () => {
+    if (!impersonatorBackup.value) {
+      return
+    }
+    const { token, record } = JSON.parse(impersonatorBackup.value)
+    impersonatorBackup.value = ''
+    pb.authStore.save(token, record)
+    userJwt.value = token
+    user.value = record
   }
 
   return {
     isAuthenticated,
     isAdminUser,
+    isImpersonating,
     isStaffUser,
     userId,
+    impersonate,
     login,
     logout,
+    stopImpersonation,
     user,
     userJwt,
     pb,

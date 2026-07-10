@@ -61,8 +61,14 @@
         </template>
       </el-table-column>
       <el-table-column label="Tél." prop="phone" width="130" />
-      <el-table-column fixed="right" width="130" align="center">
+      <el-table-column fixed="right" width="170" align="center">
         <template #default="{ row }">
+          <el-button
+            size="small"
+            :icon="Service"
+            title="Se connecter en tant que cet utilisateur"
+            @click="onImpersonate(row)"
+          />
           <el-button size="small" :icon="EditPen" @click="openEdit(row)" />
           <el-button
             size="small"
@@ -82,8 +88,9 @@
 import { ref, onMounted } from 'vue'
 import dayjs from 'dayjs'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Delete, Download, EditPen } from '@element-plus/icons-vue'
+import { Delete, Download, EditPen, Service } from '@element-plus/icons-vue'
 import { pb } from '@/pb'
+import { useAuth } from '@/composables/useAuth'
 import { downloadCsv, type CsvRow } from '@/utils/csv'
 import EntityView from '../components/EntityView.vue'
 import UserDialog from '../components/UserDialog.vue'
@@ -152,10 +159,13 @@ const exportAllUsers = async () => {
       sort: 'name',
     })
 
-    const emailCounts = records.reduce<Record<string, number>>((acc, record) => {
-      acc[record.email] = (acc[record.email] || 0) + 1
-      return acc
-    }, {})
+    const emailCounts = records.reduce<Record<string, number>>(
+      (acc, record) => {
+        acc[record.email] = (acc[record.email] || 0) + 1
+        return acc
+      },
+      {},
+    )
 
     const rows: CsvRow[] = records.map(record => ({
       email: record.email,
@@ -187,6 +197,15 @@ const openCreate = () => {
 const openEdit = (row: Record<string, any>) => {
   editedItem.value = row
   dialogOpen.value = true
+}
+
+const onImpersonate = async (row: Record<string, any>) => {
+  try {
+    await useAuth().impersonate(row.id)
+    window.location.href = '/fr/'
+  } catch {
+    ElMessage.error("Erreur lors de l'impersonation")
+  }
 }
 
 const onDelete = async (row: Record<string, any>) => {

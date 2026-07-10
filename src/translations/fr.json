@@ -225,6 +225,8 @@
   "hc_website_teaser_title": "Titre",
   "hc_website_teaser_update_success": "Teaser mis à jour avec succès",
   "hc_website_teasers": "Teasers",
+  "impersonation_banner_button": "Redevenir admin",
+  "impersonation_banner_text": "Connecté en tant que <b>{name}</b>",
   "label_events_over": "Terminées",
   "label_events_upcoming": "À venir",
   "login_action_password_forgotten": "Mot de passe oublié?",
