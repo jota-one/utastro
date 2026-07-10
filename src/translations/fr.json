@@ -300,7 +300,7 @@
   "sessions_subscription_starting": "Inscriptions dès le<br><b>{date} - {time}</b>",
   "sessions_unsubscribe_as_staff": "Se désinscrire (coach)",
   "sessions_unsubscribe_button": "Se désinscrire",
-  "sessions_unsubscribe_confirm_question": "Es-tu sûr de vouloir te désinscrire de cette sesssion?",
+  "sessions_unsubscribe_confirm_question": "Es-tu sûr de vouloir te désinscrire de cette session?",
   "sessions_watch_cities_button": "S’abonner",
   "sessions_watch_cities_dropdown_label": "Choisis une ou plusieurs villes",
   "sessions_watch_cities_info": "<b>Reste informé sur les événements Urban Training dans les villes de ton choix!</b><br>Nous te contacterons dès la mise en ligne des inscriptions définitives pour les prochaines dates dans ces villes.",
