@@ -5,6 +5,7 @@ import Cities from '../views/Cities.vue'
 import Locations from '../views/Locations.vue'
 import EventTypes from '../views/EventTypes.vue'
 import EventProposers from '../views/EventProposers.vue'
+import Sponsors from '../views/Sponsors.vue'
 import Users from '../views/Users.vue'
 import { useAuth } from '@/composables/useAuth'
 
@@ -15,6 +16,7 @@ const routes = [
   { path: '/locations', component: Locations },
   { path: '/event-types', component: EventTypes },
   { path: '/event-proposers', component: EventProposers },
+  { path: '/sponsors', component: Sponsors },
   { path: '/users', component: Users },
 ]
 

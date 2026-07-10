@@ -20,7 +20,8 @@
     "ut:import-users": "cd pb && ./pb-custom import-users",
     "ut:import-cities": "cd pb && ./pb-custom import-cities",
     "ut:import-events": "cd pb && ./pb-custom import-events",
-    "ut:import": "cd pb && ./pb-custom import-all-data && ./pb-custom import-users && ./pb-custom import-cities && ./pb-custom import-events"
+    "ut:import-sponsors": "cd pb && ./pb-custom import-sponsors",
+    "ut:import": "cd pb && ./pb-custom import-all-data && ./pb-custom import-users && ./pb-custom import-cities && ./pb-custom import-events && ./pb-custom import-sponsors"
   },
   "dependencies": {
     "@astrojs/node": "^11.0.2",

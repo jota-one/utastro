@@ -18,6 +18,7 @@ const { lang } = Astro.props
     <main class="main">
       <slot />
     </main>
+    <slot name="sponsors" />
     <LayoutPageFooter client:only="vue" />
     <LayoutGlobalModals client:only="vue" />
   </div>

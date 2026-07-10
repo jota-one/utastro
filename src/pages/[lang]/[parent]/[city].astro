@@ -9,6 +9,7 @@ import Map from '@/components/content/Map.vue'
 import SessionsView from '@/components/content/Sessions.vue'
 import ArrowLink from '@/components/ArrowLink.vue'
 import SubscriptionFormPage from '@components/pages/SubscriptionFormPage.astro'
+import CitySponsors from '@/components/layout/CitySponsors.vue'
 import { getPath, LANGS } from '@/routes'
 import { pb } from '@/pb'
 import type { LangCode } from '@/routes'
@@ -84,6 +85,7 @@ const backLinkLabels: Record<LangCode, string> = {
     <ArrowLink reverse as-button href={subscriptionPath} label={backLinkLabels[lang]} />
   </div>
   <ContentBlockSpace size="half" />
+  <CitySponsors client:only="vue" cityId={city!.id} slot="sponsors" />
 </SiteLayout>
 )}
 

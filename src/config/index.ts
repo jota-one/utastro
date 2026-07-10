@@ -33,6 +33,7 @@ export default {
   presenceCheckValidation:
     import.meta.env.PUBLIC_PRESENCE_CHECK_VALIDATION === 'true',
   dateRangeNav: import.meta.env.PUBLIC_DATE_RANGE_NAV === 'true',
+  sponsorLinks: import.meta.env.PUBLIC_SPONSOR_LINKS === 'true',
   logger: import.meta.env.LOGGER === 'true',
 
   // Access Control & Roles

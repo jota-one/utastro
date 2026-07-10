@@ -4,7 +4,6 @@ export type PageName =
   | 'home'
   | 'my-account'
   | 'subscription'
-  | 'sponsors'
   | 'contact'
   | 'subscription-form'
   | 'city'
@@ -45,12 +44,6 @@ const routeConfigs: RouteConfig[] = [
     name: 'subscription',
     slugs: { fr: 'inscription', de: 'anmeldung', en: 'subscription' },
     labels: { fr: 'Inscription', de: 'Anmeldung', en: 'Subscription' },
-    show: 'never',
-  },
-  {
-    name: 'sponsors',
-    slugs: { fr: 'sponsors', de: 'sponsoren', en: 'sponsors' },
-    labels: { fr: 'Sponsors', de: 'Sponsoren', en: 'Sponsors' },
     show: 'never',
   },
   {
