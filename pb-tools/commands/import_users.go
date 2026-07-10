@@ -79,7 +79,7 @@ func ImportUsersCommand(app *pocketbase.PocketBase) *cobra.Command {
       r.password,
       COALESCE(r.soft_deleted, 0),
       0,
-      0,
+      1,
       'Temp#' || r.id || '!2025',
       hex(randomblob(16))
     FROM ranked r
