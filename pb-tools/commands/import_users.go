@@ -53,23 +53,18 @@ func ImportUsersCommand(app *pocketbase.PocketBase) *cobra.Command {
             COALESCE(h.soft_deleted, 0) ASC,
             COALESCE(ls.last_event_date, '') DESC,
             h.id DESC
-        ) AS rn
+        ) AS rn,
+        MIN(CASE h.role_id WHEN 1 THEN 1 WHEN 2 THEN 2 WHEN 4 THEN 3 ELSE 4 END) OVER (
+          PARTITION BY lower(h.email)
+        ) AS role_rank
       FROM hypercontent__users h
       LEFT JOIN last_subscription ls ON ls.user_id = h.id
       WHERE h.email IS NOT NULL AND h.email != ''
-    ),
-    group_role AS (
-      SELECT
-        lower(email) AS lemail,
-        MIN(CASE role_id WHEN 1 THEN 1 WHEN 2 THEN 2 WHEN 4 THEN 3 ELSE 4 END) AS role_rank
-      FROM hypercontent__users
-      WHERE email IS NOT NULL AND email != ''
-      GROUP BY lower(email)
     )
     SELECT
       r.email,
       TRIM(COALESCE(r.first_name, '') || ' ' || COALESCE(r.last_name, '')),
-      CASE gr.role_rank
+      CASE r.role_rank
         WHEN 1 THEN 'superadmin'
         WHEN 2 THEN 'admin'
         WHEN 3 THEN 'coach'
@@ -83,7 +78,6 @@ func ImportUsersCommand(app *pocketbase.PocketBase) *cobra.Command {
       'Temp#' || r.id || '!2025',
       hex(randomblob(16))
     FROM ranked r
-    JOIN group_role gr ON gr.lemail = lower(r.email)
     WHERE r.rn = 1
   `
 

@@ -162,13 +162,18 @@ func ImportEventsCommand(app *pocketbase.PocketBase) *cobra.Command {
 			// the group). The mapping is materialized with an index first — a
 			// direct join on lower(email) cannot use any index and takes hours.
 			mappingSQL := []string{
+				`DROP TABLE IF EXISTS tmp_user_lookup`,
+				`CREATE TABLE tmp_user_lookup AS
+					SELECT id AS user_id, lower(email) AS lemail, legacy_id AS survivor_legacy_id
+					FROM ut_users`,
+				`CREATE INDEX idx_tmp_user_lookup_lemail ON tmp_user_lookup (lemail)`,
 				`DROP TABLE IF EXISTS tmp_user_map`,
 				`CREATE TABLE tmp_user_map AS
-					SELECT h.id AS legacy_id, u.id AS user_id, u.legacy_id AS survivor_legacy_id
+					SELECT h.id AS legacy_id, u.user_id AS user_id, u.survivor_legacy_id AS survivor_legacy_id
 					FROM hypercontent__users h
-					JOIN (SELECT id, lower(email) AS lemail, legacy_id FROM ut_users) u
-						ON u.lemail = lower(h.email)`,
+					JOIN tmp_user_lookup u ON u.lemail = lower(h.email)`,
 				`CREATE INDEX idx_tmp_user_map_legacy ON tmp_user_map (legacy_id)`,
+				`DROP TABLE IF EXISTS tmp_user_lookup`,
 			}
 			for _, q := range mappingSQL {
 				if _, err := app.DB().NewQuery(q).Execute(); err != nil {
