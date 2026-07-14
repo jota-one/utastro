@@ -31,11 +31,11 @@ Current import migrations:
 
 ## Phase 2 — Populate tables (JSON import)
 
-JSON data exports from PHPMyAdmin live in `pb/sql_import_sources/*.json`. Run the `import-data` command once per file, from the `pb/` directory:
+JSON data exports from PHPMyAdmin live in `pb/json_import_sources/*.json` (see `scripts/export-mariadb.sh` to generate them from prod). Run the `import-data` command once per file, from the `pb/` directory:
 
 ```bash
-./pb-custom import-data --table=sisi__cities --file=sql_import_sources/sisi__cities.json
-./pb-custom import-data --table=sisi__events --file=sql_import_sources/sisi__events.json
+./pb-custom import-data --table=sisi__cities --file=json_import_sources/sisi__cities.json
+./pb-custom import-data --table=sisi__events --file=json_import_sources/sisi__events.json
 # ... one command per JSON file
 ```
 
@@ -58,18 +58,18 @@ This reads the auxiliary tables and inserts into the `ut_users` PocketBase colle
 ./pocketbase serve --http=127.0.0.1:8091
 
 # 2. Import all JSON data
-./pb-custom import-data --table=hypercontent__users --file=sql_import_sources/hypercontent__users.json
-./pb-custom import-data --table=ut__userinfos       --file=sql_import_sources/ut__userinfos.json
-./pb-custom import-data --table=sisi__cities        --file=sql_import_sources/sisi__cities.json
-./pb-custom import-data --table=sisi__city_watchers --file=sql_import_sources/sisi__city_watchers.json
-./pb-custom import-data --table=sisi__event_types         --file=sql_import_sources/sisi__event_types.json
-./pb-custom import-data --table=sisi__event_types_events  --file=sql_import_sources/sisi__event_types_events.json
-./pb-custom import-data --table=sisi__event_types_lang    --file=sql_import_sources/sisi__event_types_lang.json
-./pb-custom import-data --table=sisi__events        --file=sql_import_sources/sisi__events.json
-./pb-custom import-data --table=sisi__events_lang   --file=sql_import_sources/sisi__events_lang.json
-./pb-custom import-data --table=sisi__locations     --file=sql_import_sources/sisi__locations.json
-./pb-custom import-data --table=sisi__locations_lang --file=sql_import_sources/sisi__locations_lang.json
-./pb-custom import-data --table=sisi__subscriptions --file=sql_import_sources/sisi__subscriptions.json
+./pb-custom import-data --table=hypercontent__users --file=json_import_sources/hypercontent__users.json
+./pb-custom import-data --table=ut__userinfos       --file=json_import_sources/ut__userinfos.json
+./pb-custom import-data --table=sisi__cities        --file=json_import_sources/sisi__cities.json
+./pb-custom import-data --table=sisi__city_watchers --file=json_import_sources/sisi__city_watchers.json
+./pb-custom import-data --table=sisi__event_types         --file=json_import_sources/sisi__event_types.json
+./pb-custom import-data --table=sisi__event_types_events  --file=json_import_sources/sisi__event_types_events.json
+./pb-custom import-data --table=sisi__event_types_lang    --file=json_import_sources/sisi__event_types_lang.json
+./pb-custom import-data --table=sisi__events        --file=json_import_sources/sisi__events.json
+./pb-custom import-data --table=sisi__events_lang   --file=json_import_sources/sisi__events_lang.json
+./pb-custom import-data --table=sisi__locations     --file=json_import_sources/sisi__locations.json
+./pb-custom import-data --table=sisi__locations_lang --file=json_import_sources/sisi__locations_lang.json
+./pb-custom import-data --table=sisi__subscriptions --file=json_import_sources/sisi__subscriptions.json
 
 # 3. Transform users into PocketBase collection
 ./pb-custom import-users
