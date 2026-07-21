@@ -33,7 +33,7 @@
     "@plausible-analytics/tracker": "^0.4.5",
     "@tailwindcss/vite": "^4.3.1",
     "@vueuse/core": "^14.3.0",
-    "astro": "^7.0.6",
+    "astro": "^7.1.0",
     "dayjs": "^1.11.21",
     "element-plus": "^2.14.2",
     "papaparse": "^5.5.4",
