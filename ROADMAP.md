@@ -56,7 +56,7 @@ La migration se fait sur never.urban-training.ch
 - [x] Domaine chez Infomaniak — zone DNS et registrar migrés depuis OVH le 2026-09-18, sans aucune coupure du site ni des mails : il n'y a personne à prévenir d'un downtime
 - [x] DNSSEC réactivé — fait automatiquement par Infomaniak à la reprise du domaine le 2026-09-18 : zone signée en algorithme 13 (ECDSA), DS correspondant publié au registre, validation vérifiée sur Google, Cloudflare et Quad9
 - [ ] Durcir l'authentification mail du domaine : DMARC de `p=none` à `p=quarantine` (collecte `rua` en cours depuis le 2026-09-17), puis SPF de `?all` à `~all` — deux changements séparés, jamais le même jour
-- [ ] Vérifier chez Infomaniak que le renouvellement du domaine est bien configuré (échéance fin octobre 2026) : date d'expiration reprise après le transfert, renouvellement automatique actif, adresse de contact à jour
+- [x] Renouvellement du domaine sous contrôle — renouvellement automatique actif chez Infomaniak et désactivé chez OVH, plus aucune facturation possible de leur côté (échéance fin octobre 2026)
 - [ ] `develop.urban-training.ch` : l'enregistrement DNS reste à créer dans la zone Infomaniak, qui est désormais sous notre contrôle
 - [ ] S'assurer que lesles anciens redirects ne sont plus possible, sinon les gérer si possible via caddy — les ~22 redirections 301 du site actuel ne sont reprises nulle part pour l'instant
 
