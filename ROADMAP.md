@@ -30,6 +30,9 @@ Migration du backend vers calls aux endpoint Pb out-of-the-box et ajout de route
 - [x] Approche validée : endpoints PB natifs + hooks JSVM ciblés (`attendees`, `subscriptions`, `impersonate`, `legacy_auth`, `settings`, `users`)
 - [x] Règles métier côté serveur : fenêtre d'inscription, capacité, compteurs dénormalisés, feuille de présence
 - [x] Emails : activation, reset de mot de passe (templates PB en migration), candidature coach (endpoint Astro)
+- [ ] Les liens à jeton (activation, reset) partent via le SMTP Mandrill et passent par son tracking de clics, qui journalise le jeton chez un tiers — désactiver avec un en-tête `X-MC-Track` dans les hooks `onMailerRecord*Send`, et `track_clicks`/`track_opens: false` dans `src/utils/email.ts`
+- [ ] Emails transactionnels en français uniquement, avec des liens codés en dur sur `/fr/` (`{APP_URL}/fr/inscription/activation`) : un utilisateur de/en reçoit un mail français et atterrit sur la page française
+- [ ] Adresse d'expédition incohérente : `noreply@urban-training.ch` dans `src/utils/email.ts`, `no-reply@urban-training.ch` dans `pb/pb_hooks/settings.pb.js`
 
 ### Admin @Joël
 
@@ -50,7 +53,9 @@ La migration se fait sur never.urban-training.ch
 - [x] Environnement de démo `never.urban-training.ch` en ligne
 - [ ] Préparer un vps dédié pour la prod
 - [ ] Mettre en environnement de dev et un de prod (develop.urban-training.ch et www.urban-training.ch)
-- [ ] Si le domaine n'est pas chez Infomaniak => le bouger au plus vite si possible, sinon, prévoir un plan de migration avec des dates pour pouvoir prévenir Matthieu le jour où on est prêt à switcher (y aura sûrement du downtime)
+- [x] Domaine chez Infomaniak — zone DNS et registrar migrés depuis OVH le 2026-09-18, sans aucune coupure du site ni des mails : il n'y a personne à prévenir d'un downtime
+- [ ] Durcir l'authentification mail du domaine : DMARC de `p=none` à `p=quarantine` (collecte `rua` en cours depuis le 2026-09-17), puis SPF de `?all` à `~all`, puis réactiver DNSSEC côté Infomaniak — trois changements séparés, jamais le même jour
+- [ ] `develop.urban-training.ch` : l'enregistrement DNS reste à créer dans la zone Infomaniak, qui est désormais sous notre contrôle
 - [ ] S'assurer que lesles anciens redirects ne sont plus possible, sinon les gérer si possible via caddy — les ~22 redirections 301 du site actuel ne sont reprises nulle part pour l'instant
 
 ## Décisions actées
@@ -108,3 +113,4 @@ Certaines tâches doivent être faites en 1er lieu et ensebmle pour que tout le 
 - [2026-07-10] Fix recherche par email dans l'admin Utilisateurs — le filtre email était silencieusement ignoré (`emailVisibility` requis par PocketBase pour filtrer le champ email)
 - [2026-07-10] Admin sponsors — limite de 150 Ko sur les logos uploadés (refus immédiat dans le dialog + validation serveur)
 - [2026-07-14] Import legacy — temps d'import fortement réduit (jointures quadratiques éliminées)
+- [2026-09-18] Domaine migré d'OVH vers Infomaniak — zone DNS et registrar, sans aucune coupure du site ni des mails ; DNSSEC désactivé au préalable pour éviter une panne de résolution totale, et la clé DKIM Mandrill et l'include SPF, tous deux absents de la zone Infomaniak, rétablis
