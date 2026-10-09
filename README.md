@@ -161,3 +161,4 @@ cd pb
 - [Astro Docs](https://docs.astro.build)
 - [PocketBase Docs](https://pocketbase.io/docs)
 - [Vue 3 Docs](https://vuejs.org)
+
