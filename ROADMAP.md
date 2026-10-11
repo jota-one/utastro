@@ -1,6 +1,6 @@
 # Migration UT to Pocketbase/Astro stack
 
-La version pb se trouve actuellement sur never
+La version pb tourne sur `never.urban-training.ch` (DEV) et sur `next.urban-training.ch`, le futur environnement de prod, en attendant la bascule de `www.urban-training.ch`.
 
 ## Dev Lanes
 
@@ -32,6 +32,9 @@ Migration du backend vers calls aux endpoint Pb out-of-the-box et ajout de route
 - [x] Emails : activation, reset de mot de passe (templates PB en migration), candidature coach (endpoint Astro)
 - [ ] Les liens à jeton (activation, reset) partent via le SMTP Mandrill et passent par son tracking de clics, qui journalise le jeton chez un tiers — désactiver avec un en-tête `X-MC-Track` dans les hooks `onMailerRecord*Send`, et `track_clicks`/`track_opens: false` dans `src/utils/email.ts`
 - [ ] Emails transactionnels en français uniquement, avec des liens codés en dur sur `/fr/` (`{APP_URL}/fr/inscription/activation`) : un utilisateur de/en reçoit un mail français et atterrit sur la page française
+- [ ] **Sécurité, bloquant pour la bascule** — un membre peut se donner le rôle `admin` en modifiant son propre compte : la règle de mise à jour de `ut_users` autorise l'utilisateur à modifier sa fiche, champ `role` compris (constaté en local le 2026-10-11)
+- [ ] **Sécurité, bloquant pour la bascule** — n'importe quel membre connecté peut s'inscrire comme coach (réservé au staff en legacy) et inscrire un autre utilisateur à une session : la règle de création de `ut_subscriptions` ne vérifie ni le rôle ni que l'inscription le concerne
+- [ ] Fuseau horaire : les dates des sessions sont stockées en heure suisse sans fuseau, et le hook d'inscription les compare à l'heure du serveur, qui est en UTC sur `never` — en été, les inscriptions restent ouvertes jusqu'à 2 h après le début de la session et ouvrent 2 h trop tard (1 h en hiver). À corriger côté hook, ou en passant les serveurs en `Europe/Zurich`
 - [ ] Adresse d'expédition incohérente : `noreply@urban-training.ch` dans `src/utils/email.ts`, `no-reply@urban-training.ch` dans `pb/pb_hooks/settings.pb.js`
 
 ### Admin @Joël
@@ -47,18 +50,62 @@ Migration de l'UI et du backend. Décision prise : on reste sur **Element Plus**
 
 ### Infra @Istvan
 
-La migration se fait sur never.urban-training.ch
+`never.urban-training.ch` reste l'environnement de DEV ; la prod tourne sur un VPS dédié, exposé sur `next.urban-training.ch` jusqu'à la bascule de `www`.
 
 - [x] Déploiement automatisé sur push `main` (build + migrations PB via les workflows `jota-one/infra`)
 - [x] Environnement de démo `never.urban-training.ch` en ligne
-- [ ] Préparer un vps dédié pour la prod
-- [ ] Mettre en environnement de dev et un de prod (develop.urban-training.ch et www.urban-training.ch)
+- [x] VPS dédié pour la prod — `jota-apps-3-infomaniak`, l'app y est déployée sur `next.urban-training.ch` (2026-10-09)
+- [ ] Séparer DEV et PRD : `never` et `next` suivent aujourd'hui tous les deux la branche `main`, chaque push part donc directement en prod — faire suivre `develop` à `never` et réserver `main` à la prod (flux PRD Release `develop` → `main`)
+- [ ] Sortir la clé Mandrill de `apps.yaml` (en clair dans le dépôt infra, pour `never` comme pour `next`) et la passer par les secrets Bitwarden par app, puis la régénérer
 - [x] Domaine chez Infomaniak — zone DNS et registrar migrés depuis OVH le 2026-09-18, sans aucune coupure du site ni des mails : il n'y a personne à prévenir d'un downtime
 - [x] DNSSEC réactivé — fait automatiquement par Infomaniak à la reprise du domaine le 2026-09-18 : zone signée en algorithme 13 (ECDSA), DS correspondant publié au registre, validation vérifiée sur Google, Cloudflare et Quad9
 - [ ] Durcir l'authentification mail du domaine : DMARC de `p=none` à `p=quarantine` (collecte `rua` en cours depuis le 2026-09-17), puis SPF de `?all` à `~all` — deux changements séparés, jamais le même jour
 - [x] Renouvellement du domaine sous contrôle — renouvellement automatique actif chez Infomaniak et désactivé chez OVH, plus aucune facturation possible de leur côté (échéance fin octobre 2026)
-- [ ] `develop.urban-training.ch` : l'enregistrement DNS reste à créer dans la zone Infomaniak, qui est désormais sous notre contrôle
 - [ ] S'assurer que lesles anciens redirects ne sont plus possible, sinon les gérer si possible via caddy — les ~22 redirections 301 du site actuel ne sont reprises nulle part pour l'instant
+
+### Tests E2E
+
+Suite Playwright dans `tests/e2e`, lancée à la main en local (`./tests/e2e/run.sh`) sur une copie des données de prod, avec Mailpit pour les e-mails. Elle ne tourne pas en CI. Dernier run le 2026-10-11 : 25 tests verts, 1 sauté (session pleine, faute de session à venir avec des inscrits dans les données locales).
+
+- [x] Visiteur : chargement des pages publiques, redirection de `/`, page ville et page session, formulaire d'inscription (champs, bouton désactivé, e-mail d'activation, e-mail déjà utilisé)
+- [x] Membre : inscription et désinscription à une session, compteur du header, modale de confirmation, session pleine, session passée, suivi d'une ville, redirection vers la connexion pour un visiteur
+- [x] Membre : désinscription depuis le profil, sessions passées masquées, inscription à une session passée refusée côté serveur
+- [x] Concurrence : 3 membres pour la dernière place, un seul l'obtient
+- [x] Admin : exports CSV utilisateurs, observateurs et inscrits d'une session
+
+À ajouter avant la bascule :
+
+- [x] Suite remise au vert : la recherche de sessions des tests comparait les dates à l'heure UTC et prenait des sessions déjà commencées pour des sessions ouvertes (8 échecs), et `/fr/sponsors`, page abandonnée, était encore testée
+- [ ] README des tests à remettre à jour (noms de fichiers, specs profil et admin)
+- [ ] Le test d'inscription laisse un compte `e2e+…@example.com` à chaque run (19 en base locale) : les supprimer en fin de test
+- [ ] Test de session pleine : ne plus dépendre d'une session à venir avec des inscrits, créer la situation pour le test
+- [ ] Compte de test au vrai rôle membre : le compte « membre » actuel est superadmin, les specs membre ne vérifient donc pas ce qu'un membre a le droit de faire
+- [ ] Droits d'accès : un membre ne peut ni changer son rôle, ni s'inscrire comme coach, ni inscrire quelqu'un d'autre (les trois passent aujourd'hui, voir Backend) ; non-régression sur ce qui est déjà bloqué (modifier une session, lister les utilisateurs et les inscriptions des autres, feuille de présence, impersonation, admin)
+- [ ] Connexion par l'interface : connexion, déconnexion, mauvais mot de passe, et surtout connexion d'un compte importé avec son ancien mot de passe (cas de tous les utilisateurs le jour de la bascule)
+- [ ] Mot de passe oublié de bout en bout : demande, e-mail, nouveau mot de passe, connexion
+- [ ] Activation : vérifier que le compte est réellement activé et peut se connecter (aujourd'hui seule l'absence d'erreur dans l'URL est testée)
+- [ ] Coach : feuille de présence (pointage présent/absent, enregistrement), inscription comme coach
+- [ ] Smoke test en lecture seule, lançable sur `next` avant la bascule DNS puis sur `www` juste après : pages publiques en fr/de/en, une page ville, une page session, ouverture de la connexion
+- [ ] Anciennes URLs : chacune des ~22 redirections 301 arrive sur la bonne page, une fois les règles Caddy en place
+
+Ensuite :
+
+- [ ] Versions allemande et anglaise : pages et sélecteur de langue
+- [ ] Profil : modification des infos, changement de mot de passe, onglet des villes suivies
+- [ ] Page ville : liste des sessions, filtres, navigation par date, bandeau sponsors
+- [ ] Formulaire coach et page contact : validation et envoi
+- [ ] Admin : création, modification et suppression d'une session, validation d'un compte, impersonation et retour, import CSV de sessions, fusion de lieux, liste des inscrits
+- [ ] Affichage mobile (menu hamburger) et page 404
+- [ ] Faire tourner la suite en CI sur un jeu de données de test, sans dépendre d'une copie des données de prod
+
+### Bascule
+
+- [ ] Failles de droits d'accès et fuseau horaire corrigés (voir Backend)
+- [ ] Couverture E2E « avant la bascule » ci-dessus au vert
+- [ ] Import final des données legacy sur la prod (`ut:import` sur un dump frais), après gel des inscriptions sur l'ancien site
+- [ ] Redirections des anciennes URLs en place et testées
+- [ ] Bascule DNS de `www.urban-training.ch` vers le nouveau VPS, puis smoke test sur `www`
+- [ ] Mettre à jour la sonde de monitoring (aujourd'hui `www.urban-training.ch/fr`) si l'URL de référence change
 
 ## Décisions actées
 
@@ -69,6 +116,7 @@ La migration se fait sur never.urban-training.ch
 - **Doublons d'utilisateurs** : plus de détection ni de fusion dans l'admin — les doublons legacy sont fusionnés à l'import et l'unicité de l'e-mail est garantie par PocketBase
 - **Validation de mot de passe en attente** : notion abandonnée, remplacée par le flux de réinitialisation PocketBase
 - **Backend** : endpoints PocketBase natifs par défaut, hooks JSVM uniquement quand la logique métier l'exige
+- **Environnements** : `never.urban-training.ch` reste le DEV, pas de `develop.urban-training.ch` ; la prod passe par `next.urban-training.ch` puis `www`
 
 ## Priorités
 
@@ -77,6 +125,7 @@ Certaines tâches doivent être faites en 1er lieu et ensebmle pour que tout le 
 1. ~~Valider sur la façon de faire le backend~~ — fait : endpoints PB + hooks JSVM
 2. ~~Chacun démarre son lane~~ — fait, Data / UI / Backend / Admin sont largement avancés
 3. ~~On garde l'admin pour la fin~~ — l'admin est en place ; il reste l'infra de prod, qui devient la priorité
+4. VPS de prod en place : la priorité est maintenant la couverture E2E et la préparation de la bascule (voir Tests E2E et Bascule)
 
 ## Choses importantes à prendre en compte
 
@@ -116,3 +165,4 @@ Certaines tâches doivent être faites en 1er lieu et ensebmle pour que tout le 
 - [2026-07-10] Admin sponsors — limite de 150 Ko sur les logos uploadés (refus immédiat dans le dialog + validation serveur)
 - [2026-07-14] Import legacy — temps d'import fortement réduit (jointures quadratiques éliminées)
 - [2026-09-18] Domaine migré d'OVH vers Infomaniak — zone DNS et registrar, sans aucune coupure du site ni des mails ; DNSSEC désactivé au préalable pour éviter une panne de résolution totale, et la clé DKIM Mandrill et l'include SPF, tous deux absents de la zone Infomaniak, rétablis
+- [2026-10-09] VPS dédié pour la prod — l'app tourne sur `next.urban-training.ch` en attendant la bascule de `www` ; `never` reste l'environnement de DEV
