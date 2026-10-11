@@ -9,7 +9,6 @@ import { fetchAuthToken, findOpenEvent } from '../../fixtures/index'
 const STATIC_PAGES = [
   { name: 'Homepage', path: '/fr' },
   { name: 'Contact', path: '/fr/contact' },
-  { name: 'Sponsors', path: '/fr/sponsors' },
   { name: 'Inscription (city list)', path: '/fr/inscription' },
   { name: 'Subscription form', path: '/fr/inscription/formulaire' },
 ]

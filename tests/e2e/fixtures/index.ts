@@ -140,7 +140,10 @@ async function findEvent(auth: Auth, filter: string): Promise<string | null> {
   return data.items[0]?.id ?? null
 }
 
-const pbDate = (date: Date) => date.toISOString().replace('T', ' ').slice(0, 19)
+// Event dates are stored as naive Swiss local time (text fields, no zone),
+// so compare them against the local wall-clock time, not UTC
+const pbDate = (date: Date) =>
+  date.toLocaleString('sv-SE', { timeZone: 'Europe/Zurich' }).slice(0, 19)
 
 /** An event whose subscription window is open right now. */
 export async function findOpenEvent(auth: Auth) {
