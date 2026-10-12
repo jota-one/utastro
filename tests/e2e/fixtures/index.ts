@@ -173,213 +173,181 @@ export async function findUnopenedEvent(auth: Auth) {
   )
 }
 
-/** An upcoming event with no participant spot left. */
-export async function findFullEvent(auth: Auth) {
-  const now = pbDate(new Date())
-  return findEvent(
-    auth,
-    `start_date > "${now}" && subscription_publish_date < "${now}" && max_subscriptions > 0 && subscription_count >= max_subscriptions`,
-  )
-}
-
 /**
- * Returns a full upcoming event, faking one if needed: when no event is
- * genuinely full, the most subscribed upcoming event gets its
- * max_subscriptions lowered to its current count (requires an admin test
- * user). Always await `restore()` afterwards.
+ * Creates an upcoming session open for subscriptions, with `filled` of its
+ * `capacity` spots taken by throwaway participants (requires an admin). The
+ * session reuses the location, city and types of an existing open session so
+ * its page renders like a real one. Always await `cleanup()` afterwards: it
+ * deletes the participants (their subscriptions cascade) and then the
+ * session — delete any other subscriber first.
  */
-export async function ensureFullEvent(
-  auth: Auth,
-): Promise<{ id: string; restore: () => Promise<void> } | null> {
-  const existing = await findFullEvent(auth)
-  if (existing) {
-    return { id: existing, restore: async () => {} }
-  }
-
-  const now = pbDate(new Date())
-  const params = new URLSearchParams({
-    filter: `start_date > "${now}" && subscription_publish_date < "${now}" && subscription_count > 0`,
-    sort: '-subscription_count',
-    fields: 'id,max_subscriptions,subscription_count',
-    perPage: '1',
-    skipTotal: '1',
-  })
-  const res = await fetch(
-    `${PB_URL}/api/collections/ut_events/records?${params}`,
-    { headers: { Authorization: `Bearer ${auth.token}` } },
-  )
-  const data = (await res.json()) as {
-    items: { id: string; max_subscriptions: number; subscription_count: number }[]
-  }
-  const candidate = data.items[0]
-  if (!candidate) {
-    return null
-  }
-
-  const patch = async (maxSubscriptions: number) => {
-    const patchRes = await fetch(
-      `${PB_URL}/api/collections/ut_events/records/${candidate.id}`,
-      {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${auth.token}`,
-        },
-        body: JSON.stringify({ max_subscriptions: maxSubscriptions }),
-      },
-    )
-    return patchRes.ok
-  }
-
-  if (!(await patch(candidate.subscription_count))) {
-    // non-admin test user cannot update events
-    return null
-  }
-  return {
-    id: candidate.id,
-    restore: async () => {
-      await patch(candidate.max_subscriptions)
-    },
-  }
-}
-
-/**
- * Returns an upcoming open event with exactly one participant spot left,
- * none of the given participants being subscribed to it: the event's
- * max_subscriptions is temporarily lowered to subscription_count + 1
- * (requires an admin test user). Always await `restore()` afterwards.
- */
-export async function ensureLastSpotEvent(
+export async function createTestEvent(
   admin: Auth,
-  participants: Auth[],
-): Promise<{ id: string; restore: () => Promise<void> } | null> {
-  const now = pbDate(new Date())
-  const params = new URLSearchParams({
-    filter: `start_date > "${now}" && subscription_publish_date < "${now}" && progress = "open" && max_subscriptions > subscription_count`,
-    fields: 'id,max_subscriptions,subscription_count',
-    perPage: '20',
-    skipTotal: '1',
-  })
-  const res = await fetch(
-    `${PB_URL}/api/collections/ut_events/records?${params}`,
-    { headers: { Authorization: `Bearer ${admin.token}` } },
-  )
-  const data = (await res.json()) as {
-    items: { id: string; max_subscriptions: number; subscription_count: number }[]
+  { capacity, filled }: { capacity: number; filled: number },
+): Promise<{ id: string; cleanup: () => Promise<void> }> {
+  const headers = {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${admin.token}`,
   }
-
-  const userFilter = participants
-    .map(p => `user = "${p.record.id}"`)
-    .join(' || ')
-
-  for (const candidate of data.items) {
-    const subParams = new URLSearchParams({
-      filter: `event = "${candidate.id}" && (${userFilter})`,
-      fields: 'id',
-      perPage: '1',
-      skipTotal: '1',
-    })
-    const existing = (await fetch(
-      `${PB_URL}/api/collections/ut_subscriptions/records?${subParams}`,
-      { headers: { Authorization: `Bearer ${admin.token}` } },
-    ).then(r => r.json())) as { items: unknown[] }
-    if (existing.items.length > 0) {
-      continue
-    }
-
-    const patch = async (maxSubscriptions: number) => {
-      const patchRes = await fetch(
-        `${PB_URL}/api/collections/ut_events/records/${candidate.id}`,
-        {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${admin.token}`,
-          },
-          body: JSON.stringify({ max_subscriptions: maxSubscriptions }),
-        },
-      )
-      return patchRes.ok
-    }
-
-    if (!(await patch(candidate.subscription_count + 1))) {
-      return null
-    }
-    return {
-      id: candidate.id,
-      restore: async () => {
-        await patch(candidate.max_subscriptions)
-      },
-    }
+  const templateId = await findOpenEvent(admin)
+  if (!templateId) {
+    throw new Error('No open session to copy location, city and types from')
   }
-  return null
-}
+  const template = (await fetch(
+    `${PB_URL}/api/collections/ut_events/records/${templateId}?fields=location,city,types`,
+    { headers },
+  ).then(r => r.json())) as { location: string; city: string; types: string[] }
 
-/**
- * Logs a test member in, creating and activating the account first when it
- * does not exist yet (full registration flow: create → verification email
- * via Mailpit → confirm). Requires Mailpit for the creation path.
- */
-export async function ensureMemberAccount(
-  email: string,
-  password: string,
-): Promise<Auth> {
-  try {
-    return await fetchAuthToken(email, password)
-  } catch {
-    // account missing (or wrong password) — try to create it
-  }
+  const start = new Date()
+  start.setDate(start.getDate() + 3)
+  const end = new Date(start.getTime() + 60 * 60 * 1000)
+  const publish = new Date()
+  publish.setDate(publish.getDate() - 1)
 
-  const chars = 'abcdefghijklmnopqrstuvwxyz0123456789'
-  const id = Array.from({ length: 15 })
-    .map(() => chars[Math.floor(Math.random() * chars.length)])
-    .join('')
-  await fetch(`${PB_URL}/api/collections/ut_users/records`, {
+  const created = await fetch(`${PB_URL}/api/collections/ut_events/records`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers,
     body: JSON.stringify({
-      id,
-      email,
-      emailVisibility: true,
-      password,
-      passwordConfirm: password,
-      role: 'user',
-      name: `E2E ${email.split('@')[0]}`,
+      ...template,
+      start_date: pbDate(start),
+      end_date: pbDate(end),
+      subscription_publish_date: pbDate(publish),
+      max_subscriptions: capacity,
+      progress: 'open',
+      attendees: 'todo',
+      title_fr: 'E2E session',
+      title_de: 'E2E session',
+      title_en: 'E2E session',
     }),
   })
+  if (!created.ok) {
+    throw new Error(
+      `Session creation failed: ${created.status} ${await created.text()}`,
+    )
+  }
+  const { id } = (await created.json()) as { id: string }
 
-  await fetch(`${PB_URL}/api/collections/ut_users/request-verification`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email }),
-  })
-  const message = await waitForEmail(email)
-  const token = new URL(extractLinkFromEmail(message)).searchParams.get('token')
-  await fetch(`${PB_URL}/api/collections/ut_users/confirm-verification`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ token }),
-  })
-
-  return fetchAuthToken(email, password)
-}
-
-/** Deletes the participant subscription of a user on an event, if any. */
-export async function deleteSubscription(auth: Auth, eventId: string) {
-  const params = new URLSearchParams({
-    filter: `event = "${eventId}" && user = "${auth.record.id}" && is_event_admin = false`,
-    fields: 'id',
-  })
-  const subs = (await fetch(
-    `${PB_URL}/api/collections/ut_subscriptions/records?${params}`,
-    { headers: { Authorization: `Bearer ${auth.token}` } },
-  ).then(r => r.json())) as { items: { id: string }[] }
-  for (const sub of subs.items) {
-    await fetch(`${PB_URL}/api/collections/ut_subscriptions/records/${sub.id}`, {
+  const participantEmails = Array.from({ length: filled }, (_, i) =>
+    uniqueEmail(`filler-${i}`),
+  )
+  const cleanup = async () => {
+    for (const email of participantEmails) {
+      await deleteUserByEmail(admin, email)
+    }
+    await fetch(`${PB_URL}/api/collections/ut_events/records/${id}`, {
       method: 'DELETE',
-      headers: { Authorization: `Bearer ${auth.token}` },
+      headers,
     })
   }
+
+  try {
+    for (const email of participantEmails) {
+      const userId = await createUser(admin, { email, verified: true })
+      const res = await fetch(
+        `${PB_URL}/api/collections/ut_subscriptions/records`,
+        {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({
+            user: userId,
+            event: id,
+            is_event_admin: false,
+          }),
+        },
+      )
+      if (!res.ok) {
+        throw new Error(
+          `Subscription failed: ${res.status} ${await res.text()}`,
+        )
+      }
+    }
+  } catch (err) {
+    await cleanup()
+    throw err
+  }
+  return { id, cleanup }
+}
+
+/** Signs in TEST_MEMBER, which must be an admin or superadmin account. */
+export function fetchAdminAuth(): Promise<Auth> {
+  return fetchAuthToken(
+    process.env.TEST_MEMBER_EMAIL!,
+    process.env.TEST_MEMBER_PASSWORD!,
+  )
+}
+
+/** A unique throwaway address, so a test never collides with a real user. */
+export function uniqueEmail(tag: string) {
+  const suffix = Math.random().toString(36).slice(2, 6)
+  return `e2e+${tag}-${Date.now()}${suffix}@example.com`
+}
+
+/**
+ * Creates a user through the admin API (bypasses the sign-up form and its
+ * verification email). Any ut_users field can be set through `fields`.
+ */
+export async function createUser(
+  admin: Auth,
+  fields: Record<string, unknown>,
+): Promise<string> {
+  const password = (fields.password as string) ?? `Unused-${Date.now()}!`
+  const res = await fetch(`${PB_URL}/api/collections/ut_users/records`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${admin.token}`,
+    },
+    body: JSON.stringify({
+      emailVisibility: true,
+      role: 'user',
+      name: 'E2E User',
+      ...fields,
+      password,
+      passwordConfirm: password,
+    }),
+  })
+  if (!res.ok) {
+    throw new Error(`User creation failed: ${res.status} ${await res.text()}`)
+  }
+  return ((await res.json()) as { id: string }).id
+}
+
+/** Deletes the user with this email, if it exists. */
+export async function deleteUserByEmail(admin: Auth, email: string) {
+  const params = new URLSearchParams({
+    filter: `email = "${email}"`,
+    fields: 'id',
+  })
+  const users = (await fetch(
+    `${PB_URL}/api/collections/ut_users/records?${params}`,
+    { headers: { Authorization: `Bearer ${admin.token}` } },
+  ).then(r => r.json())) as { items: { id: string }[] }
+  for (const user of users.items) {
+    await fetch(`${PB_URL}/api/collections/ut_users/records/${user.id}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${admin.token}` },
+    })
+  }
+}
+
+/** Reads a user record through the admin API. */
+export async function readUserByEmail(admin: Auth, email: string) {
+  const params = new URLSearchParams({ filter: `email = "${email}"` })
+  const users = (await fetch(
+    `${PB_URL}/api/collections/ut_users/records?${params}`,
+    { headers: { Authorization: `Bearer ${admin.token}` } },
+  ).then(r => r.json())) as { items: Record<string, unknown>[] }
+  return users.items[0] ?? null
+}
+
+/** Returns the HTTP status of a login attempt through the custom endpoint. */
+export async function loginStatus(email: string, password: string) {
+  const res = await fetch(`${PB_URL}/api/custom/auth/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password }),
+  })
+  return res.status
 }
 
 // ─── Custom fixtures ──────────────────────────────────────────────────────────

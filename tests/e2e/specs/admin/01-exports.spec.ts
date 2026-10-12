@@ -32,12 +32,20 @@ async function triggerDownload(
   page: Page,
   action: () => Promise<void>,
 ): Promise<Download> {
-  const [download] = await Promise.all([page.waitForEvent('download'), action()])
+  const [download] = await Promise.all([
+    page.waitForEvent('download'),
+    action(),
+  ])
   return download
 }
 
 test.describe('Admin CSV exports', () => {
-  test('exports all users with the expected columns', async ({ memberPage }) => {
+  test('exports all users with the expected columns', async ({
+    memberPage,
+  }) => {
+    // the export loads every account (~57,000 in a prod data copy): about
+    // 13 s locally, too close to the default 30 s timeout on a busy machine
+    test.setTimeout(90_000)
     await memberPage.goto('/admin/users')
 
     const download = await triggerDownload(memberPage, () =>

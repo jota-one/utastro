@@ -27,9 +27,10 @@ cp tests/e2e/.env.example tests/e2e/.env
 Edit `.env`:
 
 - `BASE_URL` / `PB_URL` — point to **local or staging**, never prod
-- `TEST_MEMBER_*` — real accounts in the test DB
-- `TEST_EVENT_ID_*` — pick IDs from PocketBase admin
+- `TEST_MEMBER_*` — an **admin** account of the test DB. Specs use it to create their own throwaway accounts (`e2e+…@example.com`) and sessions, and delete them afterwards
 - `TEST_CITY_SLUG` — slug of an enabled city (e.g. `lausanne`)
+
+Sessions are discovered in the data (an open one, a past one…) or created for the test, so no session id needs to be configured. The suite expects a copy of the production data.
 
 Both `.env` and auth state files are in `.gitignore`.
 
@@ -46,33 +47,37 @@ Both `.env` and auth state files are in `.gitignore`.
 
 ### anonymous/
 
-| File                      | What it covers                                                                    |
-| ------------------------- | --------------------------------------------------------------------------------- |
-| `01-navigation.spec.ts`   | All static pages load, no console errors, root redirect                           |
-| `02-registration.spec.ts` | New user form, success message, activation email (Mailpit), duplicate email error |
+| File                        | What it covers                                                                                          |
+| --------------------------- | ------------------------------------------------------------------------------------------------------- |
+| `01-navigation.spec.ts`     | Static pages load without console errors, root redirect, city and session pages                         |
+| `02-registration.spec.ts`   | Sign-up form, activation email (Mailpit), activation link, login refused before and accepted after      |
+| `03-authentication.spec.ts` | Login modal, logout, wrong password, pending account, legacy (SHA-1) passwords, password reset by email |
 
 ### member/
 
-| File                           | What it covers                                                                    |
-| ------------------------------ | --------------------------------------------------------------------------------- |
-| `01-event-subscribe.spec.ts`   | Subscribe / unsubscribe, header counter increments/decrements, modal cancel       |
-| `02-event-constraints.spec.ts` | Full event blocked, past event no button, city watch, anonymous redirect to login |
-| `03-concurrent.spec.ts`        | 3 users race for the last spot — exactly 1 wins                                   |
+| File                             | What it covers                                                                                     |
+| -------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `01-session-subscribe.spec.ts`   | Subscribe / unsubscribe, header counter, unsubscribe confirmation                                  |
+| `02-session-constraints.spec.ts` | Full session (page and server), past session, city watch, anonymous visitor asked to log in        |
+| `03-concurrent.spec.ts`          | 3 members race for the last spot of a dedicated session — exactly 1 wins                           |
+| `04-profile-sessions.spec.ts`    | Unsubscribe from the profile, past sessions hidden, past session subscription refused              |
+| `05-access-control.spec.ts`      | What a plain member cannot do: change their role, subscribe others or as coach, read others' data… |
 
-### coach/, admin/, superadmin/ — TODO
+### coach/
+
+| File                  | What it covers                                                                |
+| --------------------- | ----------------------------------------------------------------------------- |
+| `01-presence.spec.ts` | Coach a session and leave it, attendance sheet for the session's coaches only |
+
+### admin/
+
+| File                 | What it covers                                         |
+| -------------------- | ------------------------------------------------------ |
+| `01-exports.spec.ts` | CSV exports: users, city watchers, session subscribers |
 
 ## Auth strategy
 
 Tests that need authentication inject a fresh JWT directly into `localStorage` / `sessionStorage` before the page loads — no UI login needed per test. This makes the suite fast while testing the real app state.
-
-## Concurrent test setup (`03-concurrent`)
-
-Before running this spec:
-
-1. In PocketBase admin, find an event and set `subscription_count = max_subscriptions - 1`
-2. Put that `id` in `TEST_EVENT_ID_LAST_SPOT`
-3. Ensure the 3 member accounts are NOT already subscribed to it
-4. After the run, reset the counts for the next run
 
 ## Interpreting results
 
@@ -80,9 +85,9 @@ Before running this spec:
 
 **Red on `01-navigation`**: a page broke at the SSR level — check Astro build or PocketBase availability.
 
-**Red on subscribe/unsubscribe**: check `DetailView.vue` hydration, PocketBase `ut_subscriptions` collection permissions.
+**Red on subscribe/unsubscribe**: check `SessionDetail.vue` hydration, PocketBase `ut_subscriptions` collection permissions.
 
-**Red on `03-concurrent`**: SQLite write contention may be causing both users to succeed (or both to fail). Investigate PocketBase transaction handling on `ut_subscriptions`.
+**Red on `03-concurrent`**: more than one member got the last spot — check the `ut_subscriptions_capacity` SQLite trigger.
 
 Open the HTML report for screenshots and traces on failures:
 

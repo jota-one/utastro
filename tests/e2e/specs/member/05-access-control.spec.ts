@@ -1,31 +1,30 @@
 import { test, expect } from '@playwright/test'
 import {
   createAuthContext,
-  ensureMemberAccount,
+  createUser,
+  deleteUserByEmail,
+  fetchAdminAuth,
   fetchAuthToken,
   findOpenEvent,
   PB_URL,
+  uniqueEmail,
   type Auth,
 } from '../../fixtures/index'
 
 /**
  * Access control of a plain member (role `user`) against the PocketBase API
- * and the admin SPA. The spec signs in TEST_MEMBER_2 / TEST_MEMBER_3 (created
- * on the fly when missing, needs Mailpit) as plain members, and TEST_MEMBER
- * as the admin used to read back state and restore it.
+ * and the admin SPA. Two throwaway plain members are created through the
+ * admin API and deleted afterwards; TEST_MEMBER is the admin used to set
+ * them up, read back state and restore it.
  */
 
-const ADMIN = {
-  email: process.env.TEST_MEMBER_EMAIL!,
-  password: process.env.TEST_MEMBER_PASSWORD!,
-}
 const MEMBER = {
-  email: process.env.TEST_MEMBER_2_EMAIL!,
-  password: process.env.TEST_MEMBER_2_PASSWORD!,
+  email: uniqueEmail('acl-member'),
+  password: 'TestPassword123!',
 }
 const OTHER_MEMBER = {
-  email: process.env.TEST_MEMBER_3_EMAIL!,
-  password: process.env.TEST_MEMBER_3_PASSWORD!,
+  email: uniqueEmail('acl-other'),
+  password: 'TestPassword123!',
 }
 
 function api(path: string, auth: Auth | null, init: RequestInit = {}) {
@@ -68,22 +67,22 @@ let otherMemberId: string
 let openEventId: string | null
 
 test.beforeAll(async () => {
-  test.skip(
-    [ADMIN, MEMBER, OTHER_MEMBER].some(u => !u.email || !u.password),
-    'TEST_MEMBER, TEST_MEMBER_2 and TEST_MEMBER_3 credentials must be set',
-  )
-  admin = await fetchAuthToken(ADMIN.email, ADMIN.password)
-  member = await ensureMemberAccount(MEMBER.email, MEMBER.password)
-  otherMember = await ensureMemberAccount(
-    OTHER_MEMBER.email,
-    OTHER_MEMBER.password,
-  )
-  expect(member.record.role, 'TEST_MEMBER_2 must be a plain member').toBe(
-    'user',
-  )
+  test.skip(!process.env.TEST_MEMBER_EMAIL, 'TEST_MEMBER_EMAIL not set')
+  admin = await fetchAdminAuth()
+  for (const account of [MEMBER, OTHER_MEMBER]) {
+    await createUser(admin, { ...account, verified: true })
+  }
+  member = await fetchAuthToken(MEMBER.email, MEMBER.password)
+  otherMember = await fetchAuthToken(OTHER_MEMBER.email, OTHER_MEMBER.password)
   memberId = String(member.record.id)
   otherMemberId = String(otherMember.record.id)
   openEventId = await findOpenEvent(admin)
+})
+
+test.afterAll(async () => {
+  for (const account of [MEMBER, OTHER_MEMBER]) {
+    await deleteUserByEmail(admin, account.email)
+  }
 })
 
 test.describe('member account', () => {

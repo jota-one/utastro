@@ -1,12 +1,17 @@
 import {
   test,
   expect,
-  ensureFullEvent,
+  createAuthContext,
+  createTestEvent,
+  createUser,
+  deleteUserByEmail,
+  fetchAdminAuth,
   fetchAuthToken,
   findOpenEvent,
   findPastEvent,
   findUnopenedEvent,
   PB_URL,
+  uniqueEmail,
   type Auth,
 } from '../../fixtures/index'
 import { EventDetailPage } from '../../pages/EventDetailPage'
@@ -27,23 +32,57 @@ test.beforeEach(async () => {
 })
 
 test('cannot subscribe to a full event — full message is shown', async ({
-  memberPage,
+  browser,
 }) => {
-  // Uses a genuinely full event, or temporarily lowers max_subscriptions on
-  // the most subscribed upcoming one (restored right after)
-  const fullEvent = await ensureFullEvent(auth)
-  test.skip(!fullEvent, 'no candidate event found or user cannot update events')
+  // A dedicated session filled with throwaway participants, viewed and then
+  // attempted by a plain member
+  const admin = await fetchAdminAuth()
+  const fullEvent = await createTestEvent(admin, { capacity: 2, filled: 2 })
+  const memberEmail = uniqueEmail('full-viewer')
+  const memberPassword = 'TestPassword123!'
 
   try {
-    await memberPage.goto('/fr')
+    await createUser(admin, {
+      email: memberEmail,
+      password: memberPassword,
+      verified: true,
+    })
+    const { context, page } = await createAuthContext(
+      browser,
+      memberEmail,
+      memberPassword,
+    )
+    try {
+      const event = new EventDetailPage(page)
+      await event.goto(fullEvent.id)
 
-    const event = new EventDetailPage(memberPage)
-    await event.goto(fullEvent!.id)
+      await expect(event.fullMessage()).toBeVisible()
+      await expect(event.subscribeButton()).not.toBeVisible()
+    } finally {
+      await context.close()
+    }
 
-    await expect(event.fullMessage()).toBeVisible()
-    await expect(event.subscribeButton()).not.toBeVisible()
+    // the server refuses it too, whatever the page shows
+    const member = await fetchAuthToken(memberEmail, memberPassword)
+    const res = await fetch(
+      `${PB_URL}/api/collections/ut_subscriptions/records`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${member.token}`,
+        },
+        body: JSON.stringify({
+          user: member.record.id,
+          event: fullEvent.id,
+          is_event_admin: false,
+        }),
+      },
+    )
+    expect(res.ok).toBe(false)
   } finally {
-    await fullEvent!.restore()
+    await deleteUserByEmail(admin, memberEmail)
+    await fullEvent.cleanup()
   }
 })
 
@@ -117,7 +156,7 @@ test('anonymous user sees login prompt when clicking subscribe', async ({
   await event.subscribe()
 
   // Login modal or login form should appear
-  await expect(
-    page.getByRole('heading', { name: 'Connexion' }),
-  ).toBeVisible({ timeout: 5_000 })
+  await expect(page.getByRole('heading', { name: 'Connexion' })).toBeVisible({
+    timeout: 5_000,
+  })
 })

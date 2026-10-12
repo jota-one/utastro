@@ -2,8 +2,12 @@ import { test, expect } from '@playwright/test'
 import { RegistrationPage } from '../../pages/RegistrationPage'
 import {
   clearMailpit,
-  waitForEmail,
+  deleteUserByEmail,
   extractLinkFromEmail,
+  fetchAdminAuth,
+  loginStatus,
+  uniqueEmail,
+  waitForEmail,
 } from '../../fixtures/index'
 
 /**
@@ -11,15 +15,22 @@ import {
  *   fill form → submit → success message → receive activation email → activate account
  *
  * Requires Mailpit running + PocketBase SMTP configured to localhost:1025.
+ * The created account is deleted afterwards (TEST_MEMBER must be an admin).
  */
 
 const MAILPIT_AVAILABLE = !!process.env.MAILPIT_URL
 
 // Generate a unique email per run to avoid conflicts with prod data
-const testEmail = `e2e+${Date.now()}@example.com`
+const testEmail = uniqueEmail('registration')
 
 test.beforeEach(async () => {
   if (MAILPIT_AVAILABLE) await clearMailpit()
+})
+
+test.afterAll(async () => {
+  if (process.env.TEST_MEMBER_EMAIL) {
+    await deleteUserByEmail(await fetchAdminAuth(), testEmail)
+  }
 })
 
 test('registration form shows all required fields', async ({ page }) => {
@@ -73,12 +84,18 @@ test('full registration sends an activation email whose link works', async ({
   const email = await waitForEmail(testEmail)
   expect(email.Subject).toMatch(/activ/i)
 
-  const activationLink = extractLinkFromEmail(email)
-  await page.goto(activationLink)
+  // The account cannot log in before activation
+  expect(await loginStatus(testEmail, 'TestPassword123!')).toBe(403)
 
-  // After activation, user should land on the app (not an error page)
-  const response = page.url()
-  expect(response).not.toContain('error')
+  const activationLink = extractLinkFromEmail(email)
+  const baseUrl = process.env.BASE_URL || 'http://localhost:4321'
+  expect(
+    activationLink.startsWith(`${baseUrl}/fr/inscription/activation?token=`),
+  ).toBe(true)
+
+  await page.goto(activationLink)
+  await expect(page.getByText('Compte activé avec succès!')).toBeVisible()
+  expect(await loginStatus(testEmail, 'TestPassword123!')).toBe(200)
 })
 
 test('duplicate email shows an error', async ({ page }) => {
