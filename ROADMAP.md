@@ -21,7 +21,7 @@ Migration du site web Vue de nuxt à astro (SSR).
 - [x] Spécificités nuxt => loin
 - [x] Implémenter les spécificités Astro (login, activation de compte, reset de mot de passe, profil)
 - [x] Pages publiques : accueil, inscription, ville, session + détail, contact, formulaire d'inscription, formulaire coach, mon compte
-- [ ] `/{lang}/session` affiche un texte de debug (`StubPage`) : cette page n'avait pas de contenu en legacy, décider 404 ou redirection
+- [ ] `/{lang}/session` affiche un texte de debug (`StubPage`) : redirigée vers la page inscription de la langue par Caddy (PR `jota-one/infra` en cours)
 
 ### Backend @Istvan
 
@@ -66,7 +66,7 @@ Migration de l'UI et du backend. Décision prise : on reste sur **Element Plus**
 - [ ] DMARC en `p=reject`, après la bascule : attendre une série de rapports où les e-mails de l'app, qui passent désormais par l'API Mandrill, apparaissent alignés — ne pas cumuler les deux changements. Coût connu : les quelques newsletters transférées automatiquement par leur destinataire et dont la signature casse en route (4 sur 4 480 le 1er octobre) seraient rejetées au lieu d'aller en spam
 - [ ] SPF de `?all` à `~all` — de l'hygiène : la Newsletter et Mandrill utilisent leur propre domaine d'enveloppe, ce SPF ne couvre que le mail Infomaniak direct, déjà conforme
 - [x] Renouvellement du domaine sous contrôle — renouvellement automatique actif chez Infomaniak et désactivé chez OVH, plus aucune facturation possible de leur côté (échéance fin octobre 2026)
-- [ ] S'assurer que lesles anciens redirects ne sont plus possible, sinon les gérer si possible via caddy — les ~22 redirections 301 du site actuel ne sont reprises nulle part pour l'instant
+- [ ] Anciennes URLs redirigées par Caddy (clé `caddy` de l'app dans `apps.yaml`, sur `never` et `next`) : les 22 redirections du legacy, la page Sponsors abandonnée et `/{lang}/session` — PR `jota-one/infra` en cours
 
 ### Tests E2E
 
@@ -93,7 +93,7 @@ Suite Playwright dans `tests/e2e`, lancée à la main en local (`./tests/e2e/run
 - [x] Activation : lien vers le bon site, compte réellement activé, connexion refusée avant et acceptée après
 - [x] Coach : inscription et désinscription comme coach avec le compteur, feuille de présence réservée aux coachs de la session, pointage présent/absent enregistré
 - [ ] Smoke test en lecture seule, lançable sur `next` avant la bascule DNS puis sur `www` juste après : pages publiques en fr/de/en, une page ville, une page session, ouverture de la connexion
-- [ ] Anciennes URLs : chacune des ~22 redirections 301 arrive sur la bonne page, une fois les règles Caddy en place
+- [ ] Anciennes URLs : spec `04-redirects` écrite (31 redirections, à lancer contre `never`), à passer au vert une fois les règles Caddy déployées
 
 Ensuite :
 

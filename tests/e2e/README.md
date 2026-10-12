@@ -52,6 +52,7 @@ Both `.env` and auth state files are in `.gitignore`.
 | `01-navigation.spec.ts`     | Static pages load without console errors, root redirect, city and session pages                         |
 | `02-registration.spec.ts`   | Sign-up form, activation email (Mailpit), activation link, login refused before and accepted after      |
 | `03-authentication.spec.ts` | Login modal, logout, wrong password, pending account, legacy (SHA-1) passwords, password reset by email |
+| `04-redirects.spec.ts`      | Former URLs redirected by Caddy — runs only against a deployed site (`BASE_URL=https://never…`)         |
 
 ### member/
 
