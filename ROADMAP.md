@@ -30,12 +30,14 @@ Migration du backend vers calls aux endpoint Pb out-of-the-box et ajout de route
 - [x] Approche validée : endpoints PB natifs + hooks JSVM ciblés (`attendees`, `subscriptions`, `impersonate`, `legacy_auth`, `settings`, `users`)
 - [x] Règles métier côté serveur : fenêtre d'inscription, capacité, compteurs dénormalisés, feuille de présence
 - [x] Emails : activation, reset de mot de passe (templates PB en migration), candidature coach (endpoint Astro)
-- [ ] Les liens à jeton (activation, reset) partent via le SMTP Mandrill et passent par son tracking de clics, qui journalise le jeton chez un tiers — désactiver avec un en-tête `X-MC-Track` dans les hooks `onMailerRecord*Send`, et `track_clicks`/`track_opens: false` dans `src/utils/email.ts`
+- [x] E-mails d'activation et de réinitialisation : ils ne partaient pas sur `never` ni sur `next` (configuration SMTP incomplète, envoi vers un Mailpit inexistant). Ils passent maintenant par l'API Mandrill comme le formulaire coach et le legacy, avec des liens vers le domaine de l'app
+- [x] Suivi des clics et des ouvertures Mandrill désactivé, pour que les liens à jeton ne soient plus journalisés chez un tiers
 - [ ] Emails transactionnels en français uniquement, avec des liens codés en dur sur `/fr/` (`{APP_URL}/fr/inscription/activation`) : un utilisateur de/en reçoit un mail français et atterrit sur la page française
 - [x] Sécurité — un membre ne peut plus se donner un autre rôle (ni à la création du compte, ni en modifiant son profil) ni toucher aux champs de l'import legacy
 - [x] Sécurité — un membre ne peut plus inscrire quelqu'un d'autre, s'inscrire comme coach sans en avoir le rôle, ni pointer sa propre présence
 - [ ] Fuseau horaire : les dates des sessions sont stockées en heure suisse sans fuseau, et le hook d'inscription les compare à l'heure du serveur, qui est en UTC sur `never` — en été, les inscriptions restent ouvertes jusqu'à 2 h après le début de la session et ouvrent 2 h trop tard (1 h en hiver). À corriger côté hook, ou en passant les serveurs en `Europe/Zurich`
-- [ ] Adresse d'expédition incohérente : `noreply@urban-training.ch` dans `src/utils/email.ts`, `no-reply@urban-training.ch` dans `pb/pb_hooks/settings.pb.js`
+- [x] Adresse d'expédition unifiée sur celle du legacy, `administration@urban-training.ch`
+- [ ] Un envoi d'e-mail en échec n'est visible que dans les logs PocketBase : la demande d'activation ou de réinitialisation répond quand même OK à l'utilisateur
 
 ### Admin @Joël
 
@@ -56,7 +58,6 @@ Migration de l'UI et du backend. Décision prise : on reste sur **Element Plus**
 - [x] Environnement de démo `never.urban-training.ch` en ligne
 - [x] VPS dédié pour la prod — `jota-apps-3-infomaniak`, l'app y est déployée sur `next.urban-training.ch` (2026-10-09)
 - [ ] Séparer DEV et PRD : `never` et `next` suivent aujourd'hui tous les deux la branche `main`, chaque push part donc directement en prod — faire suivre `develop` à `never` et réserver `main` à la prod (flux PRD Release `develop` → `main`)
-- [ ] Sortir la clé Mandrill de `apps.yaml` (en clair dans le dépôt infra, pour `never` comme pour `next`) et la passer par les secrets Bitwarden par app, puis la régénérer
 - [x] Domaine chez Infomaniak — zone DNS et registrar migrés depuis OVH le 2026-09-18, sans aucune coupure du site ni des mails : il n'y a personne à prévenir d'un downtime
 - [x] DNSSEC réactivé — fait automatiquement par Infomaniak à la reprise du domaine le 2026-09-18 : zone signée en algorithme 13 (ECDSA), DS correspondant publié au registre, validation vérifiée sur Google, Cloudflare et Quad9
 - [ ] Durcir l'authentification mail du domaine : DMARC de `p=none` à `p=quarantine` (collecte `rua` en cours depuis le 2026-09-17), puis SPF de `?all` à `~all` — deux changements séparés, jamais le même jour
@@ -79,6 +80,7 @@ Suite Playwright dans `tests/e2e`, lancée à la main en local (`./tests/e2e/run
 - [ ] README des tests à remettre à jour (noms de fichiers, specs profil et admin)
 - [ ] Le test d'inscription laisse un compte `e2e+…@example.com` à chaque run (19 en base locale) : les supprimer en fin de test
 - [ ] Test de session pleine : ne plus dépendre d'une session à venir avec des inscrits, créer la situation pour le test
+- [ ] Export CSV des utilisateurs : dépasse parfois les 30 s du test quand la suite complète tourne (57 000 comptes) — vérifier la durée réelle pour un admin avant d'augmenter le délai
 - [ ] Compte de test au vrai rôle membre : le compte « membre » actuel est superadmin, les specs membre ne vérifient donc pas ce qu'un membre a le droit de faire
 - [x] Droits d'accès d'un membre : rôle, champs legacy, inscription d'un tiers, inscription comme coach, présence, et non-régression sur ce qui était déjà bloqué (utilisateurs et inscriptions des autres, modification d'une session, feuille de présence, impersonation, admin)
 - [ ] Connexion par l'interface : connexion, déconnexion, mauvais mot de passe, et surtout connexion d'un compte importé avec son ancien mot de passe (cas de tous les utilisateurs le jour de la bascule)
@@ -106,6 +108,7 @@ Ensuite :
 - [ ] Import final des données legacy sur la prod (`ut:import` sur un dump frais), après gel des inscriptions sur l'ancien site
 - [ ] Redirections des anciennes URLs en place et testées
 - [ ] Bascule DNS de `www.urban-training.ch` vers le nouveau VPS, puis smoke test sur `www`
+- [ ] Passer le `domain` de l'app de prod à `www.urban-training.ch` dans `jota-one/infra` : les liens des e-mails d'activation et de réinitialisation suivent ce domaine
 - [ ] Mettre à jour la sonde de monitoring (aujourd'hui `www.urban-training.ch/fr`) si l'URL de référence change
 
 ## Décisions actées
@@ -168,3 +171,4 @@ Certaines tâches doivent être faites en 1er lieu et ensebmle pour que tout le 
 - [2026-09-18] Domaine migré d'OVH vers Infomaniak — zone DNS et registrar, sans aucune coupure du site ni des mails ; DNSSEC désactivé au préalable pour éviter une panne de résolution totale, et la clé DKIM Mandrill et l'include SPF, tous deux absents de la zone Infomaniak, rétablis
 - [2026-10-09] VPS dédié pour la prod — l'app tourne sur `next.urban-training.ch` en attendant la bascule de `www` ; `never` reste l'environnement de DEV
 - [2026-10-11] Sécurité — un membre ne peut plus se promouvoir admin, s'inscrire comme coach sans en avoir le rôle, inscrire un autre utilisateur ni pointer sa présence ; couvert par une nouvelle spec E2E des droits d'accès
+- [2026-10-12] E-mails — activation et réinitialisation de mot de passe à nouveau envoyées sur les serveurs (elles ne partaient pas), via l'API Mandrill, sans suivi des clics et depuis l'adresse du legacy
