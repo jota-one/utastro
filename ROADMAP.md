@@ -21,7 +21,7 @@ Migration du site web Vue de nuxt à astro (SSR).
 - [x] Spécificités nuxt => loin
 - [x] Implémenter les spécificités Astro (login, activation de compte, reset de mot de passe, profil)
 - [x] Pages publiques : accueil, inscription, ville, session + détail, contact, formulaire d'inscription, formulaire coach, mon compte
-- [ ] `/{lang}/session` affiche un texte de debug (`StubPage`) : redirigée vers la page inscription de la langue par Caddy (PR `jota-one/infra` en cours)
+- [x] `/{lang}/session` affichait un texte de debug (`StubPage`) : redirigée vers la page inscription de la langue par Caddy
 
 ### Backend @Istvan
 
@@ -66,7 +66,7 @@ Migration de l'UI et du backend. Décision prise : on reste sur **Element Plus**
 - [ ] DMARC en `p=reject`, après la bascule : attendre une série de rapports où les e-mails de l'app, qui passent désormais par l'API Mandrill, apparaissent alignés — ne pas cumuler les deux changements. Coût connu : les quelques newsletters transférées automatiquement par leur destinataire et dont la signature casse en route (4 sur 4 480 le 1er octobre) seraient rejetées au lieu d'aller en spam
 - [ ] SPF de `?all` à `~all` — de l'hygiène : la Newsletter et Mandrill utilisent leur propre domaine d'enveloppe, ce SPF ne couvre que le mail Infomaniak direct, déjà conforme
 - [x] Renouvellement du domaine sous contrôle — renouvellement automatique actif chez Infomaniak et désactivé chez OVH, plus aucune facturation possible de leur côté (échéance fin octobre 2026)
-- [ ] Anciennes URLs redirigées par Caddy (clé `caddy` de l'app dans `apps.yaml`, sur `never` et `next`) : les 22 redirections du legacy, la page Sponsors abandonnée et `/{lang}/session` — PR `jota-one/infra` en cours
+- [x] Anciennes URLs redirigées par Caddy (clé `caddy` de l'app dans `apps.yaml`, sur `never` et `next`) : les 22 redirections du legacy, la page Sponsors abandonnée et `/{lang}/session`
 
 ### Tests E2E
 
@@ -93,7 +93,7 @@ Suite Playwright dans `tests/e2e`, lancée à la main en local (`./tests/e2e/run
 - [x] Activation : lien vers le bon site, compte réellement activé, connexion refusée avant et acceptée après
 - [x] Coach : inscription et désinscription comme coach avec le compteur, feuille de présence réservée aux coachs de la session, pointage présent/absent enregistré
 - [ ] Smoke test en lecture seule, lançable sur `next` avant la bascule DNS puis sur `www` juste après : pages publiques en fr/de/en, une page ville, une page session, ouverture de la connexion
-- [ ] Anciennes URLs : spec `04-redirects` écrite (31 redirections, à lancer contre `never`), à passer au vert une fois les règles Caddy déployées
+- [x] Anciennes URLs : spec `04-redirects`, 31 redirections vérifiées sur `never` et `next` (à lancer contre un site déployé, Caddy n'existant pas en local)
 
 Ensuite :
 
@@ -111,7 +111,8 @@ Ensuite :
 - [x] Fuseau horaire des serveurs corrigé
 - [ ] Couverture E2E « avant la bascule » ci-dessus au vert
 - [ ] Import final des données legacy sur la prod (`ut:import` sur un dump frais), après gel des inscriptions sur l'ancien site
-- [ ] Redirections des anciennes URLs en place et testées
+- [x] Redirections des anciennes URLs en place et testées
+- [ ] Reporter la clé `caddy` des redirections sur l'app `www` si elle est déclarée à part de `next` dans `apps.yaml`
 - [ ] Bascule DNS de `www.urban-training.ch` vers le nouveau VPS, puis smoke test sur `www`
 - [ ] Passer le `domain` de l'app de prod à `www.urban-training.ch` dans `jota-one/infra` : les liens des e-mails d'activation et de réinitialisation suivent ce domaine
 - [ ] Mettre à jour la sonde de monitoring (aujourd'hui `www.urban-training.ch/fr`) si l'URL de référence change
@@ -182,3 +183,4 @@ Certaines tâches doivent être faites en 1er lieu et ensebmle pour que tout le 
 - [2026-10-12] Sessions — le compteur de coachs de la fiche session est juste après une inscription ou une désinscription
 - [2026-10-12] Tests E2E — connexion, comptes importés, mot de passe oublié, activation et feuille de présence coach couverts
 - [2026-10-12] DMARC — 3e analyse des rapports (24 septembre → 11 octobre, 4 560 messages) : la campagne newsletter du 1er octobre est passée sous `p=quarantine`, aucune usurpation, seuls 2 transferts automatiques mis en quarantaine
+- [2026-10-12] Anciennes URLs — les adresses du site actuel (redirections legacy, page Sponsors, liste des sessions) mènent aux bonnes pages du nouveau site sur `never` et `next`
