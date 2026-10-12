@@ -39,6 +39,8 @@ Migration du backend vers calls aux endpoint Pb out-of-the-box et ajout de route
 - [x] Adresse d'expédition unifiée sur celle du legacy, `administration@urban-training.ch`
 - [x] Connexion des comptes importés : un ancien mot de passe contenant un emoji (ou tout caractère hors du plan de base) ne correspondait jamais à son empreinte legacy
 - [x] Fiche session : après s'être inscrit ou désinscrit, le compteur de coachs (et le compteur d'inscrits qui décide si la session est pleine) affichait une valeur fausse jusqu'au rechargement de la page
+- [x] **Les sites `next` et `never` partageaient la base de `never`** : l'URL de PocketBase était compilée dans le build depuis le `.env` du dépôt. `next` affichait les données de `never` et y aurait écrit les inscriptions, comme `www` après la bascule. Chaque site utilise désormais sa propre base, sur son propre domaine
+- [x] Page d'activation ouverte sans jeton : le cadre d'erreur s'affichait sans texte
 - [ ] Un envoi d'e-mail en échec n'est visible que dans les logs PocketBase : la demande d'activation ou de réinitialisation répond quand même OK à l'utilisateur
 
 ### Admin @Joël
@@ -92,7 +94,7 @@ Suite Playwright dans `tests/e2e`, lancée à la main en local (`./tests/e2e/run
 - [x] Mot de passe oublié de bout en bout : demande depuis la modale, e-mail, lien vers le bon site, nouveau mot de passe, connexion ; un lien ne sert qu'une fois
 - [x] Activation : lien vers le bon site, compte réellement activé, connexion refusée avant et acceptée après
 - [x] Coach : inscription et désinscription comme coach avec le compteur, feuille de présence réservée aux coachs de la session, pointage présent/absent enregistré
-- [ ] Smoke test en lecture seule, lançable sur `next` avant la bascule DNS puis sur `www` juste après : pages publiques en fr/de/en, une page ville, une page session, ouverture de la connexion
+- [x] Smoke test en lecture seule (`specs/smoke`), lançable sur `next` avant la bascule DNS puis sur `www` juste après : pages en fr/de/en, page ville, page session, le site appelle sa propre API, ouverture de la connexion, pages d'activation et de réinitialisation
 - [x] Anciennes URLs : spec `04-redirects`, 31 redirections vérifiées sur `never` et `next` (à lancer contre un site déployé, Caddy n'existant pas en local)
 
 Ensuite :
@@ -110,6 +112,7 @@ Ensuite :
 - [x] Failles de droits d'accès corrigées
 - [x] Fuseau horaire des serveurs corrigé
 - [ ] Couverture E2E « avant la bascule » ci-dessus au vert
+- [ ] `next` est vide (aucune ville ni session) : il affichait jusqu'ici les données de `never`, il montre désormais sa propre base — le smoke test y restera rouge sur la page ville et la page session jusqu'à l'import
 - [ ] Import final des données legacy sur la prod (`ut:import` sur un dump frais), après gel des inscriptions sur l'ancien site
 - [x] Redirections des anciennes URLs en place et testées
 - [ ] Reporter la clé `caddy` des redirections sur l'app `www` si elle est déclarée à part de `next` dans `apps.yaml`
@@ -184,3 +187,4 @@ Certaines tâches doivent être faites en 1er lieu et ensebmle pour que tout le 
 - [2026-10-12] Tests E2E — connexion, comptes importés, mot de passe oublié, activation et feuille de présence coach couverts
 - [2026-10-12] DMARC — 3e analyse des rapports (24 septembre → 11 octobre, 4 560 messages) : la campagne newsletter du 1er octobre est passée sous `p=quarantine`, aucune usurpation, seuls 2 transferts automatiques mis en quarantaine
 - [2026-10-12] Anciennes URLs — les adresses du site actuel (redirections legacy, page Sponsors, liste des sessions) mènent aux bonnes pages du nouveau site sur `never` et `next`
+- [2026-10-12] Prod — `next` utilise sa propre base de données au lieu de celle de `never` (et `www` après la bascule) ; smoke test en lecture seule des sites déployés
