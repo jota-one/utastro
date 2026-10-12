@@ -193,6 +193,17 @@ export const useSessions = () => {
     }
   }
 
+  // Re-read the counters kept by the subscriptions hook rather than adjusting
+  // the displayed ones: the detail page has no session list to start from,
+  // and other people may have (un)subscribed in the meantime
+  const refreshSessionCounts = async (sessionId: string) => {
+    const event = await pb
+      .collection('ut_events')
+      .getOne(sessionId, { fields: 'subscription_count,staff_count' })
+    updateSessionCount(sessionId, event.subscription_count || 0)
+    updateSessionCount(sessionId, event.staff_count || 0, true)
+  }
+
   const subscribeToSession = async (sessionId: string, asStaff?: boolean) => {
     const { userId } = useAuth()
     if (!userId.value) {
@@ -203,11 +214,7 @@ export const useSessions = () => {
       event: sessionId,
       is_event_admin: asStaff || false,
     })
-    const session = sessions.value?.find(s => s.id === sessionId)
-    const newCount = asStaff
-      ? (session?.subscriptions.staffCount || 0) + 1
-      : (session?.subscriptions.currentCount || 0) + 1
-    updateSessionCount(sessionId, newCount, asStaff)
+    await refreshSessionCounts(sessionId)
     await useUserProfile().loadUserSubscriptions()
   }
 
@@ -226,11 +233,7 @@ export const useSessions = () => {
       return
     }
     await pb.collection('ut_subscriptions').delete(sub.id)
-    const session = sessions.value?.find(s => s.id === sessionId)
-    const newCount = asStaff
-      ? Math.max((session?.subscriptions.staffCount || 1) - 1, 0)
-      : Math.max((session?.subscriptions.currentCount || 1) - 1, 0)
-    updateSessionCount(sessionId, newCount, asStaff)
+    await refreshSessionCounts(sessionId)
     await useUserProfile().loadUserSubscriptions()
   }
 
