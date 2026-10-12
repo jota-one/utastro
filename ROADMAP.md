@@ -32,8 +32,8 @@ Migration du backend vers calls aux endpoint Pb out-of-the-box et ajout de route
 - [x] Emails : activation, reset de mot de passe (templates PB en migration), candidature coach (endpoint Astro)
 - [ ] Les liens à jeton (activation, reset) partent via le SMTP Mandrill et passent par son tracking de clics, qui journalise le jeton chez un tiers — désactiver avec un en-tête `X-MC-Track` dans les hooks `onMailerRecord*Send`, et `track_clicks`/`track_opens: false` dans `src/utils/email.ts`
 - [ ] Emails transactionnels en français uniquement, avec des liens codés en dur sur `/fr/` (`{APP_URL}/fr/inscription/activation`) : un utilisateur de/en reçoit un mail français et atterrit sur la page française
-- [ ] **Sécurité, bloquant pour la bascule** — un membre peut se donner le rôle `admin` en modifiant son propre compte : la règle de mise à jour de `ut_users` autorise l'utilisateur à modifier sa fiche, champ `role` compris (constaté en local le 2026-10-11)
-- [ ] **Sécurité, bloquant pour la bascule** — n'importe quel membre connecté peut s'inscrire comme coach (réservé au staff en legacy) et inscrire un autre utilisateur à une session : la règle de création de `ut_subscriptions` ne vérifie ni le rôle ni que l'inscription le concerne
+- [x] Sécurité — un membre ne peut plus se donner un autre rôle (ni à la création du compte, ni en modifiant son profil) ni toucher aux champs de l'import legacy
+- [x] Sécurité — un membre ne peut plus inscrire quelqu'un d'autre, s'inscrire comme coach sans en avoir le rôle, ni pointer sa propre présence
 - [ ] Fuseau horaire : les dates des sessions sont stockées en heure suisse sans fuseau, et le hook d'inscription les compare à l'heure du serveur, qui est en UTC sur `never` — en été, les inscriptions restent ouvertes jusqu'à 2 h après le début de la session et ouvrent 2 h trop tard (1 h en hiver). À corriger côté hook, ou en passant les serveurs en `Europe/Zurich`
 - [ ] Adresse d'expédition incohérente : `noreply@urban-training.ch` dans `src/utils/email.ts`, `no-reply@urban-training.ch` dans `pb/pb_hooks/settings.pb.js`
 
@@ -65,7 +65,7 @@ Migration de l'UI et du backend. Décision prise : on reste sur **Element Plus**
 
 ### Tests E2E
 
-Suite Playwright dans `tests/e2e`, lancée à la main en local (`./tests/e2e/run.sh`) sur une copie des données de prod, avec Mailpit pour les e-mails. Elle ne tourne pas en CI. Dernier run le 2026-10-11 : 25 tests verts, 1 sauté (session pleine, faute de session à venir avec des inscrits dans les données locales).
+Suite Playwright dans `tests/e2e`, lancée à la main en local (`./tests/e2e/run.sh`) sur une copie des données de prod, avec Mailpit pour les e-mails. Elle ne tourne pas en CI. Dernier run le 2026-10-11 : 40 tests verts, 1 sauté (session pleine, faute de session à venir avec des inscrits dans les données locales).
 
 - [x] Visiteur : chargement des pages publiques, redirection de `/`, page ville et page session, formulaire d'inscription (champs, bouton désactivé, e-mail d'activation, e-mail déjà utilisé)
 - [x] Membre : inscription et désinscription à une session, compteur du header, modale de confirmation, session pleine, session passée, suivi d'une ville, redirection vers la connexion pour un visiteur
@@ -80,7 +80,7 @@ Suite Playwright dans `tests/e2e`, lancée à la main en local (`./tests/e2e/run
 - [ ] Le test d'inscription laisse un compte `e2e+…@example.com` à chaque run (19 en base locale) : les supprimer en fin de test
 - [ ] Test de session pleine : ne plus dépendre d'une session à venir avec des inscrits, créer la situation pour le test
 - [ ] Compte de test au vrai rôle membre : le compte « membre » actuel est superadmin, les specs membre ne vérifient donc pas ce qu'un membre a le droit de faire
-- [ ] Droits d'accès : un membre ne peut ni changer son rôle, ni s'inscrire comme coach, ni inscrire quelqu'un d'autre (les trois passent aujourd'hui, voir Backend) ; non-régression sur ce qui est déjà bloqué (modifier une session, lister les utilisateurs et les inscriptions des autres, feuille de présence, impersonation, admin)
+- [x] Droits d'accès d'un membre : rôle, champs legacy, inscription d'un tiers, inscription comme coach, présence, et non-régression sur ce qui était déjà bloqué (utilisateurs et inscriptions des autres, modification d'une session, feuille de présence, impersonation, admin)
 - [ ] Connexion par l'interface : connexion, déconnexion, mauvais mot de passe, et surtout connexion d'un compte importé avec son ancien mot de passe (cas de tous les utilisateurs le jour de la bascule)
 - [ ] Mot de passe oublié de bout en bout : demande, e-mail, nouveau mot de passe, connexion
 - [ ] Activation : vérifier que le compte est réellement activé et peut se connecter (aujourd'hui seule l'absence d'erreur dans l'URL est testée)
@@ -100,7 +100,8 @@ Ensuite :
 
 ### Bascule
 
-- [ ] Failles de droits d'accès et fuseau horaire corrigés (voir Backend)
+- [x] Failles de droits d'accès corrigées
+- [ ] Fuseau horaire du hook d'inscription corrigé (voir Backend)
 - [ ] Couverture E2E « avant la bascule » ci-dessus au vert
 - [ ] Import final des données legacy sur la prod (`ut:import` sur un dump frais), après gel des inscriptions sur l'ancien site
 - [ ] Redirections des anciennes URLs en place et testées
@@ -166,3 +167,4 @@ Certaines tâches doivent être faites en 1er lieu et ensebmle pour que tout le 
 - [2026-07-14] Import legacy — temps d'import fortement réduit (jointures quadratiques éliminées)
 - [2026-09-18] Domaine migré d'OVH vers Infomaniak — zone DNS et registrar, sans aucune coupure du site ni des mails ; DNSSEC désactivé au préalable pour éviter une panne de résolution totale, et la clé DKIM Mandrill et l'include SPF, tous deux absents de la zone Infomaniak, rétablis
 - [2026-10-09] VPS dédié pour la prod — l'app tourne sur `next.urban-training.ch` en attendant la bascule de `www` ; `never` reste l'environnement de DEV
+- [2026-10-11] Sécurité — un membre ne peut plus se promouvoir admin, s'inscrire comme coach sans en avoir le rôle, inscrire un autre utilisateur ni pointer sa présence ; couvert par une nouvelle spec E2E des droits d'accès
