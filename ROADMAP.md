@@ -62,7 +62,9 @@ Migration de l'UI et du backend. Décision prise : on reste sur **Element Plus**
 - [ ] Séparer DEV et PRD : `never` et `next` suivent aujourd'hui tous les deux la branche `main`, chaque push part donc directement en prod — faire suivre `develop` à `never` et réserver `main` à la prod (flux PRD Release `develop` → `main`)
 - [x] Domaine chez Infomaniak — zone DNS et registrar migrés depuis OVH le 2026-09-18, sans aucune coupure du site ni des mails : il n'y a personne à prévenir d'un downtime
 - [x] DNSSEC réactivé — fait automatiquement par Infomaniak à la reprise du domaine le 2026-09-18 : zone signée en algorithme 13 (ECDSA), DS correspondant publié au registre, validation vérifiée sur Google, Cloudflare et Quad9
-- [ ] Durcir l'authentification mail du domaine : DMARC de `p=none` à `p=quarantine` (collecte `rua` en cours depuis le 2026-09-17), puis SPF de `?all` à `~all` — deux changements séparés, jamais le même jour
+- [x] DMARC en `p=quarantine` depuis le 2026-09-19 — trois analyses des rapports `rua` (17 septembre, 26 septembre, 12 octobre) : toutes les sources légitimes sont alignées (Newsletter Infomaniak via Amazon SES, Mandrill, mail Infomaniak), y compris la campagne du 1er octobre envoyée sous `quarantine` (4 476 messages conformes sur 4 480)
+- [ ] DMARC en `p=reject`, après la bascule : attendre une série de rapports où les e-mails de l'app, qui passent désormais par l'API Mandrill, apparaissent alignés — ne pas cumuler les deux changements. Coût connu : les quelques newsletters transférées automatiquement par leur destinataire et dont la signature casse en route (4 sur 4 480 le 1er octobre) seraient rejetées au lieu d'aller en spam
+- [ ] SPF de `?all` à `~all` — de l'hygiène : la Newsletter et Mandrill utilisent leur propre domaine d'enveloppe, ce SPF ne couvre que le mail Infomaniak direct, déjà conforme
 - [x] Renouvellement du domaine sous contrôle — renouvellement automatique actif chez Infomaniak et désactivé chez OVH, plus aucune facturation possible de leur côté (échéance fin octobre 2026)
 - [ ] S'assurer que lesles anciens redirects ne sont plus possible, sinon les gérer si possible via caddy — les ~22 redirections 301 du site actuel ne sont reprises nulle part pour l'instant
 
@@ -179,3 +181,4 @@ Certaines tâches doivent être faites en 1er lieu et ensebmle pour que tout le 
 - [2026-10-12] Connexion — les comptes importés dont l'ancien mot de passe contient un emoji peuvent se connecter
 - [2026-10-12] Sessions — le compteur de coachs de la fiche session est juste après une inscription ou une désinscription
 - [2026-10-12] Tests E2E — connexion, comptes importés, mot de passe oublié, activation et feuille de présence coach couverts
+- [2026-10-12] DMARC — 3e analyse des rapports (24 septembre → 11 octobre, 4 560 messages) : la campagne newsletter du 1er octobre est passée sous `p=quarantine`, aucune usurpation, seuls 2 transferts automatiques mis en quarantaine
