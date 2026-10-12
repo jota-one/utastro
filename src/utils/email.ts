@@ -23,8 +23,10 @@ export const sendEmail = async ({
       message: {
         html: htmlBody,
         subject,
-        from_email: 'noreply@urban-training.ch',
+        from_email: 'administration@urban-training.ch',
         from_name: 'Urban Training',
+        track_clicks: false,
+        track_opens: false,
         to: [{ email: to.email, name: to.name || to.email, type: 'to' }],
         attachments: attachments.map(a => ({
           type: a.type || 'application/octet-stream',
