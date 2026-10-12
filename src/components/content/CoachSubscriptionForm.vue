@@ -173,7 +173,8 @@ const submit = async () => {
     formData.append('captchaToken', captchaModel.value.token)
     fileList.value.forEach(f => formData.append('files', f))
 
-    const res = await fetch(astroBaseUri + '/app/coaches', {
+    // relative on deployed sites, where astroBaseUri is not set
+    const res = await fetch(`${astroBaseUri ?? ''}/app/coaches`, {
       method: 'POST',
       body: formData,
     })
