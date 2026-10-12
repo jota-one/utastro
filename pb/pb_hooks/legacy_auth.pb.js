@@ -12,9 +12,19 @@ routerAdd('POST', '/api/custom/auth/login', e => {
     }
 
     const bytes = []
+    // UTF-8 encoding, as Node's crypto did for the legacy hashes
     for (let i = 0; i < msg.length; i++) {
-      const c = msg.charCodeAt(i)
-      if (c < 128) {
+      const c = msg.codePointAt(i)
+      if (c > 0xffff) {
+        // astral character (e.g. emoji): one code point, two UTF-16 units
+        bytes.push(
+          (c >> 18) | 240,
+          ((c >> 12) & 63) | 128,
+          ((c >> 6) & 63) | 128,
+          (c & 63) | 128,
+        )
+        i++
+      } else if (c < 128) {
         bytes.push(c)
       } else if (c < 2048) {
         bytes.push((c >> 6) | 192, (c & 63) | 128)
