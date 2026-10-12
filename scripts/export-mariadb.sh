@@ -165,54 +165,41 @@ $MYSQL -e "SELECT 1" "$DB_NAME" &>/dev/null \
   || err "Connection failed (host=$DB_HOST:$DB_LOCAL_PORT user=$DB_USER db=$DB_NAME)"
 ok "Connected to $DB_NAME"
 
-# ─── 7. Table selection ──────────────────────────────────────────────────────
-step "Table selection"
+# ─── 7. Tables ───────────────────────────────────────────────────────────────
+# Exactly the tables the pb-custom import commands read: the import-* SQL
+# (hypercontent__, sisi__, ut__userinfos) and import-sponsors (ut__sponsors*).
+# Update this list together with pb-tools/commands.
+step "Tables"
+
+REQUIRED_TABLES=(
+  hypercontent__users
+  ut__userinfos
+  sisi__cities
+  sisi__city_watchers
+  sisi__event_types
+  sisi__event_types_events
+  sisi__event_types_lang
+  sisi__events
+  sisi__events_lang
+  sisi__locations
+  sisi__locations_lang
+  sisi__subscriptions
+  ut__sponsors
+  ut__sponsors_cities
+  ut__sponsors_lang
+)
 
 ALL_TABLES=$($MYSQL -N -e "SHOW TABLES" "$DB_NAME")
-TABLE_COUNT=$(printf "%s" "$ALL_TABLES" | grep -c . || true)
-ok "${TABLE_COUNT} tables available"
-
-SELECTED_TABLES=()
-if command -v fzf &>/dev/null; then
-  while IFS= read -r line; do
-    SELECTED_TABLES+=("$line")
-  done < <(printf "%s" "$ALL_TABLES" | fzf \
-    --multi \
-    --prompt="Select tables (TAB to multi-select, ENTER to confirm): " \
-    --height=40% \
-    --layout=reverse \
-    --border)
-else
-  printf "\n"
-  i=1
-  while IFS= read -r t; do
-    printf "  %3d) %s\n" "$i" "$t"
-    i=$((i + 1))
-  done <<< "$ALL_TABLES"
-  printf "\n"
-  ask "Tables to export (e.g. 1,3,5 or all):"
-  read -r SELECTION
-  if [[ "$SELECTION" == "all" ]]; then
-    while IFS= read -r line; do
-      SELECTED_TABLES+=("$line")
-    done <<< "$ALL_TABLES"
-  else
-    IFS=',' read -ra NUMS <<< "$SELECTION"
-    for n in "${NUMS[@]}"; do
-      n="${n// /}"
-      line=$(sed -n "${n}p" <<< "$ALL_TABLES")
-      [[ -n "$line" ]] && SELECTED_TABLES+=("$line")
-    done
-  fi
-fi
-
-[[ ${#SELECTED_TABLES[@]} -gt 0 ]] || err "No tables selected"
-ok "${#SELECTED_TABLES[@]} table(s) selected"
+for TABLE in "${REQUIRED_TABLES[@]}"; do
+  grep -qx "$TABLE" <<< "$ALL_TABLES" || err "Table missing in $DB_NAME: $TABLE"
+done
+SELECTED_TABLES=("${REQUIRED_TABLES[@]}")
+ok "${#SELECTED_TABLES[@]} tables to export"
 
 # ─── 8. JSON export ──────────────────────────────────────────────────────────
 step "JSON export"
 
-# Port-forward may have dropped during interactive selection — reconnect if needed
+# Port-forward may have dropped since the connection test — reconnect if needed
 if ! $MYSQL -e "SELECT 1" "$DB_NAME" &>/dev/null; then
   warn "Connection lost, reconnecting..."
   start_mariadb_portforward
@@ -224,9 +211,12 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 EXPORT_DIR="$PROJECT_ROOT/pb/json_import_sources"
 mkdir -p "$EXPORT_DIR"
+# Start clean: a JSON file left by a previous export would be imported as is
+rm -f "$EXPORT_DIR"/*.json
 ok "Output directory: $EXPORT_DIR"
 printf "\n"
 
+FAILED_TABLES=()
 for TABLE in "${SELECTED_TABLES[@]}"; do
   [[ -z "$TABLE" ]] && continue
   OUT="$EXPORT_DIR/${TABLE}.json"
@@ -271,8 +261,32 @@ print(len(table['data']))
     printf "${GREEN}%s rows${NC}\n" "$ROW_COUNT"
   else
     printf "${RED}failed${NC}\n"
+    rm -f "$OUT"
+    FAILED_TABLES+=("$TABLE")
   fi
 done
 
 printf "\n"
+[[ ${#FAILED_TABLES[@]} -eq 0 ]] || err "Export failed for: ${FAILED_TABLES[*]} — re-run the export before importing"
 ok "Export complete → $EXPORT_DIR"
+
+# ─── 9. Sponsor logos ────────────────────────────────────────────────────────
+# Not in the database: the legacy site serves them from its sources, named
+# after the sponsor id (public/img/sponsor/<id>.<ext>). import-sponsors picks
+# <id>.svg, then .png, then .jpg, so copying every numbered file is enough.
+step "Sponsor logos"
+
+LOGOS_SRC="$UT_REPO/public/img/sponsor"
+LOGOS_DIR="$EXPORT_DIR/ut__sponsors_logos"
+[[ -d "$LOGOS_SRC" ]] || err "Logo directory not found: $LOGOS_SRC"
+
+rm -rf "$LOGOS_DIR"
+mkdir -p "$LOGOS_DIR"
+LOGO_COUNT=0
+for LOGO in "$LOGOS_SRC"/*; do
+  if [[ "$(basename "$LOGO")" =~ ^[0-9]+\.(svg|png|jpg)$ ]]; then
+    cp "$LOGO" "$LOGOS_DIR/"
+    LOGO_COUNT=$((LOGO_COUNT + 1))
+  fi
+done
+ok "${LOGO_COUNT} logo(s) copied → $LOGOS_DIR"
