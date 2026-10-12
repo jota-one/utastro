@@ -37,6 +37,8 @@ Migration du backend vers calls aux endpoint Pb out-of-the-box et ajout de route
 - [x] Sécurité — un membre ne peut plus inscrire quelqu'un d'autre, s'inscrire comme coach sans en avoir le rôle, ni pointer sa propre présence
 - [x] Fuseau horaire : les dates des sessions sont saisies en heure suisse alors que les serveurs tournent en UTC — les inscriptions restaient ouvertes jusqu'à 2 h après le début d'une session. `never` et `next` tournent désormais à l'heure suisse (option `timezone` de `jota-one/infra`)
 - [x] Adresse d'expédition unifiée sur celle du legacy, `administration@urban-training.ch`
+- [x] Connexion des comptes importés : un ancien mot de passe contenant un emoji (ou tout caractère hors du plan de base) ne correspondait jamais à son empreinte legacy
+- [x] Fiche session : après s'être inscrit ou désinscrit, le compteur de coachs (et le compteur d'inscrits qui décide si la session est pleine) affichait une valeur fausse jusqu'au rechargement de la page
 - [ ] Un envoi d'e-mail en échec n'est visible que dans les logs PocketBase : la demande d'activation ou de réinitialisation répond quand même OK à l'utilisateur
 
 ### Admin @Joël
@@ -66,7 +68,7 @@ Migration de l'UI et du backend. Décision prise : on reste sur **Element Plus**
 
 ### Tests E2E
 
-Suite Playwright dans `tests/e2e`, lancée à la main en local (`./tests/e2e/run.sh`) sur une copie des données de prod, avec Mailpit pour les e-mails. Elle ne tourne pas en CI. Dernier run le 2026-10-11 : 40 tests verts, 1 sauté (session pleine, faute de session à venir avec des inscrits dans les données locales).
+Suite Playwright dans `tests/e2e`, lancée à la main en local (`./tests/e2e/run.sh`) sur une copie des données de prod, avec Mailpit pour les e-mails. Elle ne tourne pas en CI. Dernier run le 2026-10-12 : 53 tests verts, plus aucun sauté. Les tests créent leurs propres comptes et sessions et les suppriment ensuite : seul un compte admin est à configurer.
 
 - [x] Visiteur : chargement des pages publiques, redirection de `/`, page ville et page session, formulaire d'inscription (champs, bouton désactivé, e-mail d'activation, e-mail déjà utilisé)
 - [x] Membre : inscription et désinscription à une session, compteur du header, modale de confirmation, session pleine, session passée, suivi d'une ville, redirection vers la connexion pour un visiteur
@@ -77,22 +79,23 @@ Suite Playwright dans `tests/e2e`, lancée à la main en local (`./tests/e2e/run
 À ajouter avant la bascule :
 
 - [x] Suite remise au vert : la recherche de sessions des tests comparait les dates à l'heure UTC et prenait des sessions déjà commencées pour des sessions ouvertes (8 échecs), et `/fr/sponsors`, page abandonnée, était encore testée
-- [ ] README des tests à remettre à jour (noms de fichiers, specs profil et admin)
-- [ ] Le test d'inscription laisse un compte `e2e+…@example.com` à chaque run (19 en base locale) : les supprimer en fin de test
-- [ ] Test de session pleine : ne plus dépendre d'une session à venir avec des inscrits, créer la situation pour le test
-- [ ] Export CSV des utilisateurs : dépasse parfois les 30 s du test quand la suite complète tourne (57 000 comptes) — vérifier la durée réelle pour un admin avant d'augmenter le délai
+- [x] README des tests à jour
+- [x] Les tests suppriment les comptes qu'ils créent (le test d'inscription en laissait un à chaque run) ; les comptes `e2e+…@example.com` déjà créés ont été purgés de la base locale
+- [x] Session pleine et course à la dernière place : chacune sur une session créée et remplie pour le test, au lieu de modifier la capacité d'une vraie session ; le refus côté serveur est aussi vérifié
+- [x] Export CSV des utilisateurs : environ 13 s pour 57 000 comptes, délai du test porté à 90 s ; ses échecs venaient de redémarrages intempestifs du PocketBase local, pas de la durée de l'export
 - [ ] Compte de test au vrai rôle membre : le compte « membre » actuel est superadmin, les specs membre ne vérifient donc pas ce qu'un membre a le droit de faire
 - [x] Droits d'accès d'un membre : rôle, champs legacy, inscription d'un tiers, inscription comme coach, présence, et non-régression sur ce qui était déjà bloqué (utilisateurs et inscriptions des autres, modification d'une session, feuille de présence, impersonation, admin)
-- [ ] Connexion par l'interface : connexion, déconnexion, mauvais mot de passe, et surtout connexion d'un compte importé avec son ancien mot de passe (cas de tous les utilisateurs le jour de la bascule)
-- [ ] Mot de passe oublié de bout en bout : demande, e-mail, nouveau mot de passe, connexion
-- [ ] Activation : vérifier que le compte est réellement activé et peut se connecter (aujourd'hui seule l'absence d'erreur dans l'URL est testée)
-- [ ] Coach : feuille de présence (pointage présent/absent, enregistrement), inscription comme coach
+- [x] Connexion par l'interface : connexion, maintien après rechargement, déconnexion, mauvais mot de passe, compte pas encore activé
+- [x] Comptes importés : connexion avec l'ancien mot de passe (simple, accentué, emoji, court), migration vers un mot de passe PocketBase, mauvais mot de passe refusé
+- [x] Mot de passe oublié de bout en bout : demande depuis la modale, e-mail, lien vers le bon site, nouveau mot de passe, connexion ; un lien ne sert qu'une fois
+- [x] Activation : lien vers le bon site, compte réellement activé, connexion refusée avant et acceptée après
+- [x] Coach : inscription et désinscription comme coach avec le compteur, feuille de présence réservée aux coachs de la session, pointage présent/absent enregistré
 - [ ] Smoke test en lecture seule, lançable sur `next` avant la bascule DNS puis sur `www` juste après : pages publiques en fr/de/en, une page ville, une page session, ouverture de la connexion
 - [ ] Anciennes URLs : chacune des ~22 redirections 301 arrive sur la bonne page, une fois les règles Caddy en place
 
 Ensuite :
 
-- [ ] Versions allemande et anglaise : pages et sélecteur de langue
+- [ ] Versions allemande et anglaise : pages (pas de sélecteur de langue, déjà masqué dans le legacy)
 - [ ] Profil : modification des infos, changement de mot de passe, onglet des villes suivies
 - [ ] Page ville : liste des sessions, filtres, navigation par date, bandeau sponsors
 - [ ] Formulaire coach et page contact : validation et envoi
@@ -173,3 +176,6 @@ Certaines tâches doivent être faites en 1er lieu et ensebmle pour que tout le 
 - [2026-10-11] Sécurité — un membre ne peut plus se promouvoir admin, s'inscrire comme coach sans en avoir le rôle, inscrire un autre utilisateur ni pointer sa présence ; couvert par une nouvelle spec E2E des droits d'accès
 - [2026-10-12] E-mails — activation et réinitialisation de mot de passe à nouveau envoyées sur les serveurs (elles ne partaient pas), via l'API Mandrill, sans suivi des clics et depuis l'adresse du legacy
 - [2026-10-12] Fuseau horaire — `never` et `next` tournent à l'heure suisse : les inscriptions se ferment de nouveau au début de la session et ouvrent à l'heure prévue
+- [2026-10-12] Connexion — les comptes importés dont l'ancien mot de passe contient un emoji peuvent se connecter
+- [2026-10-12] Sessions — le compteur de coachs de la fiche session est juste après une inscription ou une désinscription
+- [2026-10-12] Tests E2E — connexion, comptes importés, mot de passe oublié, activation et feuille de présence coach couverts
