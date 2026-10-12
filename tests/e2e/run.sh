@@ -10,10 +10,13 @@ set -euo pipefail
 
 ENV_FILE="$(dirname "$0")/.env"
 if [[ -f "$ENV_FILE" ]]; then
-  set -a
-  # shellcheck disable=SC1090
-  source "$ENV_FILE"
-  set +a
+  # Variables already set win, so a run can target another site:
+  #   BASE_URL=https://next.urban-training.ch ./tests/e2e/run.sh specs/smoke
+  while IFS='=' read -r key value; do
+    if [[ $key =~ ^[A-Z_][A-Z0-9_]*$ && -z ${!key+set} ]]; then
+      export "$key=$value"
+    fi
+  done < "$ENV_FILE"
 fi
 
 pnpm exec playwright test "$@"

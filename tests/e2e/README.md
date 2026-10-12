@@ -70,6 +70,20 @@ Both `.env` and auth state files are in `.gitignore`.
 | --------------------- | ----------------------------------------------------------------------------- |
 | `01-presence.spec.ts` | Coach a session and leave it, attendance sheet for the session's coaches only |
 
+### smoke/
+
+| File               | What it covers                                                                                                                |
+| ------------------ | ----------------------------------------------------------------------------------------------------------------------------- |
+| `01-smoke.spec.ts` | Read-only check of a deployed site: pages in 3 languages, a city and a session page, own API, login modal. Safe on production |
+
+Run it on `next` before the DNS switch and on `www` right after (variables set on the command line win over `tests/e2e/.env`):
+
+```bash
+BASE_URL=https://next.urban-training.ch ./tests/e2e/run.sh specs/smoke
+```
+
+Only `smoke/` and `anonymous/04-redirects` are safe on a deployed site: the other specs create and delete accounts and sessions.
+
 ### admin/
 
 | File                 | What it covers                                         |
