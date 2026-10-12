@@ -30,12 +30,12 @@ Migration du backend vers calls aux endpoint Pb out-of-the-box et ajout de route
 - [x] Approche validée : endpoints PB natifs + hooks JSVM ciblés (`attendees`, `subscriptions`, `impersonate`, `legacy_auth`, `settings`, `users`)
 - [x] Règles métier côté serveur : fenêtre d'inscription, capacité, compteurs dénormalisés, feuille de présence
 - [x] Emails : activation, reset de mot de passe (templates PB en migration), candidature coach (endpoint Astro)
-- [x] E-mails d'activation et de réinitialisation : ils ne partaient pas sur `never` ni sur `next` (configuration SMTP incomplète, envoi vers un Mailpit inexistant). Ils passent maintenant par l'API Mandrill comme le formulaire coach et le legacy, avec des liens vers le domaine de l'app
+- [x] E-mails d'activation et de réinitialisation : ils ne partaient pas sur `never` ni sur `next` (configuration SMTP incomplète, envoi vers un Mailpit inexistant). Ils passent maintenant par l'API Mandrill comme le formulaire coach et le legacy, avec des liens vers le domaine de l'app — réception vérifiée sur `never`
 - [x] Suivi des clics et des ouvertures Mandrill désactivé, pour que les liens à jeton ne soient plus journalisés chez un tiers
 - [ ] Emails transactionnels en français uniquement, avec des liens codés en dur sur `/fr/` (`{APP_URL}/fr/inscription/activation`) : un utilisateur de/en reçoit un mail français et atterrit sur la page française
 - [x] Sécurité — un membre ne peut plus se donner un autre rôle (ni à la création du compte, ni en modifiant son profil) ni toucher aux champs de l'import legacy
 - [x] Sécurité — un membre ne peut plus inscrire quelqu'un d'autre, s'inscrire comme coach sans en avoir le rôle, ni pointer sa propre présence
-- [ ] Fuseau horaire : les dates des sessions sont stockées en heure suisse sans fuseau, et le hook d'inscription les compare à l'heure du serveur, qui est en UTC sur `never` — en été, les inscriptions restent ouvertes jusqu'à 2 h après le début de la session et ouvrent 2 h trop tard (1 h en hiver). À corriger côté hook, ou en passant les serveurs en `Europe/Zurich`
+- [x] Fuseau horaire : les dates des sessions sont saisies en heure suisse alors que les serveurs tournent en UTC — les inscriptions restaient ouvertes jusqu'à 2 h après le début d'une session. `never` et `next` tournent désormais à l'heure suisse (option `timezone` de `jota-one/infra`)
 - [x] Adresse d'expédition unifiée sur celle du legacy, `administration@urban-training.ch`
 - [ ] Un envoi d'e-mail en échec n'est visible que dans les logs PocketBase : la demande d'activation ou de réinitialisation répond quand même OK à l'utilisateur
 
@@ -103,7 +103,7 @@ Ensuite :
 ### Bascule
 
 - [x] Failles de droits d'accès corrigées
-- [ ] Fuseau horaire du hook d'inscription corrigé (voir Backend)
+- [x] Fuseau horaire des serveurs corrigé
 - [ ] Couverture E2E « avant la bascule » ci-dessus au vert
 - [ ] Import final des données legacy sur la prod (`ut:import` sur un dump frais), après gel des inscriptions sur l'ancien site
 - [ ] Redirections des anciennes URLs en place et testées
@@ -172,3 +172,4 @@ Certaines tâches doivent être faites en 1er lieu et ensebmle pour que tout le 
 - [2026-10-09] VPS dédié pour la prod — l'app tourne sur `next.urban-training.ch` en attendant la bascule de `www` ; `never` reste l'environnement de DEV
 - [2026-10-11] Sécurité — un membre ne peut plus se promouvoir admin, s'inscrire comme coach sans en avoir le rôle, inscrire un autre utilisateur ni pointer sa présence ; couvert par une nouvelle spec E2E des droits d'accès
 - [2026-10-12] E-mails — activation et réinitialisation de mot de passe à nouveau envoyées sur les serveurs (elles ne partaient pas), via l'API Mandrill, sans suivi des clics et depuis l'adresse du legacy
+- [2026-10-12] Fuseau horaire — `never` et `next` tournent à l'heure suisse : les inscriptions se ferment de nouveau au début de la session et ouvrent à l'heure prévue
