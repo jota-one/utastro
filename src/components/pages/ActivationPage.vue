@@ -10,7 +10,7 @@
       </div>
     </TipBox>
     <TipBox v-else-if="error" color-theme="error">
-      {{ error }}
+      {{ t(error) }}
     </TipBox>
   </div>
 </template>
@@ -25,13 +25,15 @@ import TipBox from '@components/TipBox.vue'
 const { t } = useI36n()
 
 const success = ref(false)
+// a translation key, translated at render time: on mount the translations
+// may not be loaded yet
 const error = ref('')
 
 onMounted(async () => {
   const token = new URLSearchParams(window.location.search).get('token')
 
   if (!token) {
-    error.value = t('ERROR_HC_USER_ACTIVATION_TOKEN_EXPIRED')
+    error.value = 'ERROR_HC_USER_ACTIVATION_TOKEN_EXPIRED'
     return
   }
 
@@ -39,7 +41,7 @@ onMounted(async () => {
     await pb.collection('ut_users').confirmVerification(token)
     success.value = true
   } catch {
-    error.value = t('ERROR_HC_USER_ACTIVATION_TOKEN_EXPIRED')
+    error.value = 'ERROR_HC_USER_ACTIVATION_TOKEN_EXPIRED'
   }
 })
 </script>
