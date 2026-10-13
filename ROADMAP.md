@@ -12,6 +12,8 @@ Migration de mariadb vers pocketbase (tables + données) via migrations ré-excu
 - [x] Imports legacy ré-exécutables : `ut:import` (cities, events, users, sponsors)
 - [x] Fusion des comptes legacy en doublon d'email à l'import
 - [x] Teasers : décision prise de ne pas les migrer (voir Décisions actées)
+- [x] Import sur le serveur scripté de bout en bout (`docs/data-import.md`) : export des 15 tables utiles et des logos sponsors depuis ton poste (`scripts/export-mariadb.sh`), puis import sur le VPS (`scripts/import-on-server.sh`) avec sauvegarde, retour arrière automatique en cas d'échec, purge des données brutes du legacy et smoke test
+- [x] Répétition générale sur `never` le 2026-10-13 : 58 426 comptes, 15 878 sessions, 241 098 inscriptions ; environ 4 min de coupure ; connexion avec d'anciens mots de passe vérifiée sur deux comptes réels
 
 ### UI @Istvan
 
@@ -113,7 +115,9 @@ Ensuite :
 - [x] Fuseau horaire des serveurs corrigé
 - [ ] Couverture E2E « avant la bascule » ci-dessus au vert
 - [ ] `next` est vide (aucune ville ni session) : il affichait jusqu'ici les données de `never`, il montre désormais sa propre base — le smoke test y restera rouge sur la page ville et la page session jusqu'à l'import
-- [ ] Import final des données legacy sur la prod (`ut:import` sur un dump frais), après gel des inscriptions sur l'ancien site
+- [ ] Import final sur la prod : geler l'ancien site (environ 6 min, de l'export au redémarrage), `scripts/export-mariadb.sh`, puis `scripts/import-on-server.sh next.urban-training.ch --fresh` — demande d'abord un accès SSH à `jota-apps-3` (clé d'hôte à vérifier)
+- [ ] Après l'import : tester une connexion avec un compte et un mot de passe de l'ancien site, puis supprimer les exports locaux et la sauvegarde laissée sur le serveur (données personnelles)
+- [ ] Définir comment geler l'ancien site pendant l'import (pas de mode maintenance trouvé dans le legacy)
 - [x] Redirections des anciennes URLs en place et testées
 - [ ] Reporter la clé `caddy` des redirections sur l'app `www` si elle est déclarée à part de `next` dans `apps.yaml`
 - [ ] Bascule DNS de `www.urban-training.ch` vers le nouveau VPS, puis smoke test sur `www`
@@ -188,3 +192,4 @@ Certaines tâches doivent être faites en 1er lieu et ensebmle pour que tout le 
 - [2026-10-12] DMARC — 3e analyse des rapports (24 septembre → 11 octobre, 4 560 messages) : la campagne newsletter du 1er octobre est passée sous `p=quarantine`, aucune usurpation, seuls 2 transferts automatiques mis en quarantaine
 - [2026-10-12] Anciennes URLs — les adresses du site actuel (redirections legacy, page Sponsors, liste des sessions) mènent aux bonnes pages du nouveau site sur `never` et `next`
 - [2026-10-12] Prod — `next` utilise sa propre base de données au lieu de celle de `never` (et `www` après la bascule) ; smoke test en lecture seule des sites déployés
+- [2026-10-13] Import des données — export et import sur le serveur scriptés de bout en bout ; répétition générale sur `never` avec des données fraîches, environ 4 min de coupure
