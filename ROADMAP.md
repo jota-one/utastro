@@ -117,7 +117,10 @@ Ensuite :
 - [ ] `next` est vide (aucune ville ni session) : il affichait jusqu'ici les données de `never`, il montre désormais sa propre base — le smoke test y restera rouge sur la page ville et la page session jusqu'à l'import
 - [ ] Import final sur la prod : geler l'ancien site (environ 6 min, de l'export au redémarrage), `scripts/export-mariadb.sh`, puis `scripts/import-on-server.sh next.urban-training.ch --fresh` — demande d'abord un accès SSH à `jota-apps-3` (clé d'hôte à vérifier)
 - [ ] Après l'import : tester une connexion avec un compte et un mot de passe de l'ancien site, puis supprimer les exports locaux et la sauvegarde laissée sur le serveur (données personnelles)
-- [ ] Définir comment geler l'ancien site pendant l'import (pas de mode maintenance trouvé dans le legacy)
+- [x] Page de maintenance (`public/maintenance.html`, en fr/de/en) servie par Caddy avec un code 503 dès que l'app ne répond pas — import, déploiement ou panne ; elle se recharge d'elle-même au retour du site. Testée sur `never`. Le monitoring continue de signaler le site en panne (« HTTP 503 »)
+- [x] Caddy officiel sur tous les serveurs : `jota-apps-3` tournait avec le Caddy 2.6 de Debian, qui refusait la config — le provisionnement installe désormais la version officielle
+- [ ] Gel de l'ancien site le jour J, sans déploiement : arrêter l'app du nouveau VPS (page de maintenance), basculer le DNS de `urban-training.ch` (cache de 5 min, `www` est un alias), arrêter l'ancienne app (`kubectl -n urbantraining-production scale deployment webapp-deployment --replicas=0`), puis export et import — l'export passe par le cluster, pas par le domaine
+- [ ] Reprendre dans notre Caddy la redirection `urban-training.ch` → `www`, faite aujourd'hui par l'ancien cluster
 - [x] Redirections des anciennes URLs en place et testées
 - [ ] Reporter la clé `caddy` des redirections sur l'app `www` si elle est déclarée à part de `next` dans `apps.yaml`
 - [ ] Bascule DNS de `www.urban-training.ch` vers le nouveau VPS, puis smoke test sur `www`
@@ -193,3 +196,4 @@ Certaines tâches doivent être faites en 1er lieu et ensebmle pour que tout le 
 - [2026-10-12] Anciennes URLs — les adresses du site actuel (redirections legacy, page Sponsors, liste des sessions) mènent aux bonnes pages du nouveau site sur `never` et `next`
 - [2026-10-12] Prod — `next` utilise sa propre base de données au lieu de celle de `never` (et `www` après la bascule) ; smoke test en lecture seule des sites déployés
 - [2026-10-13] Import des données — export et import sur le serveur scriptés de bout en bout ; répétition générale sur `never` avec des données fraîches, environ 4 min de coupure
+- [2026-10-13] Page de maintenance — affichée automatiquement quand le site est arrêté (import, déploiement, panne) et retirée d'elle-même à son retour
