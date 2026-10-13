@@ -1,27 +1,22 @@
 import {
   test,
   expect,
-  fetchAuthToken,
+  fetchAdminAuth,
   findOpenEvent,
 } from '../../fixtures/index'
 import { EventDetailPage } from '../../pages/EventDetailPage'
 
 /**
  * Authenticated member: subscribe / unsubscribe flows and counter updates.
- * Requires TEST_MEMBER_EMAIL and TEST_MEMBER_PASSWORD. The target event is
- * discovered dynamically so the spec does not depend on aging
- * TEST_EVENT_ID_* fixtures.
+ * Runs as a throwaway plain member (`memberPage`), deleted afterwards with its
+ * subscriptions. The target event is discovered dynamically through the admin
+ * account (TEST_MEMBER).
  */
 
 let openEventId: string | null = null
 
 test.beforeEach(async ({ memberPage }) => {
-  test.skip(!process.env.TEST_MEMBER_EMAIL, 'TEST_MEMBER_EMAIL not set')
-  const auth = await fetchAuthToken(
-    process.env.TEST_MEMBER_EMAIL!,
-    process.env.TEST_MEMBER_PASSWORD!,
-  )
-  openEventId = await findOpenEvent(auth)
+  openEventId = await findOpenEvent(await fetchAdminAuth())
   test.skip(!openEventId, 'no event with an open subscription window')
   // Navigate to homepage to establish event before going to detail
   await memberPage.goto('/fr')

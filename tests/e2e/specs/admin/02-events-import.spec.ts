@@ -10,7 +10,7 @@ import {
  * Admin CSV import of sessions: upload → preview (per-cell errors, language
  * merge, recurrence, unselecting a row) → import (duplicates skipped) → the
  * sessions actually created. Runs on a throwaway location and activity type,
- * with sessions in 2031, all deleted afterwards. Uses the `memberPage`
+ * with sessions in 2031, all deleted afterwards. Uses the `adminPage`
  * fixture, whose TEST_MEMBER account is an admin.
  */
 
@@ -145,7 +145,7 @@ test.describe('Admin CSV import of sessions', () => {
   })
 
   test('previews, imports and creates the sessions of a CSV file', async ({
-    memberPage: page,
+    adminPage: page,
   }) => {
     await page.goto('/admin/events')
     await page.getByRole('button', { name: 'Importer' }).first().click()

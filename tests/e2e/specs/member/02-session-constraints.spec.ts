@@ -18,17 +18,15 @@ import { EventDetailPage } from '../../pages/EventDetailPage'
 
 /**
  * Edge cases: full events, past events, city watch.
- * All target events are discovered dynamically.
+ * Runs as throwaway plain members; target events are discovered through the
+ * admin account (TEST_MEMBER), read-only.
  */
 
 let auth: Auth
 
 test.beforeEach(async () => {
   test.skip(!process.env.TEST_MEMBER_EMAIL, 'TEST_MEMBER_EMAIL not set')
-  auth = await fetchAuthToken(
-    process.env.TEST_MEMBER_EMAIL!,
-    process.env.TEST_MEMBER_PASSWORD!,
-  )
+  auth = await fetchAdminAuth()
 })
 
 test('cannot subscribe to a full event — full message is shown', async ({
@@ -100,7 +98,7 @@ test('subscribe button is not shown for a past event', async ({
   await expect(event.unsubscribeButton()).not.toBeVisible()
 })
 
-test('member can watch a city for news', async ({ memberPage }) => {
+test('member can watch a city for news', async ({ memberPage, member }) => {
   // The watch button only appears when the subscription window is not open yet
   const unopenedEventId = await findUnopenedEvent(auth)
   test.skip(!unopenedEventId, 'no upcoming event with a closed window found')
@@ -111,37 +109,25 @@ test('member can watch a city for news', async ({ memberPage }) => {
 
   await expect(event.watchCityButton()).toBeVisible({ timeout: 8_000 })
   await event.watchCityButton().click()
+  await expect(
+    memberPage.getByText('Tu es abonné à', { exact: false }),
+  ).toBeVisible({ timeout: 5_000 })
 
-  try {
-    // Confirmation text appears
-    await expect(
-      memberPage.getByText('Tu es abonné à', { exact: false }),
-    ).toBeVisible({ timeout: 5_000 })
-  } finally {
-    // Cleanup: remove the created watcher, otherwise the button is hidden
-    // on the next run
-    const { city } = (await fetch(
-      `${PB_URL}/api/collections/ut_events/records/${unopenedEventId}?fields=city`,
-      { headers: { Authorization: `Bearer ${auth.token}` } },
-    ).then(r => r.json())) as { city: string }
-    const params = new URLSearchParams({
-      filter: `user = "${auth.record.id}" && city = "${city}"`,
-      fields: 'id',
-    })
-    const watchers = (await fetch(
-      `${PB_URL}/api/collections/ut_city_watchers/records?${params}`,
-      { headers: { Authorization: `Bearer ${auth.token}` } },
-    ).then(r => r.json())) as { items: { id: string }[] }
-    for (const watcher of watchers.items) {
-      await fetch(
-        `${PB_URL}/api/collections/ut_city_watchers/records/${watcher.id}`,
-        {
-          method: 'DELETE',
-          headers: { Authorization: `Bearer ${auth.token}` },
-        },
-      )
-    }
-  }
+  // The watch is stored for this member and this city (it goes with the
+  // throwaway account afterwards)
+  const { city } = (await fetch(
+    `${PB_URL}/api/collections/ut_events/records/${unopenedEventId}?fields=city`,
+    { headers: { Authorization: `Bearer ${auth.token}` } },
+  ).then(r => r.json())) as { city: string }
+  const params = new URLSearchParams({
+    filter: `city = "${city}"`,
+    fields: 'user',
+  })
+  const watchers = (await fetch(
+    `${PB_URL}/api/collections/ut_city_watchers/records?${params}`,
+    { headers: { Authorization: `Bearer ${member.token}` } },
+  ).then(r => r.json())) as { items: { user: string }[] }
+  expect(watchers.items.map(w => w.user)).toEqual([member.record.id])
 })
 
 test('anonymous user sees login prompt when clicking subscribe', async ({

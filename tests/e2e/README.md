@@ -95,6 +95,11 @@ Only `smoke/` and `anonymous/04-redirects` are safe on a deployed site: the othe
 
 Tests that need authentication inject a fresh JWT directly into `localStorage` / `sessionStorage` before the page loads — no UI login needed per test. This makes the suite fast while testing the real app state.
 
+Fixtures (`fixtures/index.ts`):
+
+- `memberPage` — a page signed in as a throwaway plain member (role `user`), created for the test and deleted afterwards with its subscriptions and watched cities; `member` gives the same account's token and record for API calls
+- `adminPage` — a page signed in as `TEST_MEMBER`, for the admin specs only
+
 ## Interpreting results
 
 **Green run**: all specs passed, feature set is intact.
