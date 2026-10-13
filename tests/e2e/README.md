@@ -86,9 +86,10 @@ Only `smoke/` and `anonymous/04-redirects` are safe on a deployed site: the othe
 
 ### admin/
 
-| File                 | What it covers                                         |
-| -------------------- | ------------------------------------------------------ |
-| `01-exports.spec.ts` | CSV exports: users, city watchers, session subscribers |
+| File                       | What it covers                                                                                                                         |
+| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `01-exports.spec.ts`       | CSV exports: users, city watchers, session subscribers                                                                                 |
+| `02-events-import.spec.ts` | CSV import of sessions: preview with per-cell errors, language merge, recurrence, unselected row, duplicates skipped, sessions created |
 
 ## Auth strategy
 
