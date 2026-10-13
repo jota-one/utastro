@@ -90,7 +90,7 @@ Suite Playwright dans `tests/e2e`, lancée à la main en local (`./tests/e2e/run
 - [x] Les tests suppriment les comptes qu'ils créent (le test d'inscription en laissait un à chaque run) ; les comptes `e2e+…@example.com` déjà créés ont été purgés de la base locale
 - [x] Session pleine et course à la dernière place : chacune sur une session créée et remplie pour le test, au lieu de modifier la capacité d'une vraie session ; le refus côté serveur est aussi vérifié
 - [x] Export CSV des utilisateurs : environ 13 s pour 57 000 comptes, délai du test porté à 90 s ; ses échecs venaient de redémarrages intempestifs du PocketBase local, pas de la durée de l'export
-- [ ] Compte de test au vrai rôle membre : le compte « membre » actuel est superadmin, les specs membre ne vérifient donc pas ce qu'un membre a le droit de faire
+- [x] Specs membre jouées par un vrai membre : chaque test crée son propre compte au rôle `user` et le supprime ensuite ; le compte de test du `.env` ne sert plus qu'aux specs admin
 - [x] Droits d'accès d'un membre : rôle, champs legacy, inscription d'un tiers, inscription comme coach, présence, et non-régression sur ce qui était déjà bloqué (utilisateurs et inscriptions des autres, modification d'une session, feuille de présence, impersonation, admin)
 - [x] Connexion par l'interface : connexion, maintien après rechargement, déconnexion, mauvais mot de passe, compte pas encore activé
 - [x] Comptes importés : connexion avec l'ancien mot de passe (simple, accentué, emoji, court), migration vers un mot de passe PocketBase, mauvais mot de passe refusé
@@ -100,22 +100,28 @@ Suite Playwright dans `tests/e2e`, lancée à la main en local (`./tests/e2e/run
 - [x] Smoke test en lecture seule (`specs/smoke`), lançable sur `next` avant la bascule DNS puis sur `www` juste après : pages en fr/de/en, page ville, page session, le site appelle sa propre API, ouverture de la connexion, pages d'activation et de réinitialisation
 - [x] Anciennes URLs : spec `04-redirects`, 31 redirections vérifiées sur `never` et `next` (à lancer contre un site déployé, Caddy n'existant pas en local)
 
-Ensuite :
+Pas encore couvert :
 
-- [ ] Versions allemande et anglaise : pages (pas de sélecteur de langue, déjà masqué dans le legacy)
-- [ ] Profil : modification des infos, changement de mot de passe, onglet des villes suivies
-- [ ] Page ville : liste des sessions, filtres, navigation par date, bandeau sponsors
-- [ ] Formulaire coach et page contact : validation et envoi
-- [x] Admin : import CSV de sessions (aperçu avec erreurs par cellule, fusion des langues, récurrence, ligne décochée, doublons ignorés, sessions réellement créées)
-- [ ] Admin : création, modification et suppression d'une session, validation d'un compte, impersonation et retour, fusion de lieux, liste des inscrits
-- [ ] Affichage mobile (menu hamburger) et page 404
+- [ ] Site public — page ville : filtres des sessions, navigation par date (option désactivée), carte Google Maps, bandeau des sponsors (liens activables) ; accueil : contenu, teasers, carte des villes
+- [ ] Site public — versions allemande et anglaise au-delà du chargement des pages : textes, liens entre pages, e-mails (aujourd'hui en français seulement)
+- [ ] Site public — affichage mobile (menu hamburger), page 404, redirection d'un ancien identifiant numérique de session (`/fr/session/36` → 301)
+- [ ] Profil : modification des informations, changement de mot de passe, onglet des villes suivies (ajout et retrait), compteurs du header (villes, sessions, coaching)
+- [ ] Formulaire coach : validation, pièces jointes, envoi de l'e-mail (captcha désactivé en local)
+- [ ] Coach : validation finale de la feuille de présence (option désactivée), désinscription comme coach depuis le profil
+- [ ] Impersonation : se connecter en tant qu'un utilisateur depuis l'admin, bannière, retour au compte admin (seul le refus pour un membre est testé)
+- [ ] Admin sessions : création, modification, suppression, filtres et recherche, liste des inscrits (copie des e-mails, export)
+- [ ] Admin utilisateurs : recherche par e-mail, création, modification, validation du compte, suppression
+- [ ] Admin villes, lieux, types d'activité, proposants : création, modification, activation, suppression ; fusion de lieux ; exports par ville et statistiques (seul l'export global des personnes intéressées est testé)
+- [ ] Admin sponsors : création avec logo, limite de 150 Ko, sponsor global ou par villes, activation, affichage sur les pages ville
+- [ ] E-mails réellement envoyés par Mandrill (testé à la main sur `never`, les tests passent par Mailpit) ; rapport d'erreur d'envoi
+- [ ] Page de maintenance et retour automatique (testés à la main sur `never`, pas de spec)
 - [ ] Faire tourner la suite en CI sur un jeu de données de test, sans dépendre d'une copie des données de prod
 
 ### Bascule
 
 - [x] Failles de droits d'accès corrigées
 - [x] Fuseau horaire des serveurs corrigé
-- [ ] Couverture E2E « avant la bascule » ci-dessus au vert
+- [x] Couverture E2E « avant la bascule » ci-dessus au vert
 - [ ] `next` est vide (aucune ville ni session) : il affichait jusqu'ici les données de `never`, il montre désormais sa propre base — le smoke test y restera rouge sur la page ville et la page session jusqu'à l'import
 - [x] Page de maintenance (`public/maintenance.html`, en fr/de/en) servie par Caddy avec un code 503 dès que l'app ne répond pas — import, déploiement ou panne ; elle se recharge d'elle-même au retour du site. Testée sur `never`. Le monitoring continue de signaler le site en panne (« HTTP 503 »)
 - [x] Caddy officiel sur tous les serveurs : `jota-apps-3` tournait avec le Caddy 2.6 de Debian, qui refusait la config — le provisionnement installe désormais la version officielle
@@ -123,7 +129,7 @@ Ensuite :
 - [x] Redirection `urban-training.ch` et `next.urban-training.ch` → `www`, et liens des e-mails sur `www` : prêts dans la PR de bascule `jota-one/infra#30` (brouillon, à merger seulement le jour J après la bascule DNS)
 - [ ] Jour J : suivre `docs/switchover.md` — seuls le changement DNS chez Infomaniak et la vérification d'une connexion avec un ancien compte restent manuels
 - [x] Redirections des anciennes URLs en place et testées
-- [ ] Mettre à jour la sonde de monitoring (aujourd'hui `www.urban-training.ch/fr`) si l'URL de référence change
+- [x] Sonde de monitoring : rien à changer, elle surveille déjà `www.urban-training.ch/fr`
 
 ## Décisions actées
 
@@ -197,3 +203,4 @@ Certaines tâches doivent être faites en 1er lieu et ensebmle pour que tout le 
 - [2026-10-13] Page de maintenance — affichée automatiquement quand le site est arrêté (import, déploiement, panne) et retirée d'elle-même à son retour
 - [2026-10-13] Bascule — scriptée étape par étape et répétée sur `never` ; l'adresse `www` et les redirections de `urban-training.ch` sont prêtes à être activées le jour J
 - [2026-10-13] Admin — l'import CSV de sessions ne fige plus l'onglet sur une date de fin de récurrence mal formée ; parcours complet de l'import couvert par les tests E2E
+- [2026-10-13] Tests E2E — toutes les specs membre jouées par de vrais comptes membre jetables ; inventaire complet de ce qui reste à couvrir
