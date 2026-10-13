@@ -115,16 +115,12 @@ Ensuite :
 - [x] Fuseau horaire des serveurs corrigé
 - [ ] Couverture E2E « avant la bascule » ci-dessus au vert
 - [ ] `next` est vide (aucune ville ni session) : il affichait jusqu'ici les données de `never`, il montre désormais sa propre base — le smoke test y restera rouge sur la page ville et la page session jusqu'à l'import
-- [ ] Import final sur la prod : geler l'ancien site (environ 6 min, de l'export au redémarrage), `scripts/export-mariadb.sh`, puis `scripts/import-on-server.sh next.urban-training.ch --fresh` — demande d'abord un accès SSH à `jota-apps-3` (clé d'hôte à vérifier)
-- [ ] Après l'import : tester une connexion avec un compte et un mot de passe de l'ancien site, puis supprimer les exports locaux et la sauvegarde laissée sur le serveur (données personnelles)
 - [x] Page de maintenance (`public/maintenance.html`, en fr/de/en) servie par Caddy avec un code 503 dès que l'app ne répond pas — import, déploiement ou panne ; elle se recharge d'elle-même au retour du site. Testée sur `never`. Le monitoring continue de signaler le site en panne (« HTTP 503 »)
 - [x] Caddy officiel sur tous les serveurs : `jota-apps-3` tournait avec le Caddy 2.6 de Debian, qui refusait la config — le provisionnement installe désormais la version officielle
-- [ ] Gel de l'ancien site le jour J, sans déploiement : arrêter l'app du nouveau VPS (page de maintenance), basculer le DNS de `urban-training.ch` (cache de 5 min, `www` est un alias), arrêter l'ancienne app (`kubectl -n urbantraining-production scale deployment webapp-deployment --replicas=0`), puis export et import — l'export passe par le cluster, pas par le domaine
-- [ ] Reprendre dans notre Caddy la redirection `urban-training.ch` → `www`, faite aujourd'hui par l'ancien cluster
+- [x] Bascule scriptée étape par étape (`scripts/switchover.sh`, marche à suivre dans `docs/switchover.md`) : gel du nouveau site, attente du DNS, merge de la PR de bascule, arrêt de l'ancien site, export, import, smoke test sur `www`, nettoyage — répétée sur `never` le 2026-10-13 (moins de 6 min de maintenance, export compris)
+- [x] Redirection `urban-training.ch` et `next.urban-training.ch` → `www`, et liens des e-mails sur `www` : prêts dans la PR de bascule `jota-one/infra#30` (brouillon, à merger seulement le jour J après la bascule DNS)
+- [ ] Jour J : suivre `docs/switchover.md` — seuls le changement DNS chez Infomaniak et la vérification d'une connexion avec un ancien compte restent manuels
 - [x] Redirections des anciennes URLs en place et testées
-- [ ] Reporter la clé `caddy` des redirections sur l'app `www` si elle est déclarée à part de `next` dans `apps.yaml`
-- [ ] Bascule DNS de `www.urban-training.ch` vers le nouveau VPS, puis smoke test sur `www`
-- [ ] Passer le `domain` de l'app de prod à `www.urban-training.ch` dans `jota-one/infra` : les liens des e-mails d'activation et de réinitialisation suivent ce domaine
 - [ ] Mettre à jour la sonde de monitoring (aujourd'hui `www.urban-training.ch/fr`) si l'URL de référence change
 
 ## Décisions actées
@@ -197,3 +193,4 @@ Certaines tâches doivent être faites en 1er lieu et ensebmle pour que tout le 
 - [2026-10-12] Prod — `next` utilise sa propre base de données au lieu de celle de `never` (et `www` après la bascule) ; smoke test en lecture seule des sites déployés
 - [2026-10-13] Import des données — export et import sur le serveur scriptés de bout en bout ; répétition générale sur `never` avec des données fraîches, environ 4 min de coupure
 - [2026-10-13] Page de maintenance — affichée automatiquement quand le site est arrêté (import, déploiement, panne) et retirée d'elle-même à son retour
+- [2026-10-13] Bascule — scriptée étape par étape et répétée sur `never` ; l'adresse `www` et les redirections de `urban-training.ch` sont prêtes à être activées le jour J
