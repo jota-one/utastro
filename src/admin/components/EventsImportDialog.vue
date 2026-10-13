@@ -111,6 +111,11 @@
               </el-tooltip>
             </span>
             <span v-else>{{ formatDateTime(row.end_date) }}</span>
+            <div v-if="isCellError(row.end_recurrence)" class="error">
+              <el-tooltip :content="row.end_recurrence.code">
+                <span>Fin de récurrence [{{ row.end_recurrence.value }}]</span>
+              </el-tooltip>
+            </div>
           </template>
         </el-table-column>
         <el-table-column label="Max" width="70">
@@ -356,7 +361,15 @@ const sanitizeLine = (line: Record<string, string>) => {
         return acc
       }
       if (field === 'end_recurrence') {
-        acc[field] = dayjs(value, 'YYYY-MM-DD')
+        // Strict: a lenient parse turns 2026-13-45 into a date in 2027, and an
+        // unparsable one (30.11.2026) made the recurrence expansion loop forever
+        const parsed = dayjs(value, 'YYYY-MM-DD', true)
+        if (!parsed.isValid()) {
+          acc[field] = cellError(value, 'DATE_BAD_FORMAT')
+          acc.importable = false
+          return acc
+        }
+        acc[field] = parsed
         return acc
       }
 
@@ -448,12 +461,17 @@ const doUpload = async (options: { file: File }) => {
     const expanded = merged.reduce((acc: Record<string, any>[], line) => {
       const base = { ...line }
       delete base.recurrence
-      delete base.end_recurrence
       delete base.groupKey
+      // keep an invalid end of recurrence on the row so the preview shows why
+      // it cannot be imported
+      if (!isCellError(line.end_recurrence)) {
+        delete base.end_recurrence
+      }
       if (
         Number(line.recurrence) > 0 &&
         dayjs.isDayjs(line.start_date) &&
-        dayjs.isDayjs(line.end_date)
+        dayjs.isDayjs(line.end_date) &&
+        dayjs.isDayjs(line.end_recurrence)
       ) {
         let next = line.start_date
         let nextEnd = line.end_date
