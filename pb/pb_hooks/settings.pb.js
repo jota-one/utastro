@@ -3,10 +3,14 @@
 onBootstrap(e => {
   e.next()
 
-  // DOMAIN is set by the jota-one/infra deployment for every app
+  // Set by the jota-one/infra deployment: DOMAIN for every app, ENV_SITE_URL
+  // (apps.yaml env.SITE_URL) when the public address differs from the app's
+  // domain — production is declared as next.urban-training.ch but answers on
+  // www.urban-training.ch, and the email links must point there
   const domain = $os.getenv('DOMAIN')
   const appUrl =
     $os.getenv('PUBLIC_ASTRO_BASE_URI') ||
+    $os.getenv('ENV_SITE_URL') ||
     (domain ? `https://${domain}` : 'http://localhost:4321')
 
   const settings = $app.settings()
