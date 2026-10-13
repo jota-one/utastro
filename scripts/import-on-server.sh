@@ -58,6 +58,9 @@ INFRA_REPO="${INFRA_REPO:-$PROJECT_ROOT/../infra}"
 SSH_CONFIG="$INFRA_REPO/resources/ssh/config"
 [[ -f "$SSH_CONFIG" ]] || err "SSH config not found: $SSH_CONFIG (set INFRA_REPO)"
 SSH=(ssh -F "$SSH_CONFIG" -o BatchMode=yes "$SSH_HOST")
+# for commands that read nothing: ssh would otherwise swallow this script's
+# own stdin (and the confirmation answer with it)
+SSH_NO_STDIN=(ssh -n -F "$SSH_CONFIG" -o BatchMode=yes "$SSH_HOST")
 
 APP_ROOT="/srv/www/$DOMAIN"
 SERVICE_SUFFIX="${DOMAIN//./-}"
@@ -98,7 +101,7 @@ ok "${#REQUIRED_TABLES[@]} tables and $LOGO_COUNT logos, exported on $OLDEST"
 # ─── 2. Server checks (read-only) ────────────────────────────────────────────
 step "Server"
 
-"${SSH[@]}" true 2>/dev/null || err "Cannot connect to $SSH_HOST (check the host key and $SSH_CONFIG)"
+"${SSH_NO_STDIN[@]}" true 2>/dev/null || err "Cannot connect to $SSH_HOST (check the host key and $SSH_CONFIG)"
 "${SSH[@]}" bash -s -- "$APP_ROOT" "$SERVICE_SUFFIX" <<'REMOTE' || err "Server checks failed"
 set -euo pipefail
 APP_ROOT="$1"; SUFFIX="$2"
@@ -118,11 +121,12 @@ ok "Site found, services present"
 # ─── 3. Upload exports and build pb-custom ───────────────────────────────────
 step "Upload and build (the site keeps running)"
 
-tar -czf - -C "$PROJECT_ROOT/pb" json_import_sources \
+# no macOS metadata: GNU tar on the server warns about every file otherwise
+COPYFILE_DISABLE=1 tar --no-mac-metadata --no-xattrs -czf - -C "$PROJECT_ROOT/pb" json_import_sources \
   | "${SSH[@]}" "rm -rf '$APP_ROOT/json_import_sources' && tar -xzf - -C '$APP_ROOT'"
 ok "Exports uploaded to $APP_ROOT/json_import_sources"
 
-"${SSH[@]}" "cd '$APP_ROOT' && cd \"\$(cat .gitref)/pb-tools\" && go build -o '$APP_ROOT/pb-custom' ." \
+"${SSH_NO_STDIN[@]}" "cd '$APP_ROOT' && cd \"\$(cat .gitref)/pb-tools\" && go build -o '$APP_ROOT/pb-custom' ." \
   || err "pb-custom build failed"
 ok "pb-custom built from the deployed release"
 
@@ -131,7 +135,7 @@ step "Confirmation"
 printf "  %s goes down until the import is over (a few minutes).\n" "$DOMAIN"
 printf "  Do not push to main meanwhile.\n"
 ask "Type the domain to go on:"
-read -r CONFIRM
+read -r CONFIRM || CONFIRM=""
 [[ "$CONFIRM" == "$DOMAIN" ]] || err "Aborted — exports stay on the server, nothing else changed"
 
 # ─── 5. Import ───────────────────────────────────────────────────────────────

@@ -159,7 +159,9 @@ DB_HOST="127.0.0.1"
 DB_NAME="urbantraining-production"
 
 export MYSQL_PWD="$DB_PASS"
-MYSQL="mysql -h $DB_HOST -P $DB_LOCAL_PORT -u $DB_USER --connect-timeout=5"
+# Force UTF-8: without a UTF-8 locale (LANG unset) the client falls back to
+# latin1 and the accented text lands in the JSON as invalid UTF-8
+MYSQL="mysql -h $DB_HOST -P $DB_LOCAL_PORT -u $DB_USER --connect-timeout=5 --default-character-set=utf8mb4"
 
 $MYSQL -e "SELECT 1" "$DB_NAME" &>/dev/null \
   || err "Connection failed (host=$DB_HOST:$DB_LOCAL_PORT user=$DB_USER db=$DB_NAME)"
@@ -251,14 +253,20 @@ print(']')
 print('}')
 print(']')
 " "$TABLE" "$DB_NAME" > "$OUT" 2>/dev/null; then
-    ROW_COUNT=$(python3 -c "
+    # Read the file back strictly: an unreadable export must not reach the import
+    if ROW_COUNT=$(python3 -c "
 import json
-with open('$OUT') as f:
+with open('$OUT', encoding='utf-8') as f:
     data = json.load(f)
 table = next(e for e in data if e.get('type') == 'table')
 print(len(table['data']))
-" 2>/dev/null || echo "?")
-    printf "${GREEN}%s rows${NC}\n" "$ROW_COUNT"
+" 2>/dev/null); then
+      printf "${GREEN}%s rows${NC}\n" "$ROW_COUNT"
+    else
+      printf "${RED}unreadable${NC}\n"
+      rm -f "$OUT"
+      FAILED_TABLES+=("$TABLE")
+    fi
   else
     printf "${RED}failed${NC}\n"
     rm -f "$OUT"
