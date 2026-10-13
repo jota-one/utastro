@@ -43,6 +43,7 @@ Migration du backend vers calls aux endpoint Pb out-of-the-box et ajout de route
 - [x] Fiche session : après s'être inscrit ou désinscrit, le compteur de coachs (et le compteur d'inscrits qui décide si la session est pleine) affichait une valeur fausse jusqu'au rechargement de la page
 - [x] **Les sites `next` et `never` partageaient la base de `never`** : l'URL de PocketBase était compilée dans le build depuis le `.env` du dépôt. `next` affichait les données de `never` et y aurait écrit les inscriptions, comme `www` après la bascule. Chaque site utilise désormais sa propre base, sur son propre domaine
 - [x] Page d'activation ouverte sans jeton : le cadre d'erreur s'affichait sans texte
+- [x] Import CSV de sessions : une fin de récurrence au format suisse (`30.11.2026`) figeait l'onglet de l'admin (boucle sans fin), et une date impossible (`2026-13-45`) passait pour une date de 2027 — la ligne est désormais signalée en erreur dans l'aperçu
 - [ ] Un envoi d'e-mail en échec n'est visible que dans les logs PocketBase : la demande d'activation ou de réinitialisation répond quand même OK à l'utilisateur
 
 ### Admin @Joël
@@ -105,7 +106,8 @@ Ensuite :
 - [ ] Profil : modification des infos, changement de mot de passe, onglet des villes suivies
 - [ ] Page ville : liste des sessions, filtres, navigation par date, bandeau sponsors
 - [ ] Formulaire coach et page contact : validation et envoi
-- [ ] Admin : création, modification et suppression d'une session, validation d'un compte, impersonation et retour, import CSV de sessions, fusion de lieux, liste des inscrits
+- [x] Admin : import CSV de sessions (aperçu avec erreurs par cellule, fusion des langues, récurrence, ligne décochée, doublons ignorés, sessions réellement créées)
+- [ ] Admin : création, modification et suppression d'une session, validation d'un compte, impersonation et retour, fusion de lieux, liste des inscrits
 - [ ] Affichage mobile (menu hamburger) et page 404
 - [ ] Faire tourner la suite en CI sur un jeu de données de test, sans dépendre d'une copie des données de prod
 
@@ -194,3 +196,4 @@ Certaines tâches doivent être faites en 1er lieu et ensebmle pour que tout le 
 - [2026-10-13] Import des données — export et import sur le serveur scriptés de bout en bout ; répétition générale sur `never` avec des données fraîches, environ 4 min de coupure
 - [2026-10-13] Page de maintenance — affichée automatiquement quand le site est arrêté (import, déploiement, panne) et retirée d'elle-même à son retour
 - [2026-10-13] Bascule — scriptée étape par étape et répétée sur `never` ; l'adresse `www` et les redirections de `urban-training.ch` sont prêtes à être activées le jour J
+- [2026-10-13] Admin — l'import CSV de sessions ne fige plus l'onglet sur une date de fin de récurrence mal formée ; parcours complet de l'import couvert par les tests E2E
