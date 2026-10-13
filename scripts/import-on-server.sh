@@ -11,9 +11,14 @@ set -euo pipefail
 #      backup if anything fails on the way
 #   4. runs the read-only smoke test against the site
 #
-# Usage: scripts/import-on-server.sh <domain> [--fresh]
-#   --fresh  start from an empty database (superusers kept) instead of
-#            importing over the current one: what a production import does
+# Usage: scripts/import-on-server.sh <domain> [--fresh] [--yes] [--keep-frozen]
+#   --fresh        start from an empty database (superusers kept) instead of
+#                  importing over the current one: what a production import does
+#   --yes          skip the confirmation (scripts/switchover.sh asks it once)
+#   --keep-frozen  the site was frozen beforehand (Node stopped, maintenance
+#                  page shown): on failure, restore the backup but keep it frozen
+#                  rather than reopen it
+# SITE_URL is the address the smoke test checks (default https://<domain>).
 #
 # The site is down from the stop to the restart. Do not push to main (or merge
 # into it) meanwhile: a deployment would restart PocketBase mid-import.
@@ -35,9 +40,20 @@ ask()  { printf "${BLUE}?${NC} ${BOLD}%s${NC} " "$*"; }
 
 # ─── Arguments ───────────────────────────────────────────────────────────────
 DOMAIN="${1:-}"
+[[ -n "$DOMAIN" && "$DOMAIN" != --* ]] || err "Usage: $0 <domain> [--fresh] [--yes] [--keep-frozen]"
+shift
 FRESH=0
-[[ "${2:-}" == "--fresh" ]] && FRESH=1
-[[ -n "$DOMAIN" ]] || err "Usage: $0 <domain> [--fresh]"
+ASSUME_YES=0
+KEEP_FROZEN=0
+for OPTION in "$@"; do
+  case "$OPTION" in
+    --fresh)       FRESH=1 ;;
+    --yes)         ASSUME_YES=1 ;;
+    --keep-frozen) KEEP_FROZEN=1 ;;
+    *)             err "Unknown option: $OPTION" ;;
+  esac
+done
+SITE_URL="${SITE_URL:-https://$DOMAIN}"
 
 # Server and PocketBase port of each site, as declared in jota-one/infra
 # apps.yaml (host-on, pb.port). Override with SSH_HOST / PB_PORT.
@@ -134,16 +150,20 @@ ok "pb-custom built from the deployed release"
 step "Confirmation"
 printf "  %s goes down until the import is over (a few minutes).\n" "$DOMAIN"
 printf "  Do not push to main meanwhile.\n"
-ask "Type the domain to go on:"
-read -r CONFIRM || CONFIRM=""
-[[ "$CONFIRM" == "$DOMAIN" ]] || err "Aborted — exports stay on the server, nothing else changed"
+if [[ $ASSUME_YES -eq 1 ]]; then
+  ok "Confirmed by --yes"
+else
+  ask "Type the domain to go on:"
+  read -r CONFIRM || CONFIRM=""
+  [[ "$CONFIRM" == "$DOMAIN" ]] || err "Aborted — exports stay on the server, nothing else changed"
+fi
 
 # ─── 5. Import ───────────────────────────────────────────────────────────────
 step "Import"
 
-"${SSH[@]}" bash -s -- "$APP_ROOT" "$SERVICE_SUFFIX" "$PB_PORT" "$FRESH" <<'REMOTE'
+"${SSH[@]}" bash -s -- "$APP_ROOT" "$SERVICE_SUFFIX" "$PB_PORT" "$FRESH" "$KEEP_FROZEN" <<'REMOTE'
 set -Eeuo pipefail
-APP_ROOT="$1"; SUFFIX="$2"; PB_PORT="$3"; FRESH="$4"
+APP_ROOT="$1"; SUFFIX="$2"; PB_PORT="$3"; FRESH="$4"; KEEP_FROZEN="$5"
 cd "$APP_ROOT"
 
 PB_SERVICE="pb-$SUFFIX.service"
@@ -169,8 +189,15 @@ rollback() {
     rm -rf pb_data.failed && mv pb_data pb_data.failed 2>/dev/null || true
     mv "$BACKUP" pb_data
   fi
-  start_site
-  echo "✗ Site restarted on its previous data (failed import kept in pb_data.failed)" >&2
+  if [[ "$KEEP_FROZEN" == "1" ]]; then
+    # PocketBase back for the provisioning, Node kept off: the maintenance
+    # page stays up instead of the site reopening on its previous data
+    sudo systemctl start "$PB_SERVICE"
+    echo "✗ Previous data restored, site still frozen (failed import kept in pb_data.failed)" >&2
+  else
+    start_site
+    echo "✗ Site restarted on its previous data (failed import kept in pb_data.failed)" >&2
+  fi
   exit 1
 }
 
@@ -246,10 +273,10 @@ ok "Import done"
 
 # ─── 6. Smoke test ───────────────────────────────────────────────────────────
 step "Smoke test"
-if BASE_URL="https://$DOMAIN" "$PROJECT_ROOT/tests/e2e/run.sh" specs/smoke; then
-  ok "Smoke test green on $DOMAIN"
+if BASE_URL="$SITE_URL" "$PROJECT_ROOT/tests/e2e/run.sh" specs/smoke; then
+  ok "Smoke test green on $SITE_URL"
 else
-  warn "Smoke test failed on $DOMAIN — check before going further"
+  err "Smoke test failed on $SITE_URL — the import itself succeeded, check the site before going further"
 fi
 
 printf "\n"

@@ -66,21 +66,24 @@ ok "$(python3 --version)"
 # ─── 2. urban-training repo ──────────────────────────────────────────────────
 step "urban-training repo"
 
-ask "Repo path [../urban-training]:"
-read -r UT_REPO
+# UT_REPO, K8S_CONTEXT and DB_USER skip their question when set (used by
+# scripts/switchover.sh)
+if [[ -z "${UT_REPO:-}" ]]; then
+  ask "Repo path [../urban-training]:"
+  read -r UT_REPO || UT_REPO=""
+fi
 UT_REPO="${UT_REPO:-../urban-training}"
 
 [[ -d "$UT_REPO" ]] || err "Directory not found: $UT_REPO"
-PMA_SCRIPT="$UT_REPO/k8s/scripts/pma-prod.sh"
-[[ -f "$PMA_SCRIPT" ]] || err "Script not found: $PMA_SCRIPT"
-[[ -x "$PMA_SCRIPT" ]] || chmod +x "$PMA_SCRIPT"
 ok "Repo: $(realpath "$UT_REPO")"
 
 # ─── 3. kubectl context ──────────────────────────────────────────────────────
 step "Kubernetes context"
 
-ask "kubectl context [ut-prod]:"
-read -r K8S_CONTEXT
+if [[ -z "${K8S_CONTEXT:-}" ]]; then
+  ask "kubectl context [ut-prod]:"
+  read -r K8S_CONTEXT || K8S_CONTEXT=""
+fi
 K8S_CONTEXT="${K8S_CONTEXT:-ut-prod}"
 
 kubectl config use-context "$K8S_CONTEXT" \
@@ -92,9 +95,13 @@ K8S_NS="urbantraining-production"
 # ─── 4. MariaDB credentials ──────────────────────────────────────────────────
 step "MariaDB credentials"
 
-printf "  1) istvan\n  2) joel\n"
-ask "User [1]:"
-read -r USER_CHOICE
+if [[ -n "${DB_USER:-}" ]]; then
+  USER_CHOICE="$DB_USER"
+else
+  printf "  1) istvan\n  2) joel\n"
+  ask "User [1]:"
+  read -r USER_CHOICE || USER_CHOICE=""
+fi
 
 case "${USER_CHOICE:-1}" in
   1|istvan) DB_USER="istvan" ;;
@@ -122,10 +129,9 @@ fi
 # ─── 5. Kubernetes tunnels ───────────────────────────────────────────────────
 step "Kubernetes tunnels"
 
-# phpMyAdmin (scale up + port-forward on :8888)
-ok "Starting phpMyAdmin (localhost:8888)..."
-bash "$PMA_SCRIPT" &>/dev/null &
-PIDS+=($!)
+# No phpMyAdmin: the export talks to MariaDB directly. Starting it here used
+# to leave it running on the legacy cluster, as its own script only scales it
+# back down when interrupted by hand.
 
 # Direct port-forward to MariaDB on :3307
 DB_LOCAL_PORT=3307
