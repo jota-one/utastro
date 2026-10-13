@@ -137,7 +137,7 @@ start_mariadb_portforward() {
   MARIADB_PF_PID=$!
   PIDS+=($MARIADB_PF_PID)
   printf "  Waiting for port %d" "$DB_LOCAL_PORT"
-  for i in $(seq 1 20); do
+  for _ in $(seq 1 20); do
     if (echo >/dev/tcp/127.0.0.1/$DB_LOCAL_PORT) 2>/dev/null; then
       printf " — ready\n"
       return 0
