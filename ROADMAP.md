@@ -44,7 +44,7 @@ Migration du backend vers calls aux endpoint Pb out-of-the-box et ajout de route
 - [x] **Les sites `next` et `never` partageaient la base de `never`** : l'URL de PocketBase était compilée dans le build depuis le `.env` du dépôt. `next` affichait les données de `never` et y aurait écrit les inscriptions, comme `www` après la bascule. Chaque site utilise désormais sa propre base, sur son propre domaine
 - [x] Page d'activation ouverte sans jeton : le cadre d'erreur s'affichait sans texte
 - [x] Import CSV de sessions : une fin de récurrence au format suisse (`30.11.2026`) figeait l'onglet de l'admin (boucle sans fin), et une date impossible (`2026-13-45`) passait pour une date de 2027 — la ligne est désormais signalée en erreur dans l'aperçu
-- [ ] Un envoi d'e-mail en échec n'est visible que dans les logs PocketBase : la demande d'activation ou de réinitialisation répond quand même OK à l'utilisateur
+- [x] Un envoi d'e-mail d'activation ou de réinitialisation en échec n'apparaissait que dans les logs PocketBase, l'utilisateur voyait un succès : il voit désormais « l'e-mail n'a pas pu être envoyé », comme dans le legacy
 
 ### Admin @Joël
 
@@ -205,3 +205,4 @@ Certaines tâches doivent être faites en 1er lieu et ensebmle pour que tout le 
 - [2026-10-13] Admin — l'import CSV de sessions ne fige plus l'onglet sur une date de fin de récurrence mal formée ; parcours complet de l'import couvert par les tests E2E
 - [2026-10-13] Tests E2E — toutes les specs membre jouées par de vrais comptes membre jetables ; inventaire complet de ce qui reste à couvrir
 - [2026-10-14] Environnements — `never` déployé depuis `develop`, la prod uniquement depuis `main` via une PR de release
+- [2026-10-14] E-mails — un échec d'envoi du mail d'activation ou de réinitialisation est désormais signalé à l'utilisateur au lieu d'afficher un succès

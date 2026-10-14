@@ -104,3 +104,51 @@ onMailerRecordPasswordResetSend(e => {
   }
   e.next()
 }, 'ut_users')
+
+// PocketBase sends the activation and password reset mails in the background
+// and answers OK even when the send fails. Send them during the request
+// instead, so that a failure reaches the user ("the email could not be
+// sent"). The default handler (e.next()) is not called: it would send the mail
+// a second time. Same throttling as PocketBase: one mail per account every
+// two minutes, further requests answer OK without sending.
+onRecordRequestVerificationRequest(e => {
+  if (e.record.verified()) {
+    return e.noContent(204)
+  }
+
+  const throttleKey = `ut_verification_mail_${e.record.id}`
+  const lastSent = $app.store().get(throttleKey)
+  if (lastSent && Date.now() - lastSent < 2 * 60 * 1000) {
+    return e.noContent(204)
+  }
+
+  try {
+    $mails.sendRecordVerification($app, e.record)
+  } catch (err) {
+    $app
+      .logger()
+      .error('Failed to send verification email', 'error', String(err))
+    throw new BadRequestError('The email could not be sent.')
+  }
+  $app.store().set(throttleKey, Date.now())
+  return e.noContent(204)
+}, 'ut_users')
+
+onRecordRequestPasswordResetRequest(e => {
+  const throttleKey = `ut_password_reset_mail_${e.record.id}`
+  const lastSent = $app.store().get(throttleKey)
+  if (lastSent && Date.now() - lastSent < 2 * 60 * 1000) {
+    return e.noContent(204)
+  }
+
+  try {
+    $mails.sendRecordPasswordReset($app, e.record)
+  } catch (err) {
+    $app
+      .logger()
+      .error('Failed to send password reset email', 'error', String(err))
+    throw new BadRequestError('The email could not be sent.')
+  }
+  $app.store().set(throttleKey, Date.now())
+  return e.noContent(204)
+}, 'ut_users')
