@@ -45,6 +45,7 @@ Migration du backend vers calls aux endpoint Pb out-of-the-box et ajout de route
 - [x] Page d'activation ouverte sans jeton : le cadre d'erreur s'affichait sans texte
 - [x] Import CSV de sessions : une fin de récurrence au format suisse (`30.11.2026`) figeait l'onglet de l'admin (boucle sans fin), et une date impossible (`2026-13-45`) passait pour une date de 2027 — la ligne est désormais signalée en erreur dans l'aperçu
 - [x] Un envoi d'e-mail d'activation ou de réinitialisation en échec n'apparaissait que dans les logs PocketBase, l'utilisateur voyait un succès : il voit désormais « l'e-mail n'a pas pu être envoyé », comme dans le legacy
+- [x] E-mails d'activation et de réinitialisation : ils ne partaient plus sur `never` ni sur `next` depuis l'ajout des redirections (12 octobre) — la configuration Caddy, écrite dans le `.env` de l'app, en coupait la lecture et la clé Mandrill était perdue. Corrigé dans `jota-one/infra` ; un changement de `.env` n'est pris en compte qu'au redémarrage des services, par exemple en relançant le dernier déploiement
 
 ### Admin @Joël
 
@@ -206,3 +207,4 @@ Certaines tâches doivent être faites en 1er lieu et ensebmle pour que tout le 
 - [2026-10-13] Tests E2E — toutes les specs membre jouées par de vrais comptes membre jetables ; inventaire complet de ce qui reste à couvrir
 - [2026-10-14] Environnements — `never` déployé depuis `develop`, la prod uniquement depuis `main` via une PR de release
 - [2026-10-14] E-mails — un échec d'envoi du mail d'activation ou de réinitialisation est désormais signalé à l'utilisateur au lieu d'afficher un succès
+- [2026-10-14] E-mails — les mails d'activation et de réinitialisation partent de nouveau sur `never` et `next`, coupés depuis l'ajout des redirections
