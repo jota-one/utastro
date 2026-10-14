@@ -20,8 +20,9 @@ set -euo pipefail
 #                  rather than reopen it
 # SITE_URL is the address the smoke test checks (default https://<domain>).
 #
-# The site is down from the stop to the restart. Do not push to main (or merge
-# into it) meanwhile: a deployment would restart PocketBase mid-import.
+# The site is down from the stop to the restart. Do not push to the site's branch
+# (main for next, develop for never) meanwhile: a deployment would restart
+# PocketBase mid-import.
 
 # ─── Colors ──────────────────────────────────────────────────────────────────
 RED='\033[0;31m'
@@ -149,7 +150,7 @@ ok "pb-custom built from the deployed release"
 # ─── 4. Confirmation ─────────────────────────────────────────────────────────
 step "Confirmation"
 printf "  %s goes down until the import is over (a few minutes).\n" "$DOMAIN"
-printf "  Do not push to main meanwhile.\n"
+printf "  Do not push to %s meanwhile.\n" "$([ "$DOMAIN" = never.urban-training.ch ] && echo develop || echo main)"
 if [[ $ASSUME_YES -eq 1 ]]; then
   ok "Confirmed by --yes"
 else

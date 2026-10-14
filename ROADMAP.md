@@ -61,10 +61,10 @@ Migration de l'UI et du backend. Décision prise : on reste sur **Element Plus**
 
 `never.urban-training.ch` reste l'environnement de DEV ; la prod tourne sur un VPS dédié, exposé sur `next.urban-training.ch` jusqu'à la bascule de `www`.
 
-- [x] Déploiement automatisé sur push `main` (build + migrations PB via les workflows `jota-one/infra`)
+- [x] Déploiement automatisé (build + migrations PB via les workflows `jota-one/infra`) : push `develop` → `never`, push `main` → prod
 - [x] Environnement de démo `never.urban-training.ch` en ligne
 - [x] VPS dédié pour la prod — `jota-apps-3-infomaniak`, l'app y est déployée sur `next.urban-training.ch` (2026-10-09)
-- [ ] Séparer DEV et PRD : `never` et `next` suivent aujourd'hui tous les deux la branche `main`, chaque push part donc directement en prod — faire suivre `develop` à `never` et réserver `main` à la prod (flux PRD Release `develop` → `main`)
+- [x] DEV et PRD séparés : `never` suit `develop`, la prod suit `main` ; une mise en prod passe par une PR « PRD Release » `develop` → `main`
 - [x] Domaine chez Infomaniak — zone DNS et registrar migrés depuis OVH le 2026-09-18, sans aucune coupure du site ni des mails : il n'y a personne à prévenir d'un downtime
 - [x] DNSSEC réactivé — fait automatiquement par Infomaniak à la reprise du domaine le 2026-09-18 : zone signée en algorithme 13 (ECDSA), DS correspondant publié au registre, validation vérifiée sur Google, Cloudflare et Quad9
 - [x] DMARC en `p=quarantine` depuis le 2026-09-19 — trois analyses des rapports `rua` (17 septembre, 26 septembre, 12 octobre) : toutes les sources légitimes sont alignées (Newsletter Infomaniak via Amazon SES, Mandrill, mail Infomaniak), y compris la campagne du 1er octobre envoyée sous `quarantine` (4 476 messages conformes sur 4 480)
@@ -204,3 +204,4 @@ Certaines tâches doivent être faites en 1er lieu et ensebmle pour que tout le 
 - [2026-10-13] Bascule — scriptée étape par étape et répétée sur `never` ; l'adresse `www` et les redirections de `urban-training.ch` sont prêtes à être activées le jour J
 - [2026-10-13] Admin — l'import CSV de sessions ne fige plus l'onglet sur une date de fin de récurrence mal formée ; parcours complet de l'import couvert par les tests E2E
 - [2026-10-13] Tests E2E — toutes les specs membre jouées par de vrais comptes membre jetables ; inventaire complet de ce qui reste à couvrir
+- [2026-10-14] Environnements — `never` déployé depuis `develop`, la prod uniquement depuis `main` via une PR de release
