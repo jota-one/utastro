@@ -58,7 +58,7 @@ The server and PocketBase port of `never` and `next` are known; for another site
 
 **Any failure while the site is down restores the backup and restarts the site.** The previous database stays in `pb_data.before-import-<date>` until you delete it.
 
-Do not push to `main` during the import: a deployment would replace the release while the import runs.
+Do not push to the site's branch during the import (`main` for next, `develop` for never): a deployment would replace the release while the import runs.
 
 Afterwards, log in by hand with a legacy account and its old password.
 

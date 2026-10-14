@@ -352,15 +352,44 @@ export async function loginStatus(email: string, password: string) {
 
 // ─── Custom fixtures ──────────────────────────────────────────────────────────
 
+export type Member = Auth & { email: string; password: string }
+
 type Fixtures = {
+  member: Member
   memberPage: Page
+  adminPage: Page
 }
 
 export const test = base.extend<Fixtures>({
-  memberPage: async ({ page }, use) => {
-    const email = process.env.TEST_MEMBER_EMAIL!
-    const password = process.env.TEST_MEMBER_PASSWORD!
-    await injectAuth(page, email, password)
+  // A throwaway plain member (role user) for the test, deleted afterwards
+  // along with its subscriptions and watched cities
+  // eslint-disable-next-line no-empty-pattern
+  member: async ({}, use) => {
+    const admin = await fetchAdminAuth()
+    const email = uniqueEmail('member')
+    const password = 'TestPassword123!'
+    await createUser(admin, {
+      email,
+      password,
+      verified: true,
+      name: 'E2E Member',
+    })
+    const auth = await fetchAuthToken(email, password)
+    await use({ ...auth, email, password })
+    await deleteUserByEmail(admin, email)
+  },
+  // A page signed in as that member
+  memberPage: async ({ page, member }, use) => {
+    await injectAuth(page, member.email, member.password)
+    await use(page)
+  },
+  // A page signed in as TEST_MEMBER, which must be an admin
+  adminPage: async ({ page }, use) => {
+    await injectAuth(
+      page,
+      process.env.TEST_MEMBER_EMAIL!,
+      process.env.TEST_MEMBER_PASSWORD!,
+    )
     await use(page)
   },
 })

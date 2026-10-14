@@ -69,6 +69,14 @@ K8S_NS="urbantraining-production"
 LEGACY_DEPLOYMENT="webapp-deployment"
 RESOLVERS=(1.1.1.1 8.8.8.8 9.9.9.9)
 
+# The smoke test after the import sends a password reset email to this account
+# to check that the site sends its emails. Default: the admin account of the
+# e2e tests (tests/e2e/.env), which also exists on the legacy site.
+if [[ -z "${SMOKE_MAIL_TO:-}" && -f "$PROJECT_ROOT/tests/e2e/.env" ]]; then
+  SMOKE_MAIL_TO="$(sed -n 's/^TEST_MEMBER_EMAIL=//p' "$PROJECT_ROOT/tests/e2e/.env" | head -1)"
+fi
+export SMOKE_MAIL_TO="${SMOKE_MAIL_TO:-}"
+
 SUFFIX="${APP_DOMAIN//./-}"
 NODE_SERVICE="node-$SUFFIX.service"
 PB_SERVICE="pb-$SUFFIX.service"
@@ -148,7 +156,8 @@ Switchover of $WWW (TARGET=$TARGET)
   5. stop-legacy    script   the legacy app is stopped: from now on nothing is written there
   6. export         script   legacy data exported (~20 s)
   7. import         script   imported on $APP_DOMAIN (~5 min), site reopened, smoke test on $SITE_URL
-  8. check          YOU      log in with a legacy account and its old password
+  8. check          YOU      log in with a legacy account and its old password; the smoke
+                             test's reset email reached ${SMOKE_MAIL_TO:-SMOKE_MAIL_TO} (then delete it)
   9. cleanup        script   deletes the exports and the pre-import backup (personal data)
 
   Freeze for visitors: from step 2 to the end of step 7, about 15 minutes.
@@ -199,6 +208,12 @@ cmd_preflight() {
     [[ "$(gh pr view "$SWITCH_PR" -R "$INFRA_GH_REPO" --json state -q .state)" == "OPEN" ]] \
       || err "$INFRA_GH_REPO#$SWITCH_PR is not open"
     ok "Switch PR $INFRA_GH_REPO#$SWITCH_PR open"
+  fi
+
+  if [[ -n "${SMOKE_MAIL_TO:-}" ]]; then
+    ok "The smoke test will send a password reset email to $SMOKE_MAIL_TO"
+  else
+    warn "No SMOKE_MAIL_TO nor TEST_MEMBER_EMAIL in tests/e2e/.env: the smoke test will not check that the site sends its emails"
   fi
   ok "Ready"
 }

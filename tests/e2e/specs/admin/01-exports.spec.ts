@@ -4,7 +4,7 @@ import type { Download, Page } from '@playwright/test'
 /**
  * Admin CSV exports (Users, Cities, Events). Validates the full chain:
  * admin auth → view → export click → browser download → CSV shape.
- * Uses the `memberPage` fixture, whose TEST_MEMBER account is a superadmin.
+ * Uses the `adminPage` fixture (TEST_MEMBER, an admin).
  * Assertions target structure (BOM, delimiter, headers, dedup) rather than
  * exact counts, so the spec is robust against seed-data drift.
  */
@@ -40,16 +40,14 @@ async function triggerDownload(
 }
 
 test.describe('Admin CSV exports', () => {
-  test('exports all users with the expected columns', async ({
-    memberPage,
-  }) => {
+  test('exports all users with the expected columns', async ({ adminPage }) => {
     // the export loads every account (~57,000 in a prod data copy): about
     // 13 s locally, too close to the default 30 s timeout on a busy machine
     test.setTimeout(90_000)
-    await memberPage.goto('/admin/users')
+    await adminPage.goto('/admin/users')
 
-    const download = await triggerDownload(memberPage, () =>
-      memberPage.getByRole('button', { name: 'Exporter' }).click(),
+    const download = await triggerDownload(adminPage, () =>
+      adminPage.getByRole('button', { name: 'Exporter' }).click(),
     )
 
     expect(download.suggestedFilename()).toMatch(/-users\.csv$/)
@@ -71,13 +69,13 @@ test.describe('Admin CSV exports', () => {
     expect(dataLines.length).toBeGreaterThan(0)
   })
 
-  test('exports all city watchers', async ({ memberPage }) => {
-    await memberPage.goto('/admin/cities')
+  test('exports all city watchers', async ({ adminPage }) => {
+    await adminPage.goto('/admin/cities')
 
     // Open the global export dropdown, then pick "Pers. intéressées".
-    await memberPage.getByRole('button', { name: 'Exporter' }).click()
-    const download = await triggerDownload(memberPage, () =>
-      memberPage
+    await adminPage.getByRole('button', { name: 'Exporter' }).click()
+    const download = await triggerDownload(adminPage, () =>
+      adminPage
         .getByRole('menuitem', { name: 'Pers. intéressées', exact: true })
         .click(),
     )
@@ -90,7 +88,7 @@ test.describe('Admin CSV exports', () => {
   })
 
   test('exports event subscribers for an event that has some', async ({
-    memberPage,
+    adminPage,
   }) => {
     // Find an event with at least one subscriber so the CSV is non-trivial.
     const res = await fetch(
@@ -106,17 +104,17 @@ test.describe('Admin CSV exports', () => {
     test.skip(items.length === 0, 'no event with subscribers in this dataset')
     const eventId = items[0].id
 
-    await memberPage.goto('/admin/events')
+    await adminPage.goto('/admin/events')
 
     // The events table paginates; the row for our event may not be visible, so
     // export from the row that exposes the "Exporter les inscrits" action and
     // assert on the download shape rather than a specific event.
-    const exportButton = memberPage
+    const exportButton = adminPage
       .locator('button[title="Exporter les inscrits"]')
       .first()
     await expect(exportButton).toBeVisible()
 
-    const download = await triggerDownload(memberPage, () =>
+    const download = await triggerDownload(adminPage, () =>
       exportButton.click(),
     )
 

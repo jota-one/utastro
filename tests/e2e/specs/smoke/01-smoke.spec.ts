@@ -8,6 +8,11 @@ import { LoginForm } from '../../pages/LoginForm'
  * It never logs in, submits a form or writes anything, so it is safe on
  * production. It expects real data: a site without cities or upcoming
  * sessions fails.
+ *
+ * One exception, only when SMOKE_MAIL_TO is set: a password reset email is
+ * sent to that account, through the site's real mail delivery. The account
+ * must exist on the site (an unknown address answers OK without any email);
+ * check that the email arrived, then delete it.
  */
 
 const baseUrl = process.env.BASE_URL || 'http://localhost:4321'
@@ -178,4 +183,15 @@ test('activation and password reset pages answer without a token', async ({
   await expect(
     page.getByText('Le délai d’activation du compte a expiré'),
   ).toBeVisible()
+})
+
+test('the site sends its emails', async ({ request }) => {
+  const email = process.env.SMOKE_MAIL_TO
+  test.skip(!email, 'SMOKE_MAIL_TO not set')
+  // answers with an error when the delivery fails (see pb_hooks/settings.pb.js)
+  const res = await request.post(
+    `${apiUrl}/api/collections/ut_users/request-password-reset`,
+    { data: { email } },
+  )
+  expect(res.status(), await res.text()).toBe(204)
 })

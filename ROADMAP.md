@@ -34,7 +34,7 @@ Migration du backend vers calls aux endpoint Pb out-of-the-box et ajout de route
 - [x] Emails : activation, reset de mot de passe (templates PB en migration), candidature coach (endpoint Astro)
 - [x] E-mails d'activation et de réinitialisation : ils ne partaient pas sur `never` ni sur `next` (configuration SMTP incomplète, envoi vers un Mailpit inexistant). Ils passent maintenant par l'API Mandrill comme le formulaire coach et le legacy, avec des liens vers le domaine de l'app — réception vérifiée sur `never`
 - [x] Suivi des clics et des ouvertures Mandrill désactivé, pour que les liens à jeton ne soient plus journalisés chez un tiers
-- [ ] Emails transactionnels en français uniquement, avec des liens codés en dur sur `/fr/` (`{APP_URL}/fr/inscription/activation`) : un utilisateur de/en reçoit un mail français et atterrit sur la page française
+- [ ] Après la bascule — e-mails transactionnels traduits en allemand et en anglais : aujourd'hui en français uniquement, avec des liens codés en dur sur `/fr/` (`{APP_URL}/fr/inscription/activation`), un utilisateur de/en reçoit un mail français et atterrit sur la page française. Pas une régression : le legacy n'avait que des modèles français, et une inscription ou une demande de nouveau mot de passe depuis `/de/` ou `/en/` y échouait sans aucun mail envoyé
 - [x] Sécurité — un membre ne peut plus se donner un autre rôle (ni à la création du compte, ni en modifiant son profil) ni toucher aux champs de l'import legacy
 - [x] Sécurité — un membre ne peut plus inscrire quelqu'un d'autre, s'inscrire comme coach sans en avoir le rôle, ni pointer sa propre présence
 - [x] Fuseau horaire : les dates des sessions sont saisies en heure suisse alors que les serveurs tournent en UTC — les inscriptions restaient ouvertes jusqu'à 2 h après le début d'une session. `never` et `next` tournent désormais à l'heure suisse (option `timezone` de `jota-one/infra`)
@@ -44,7 +44,8 @@ Migration du backend vers calls aux endpoint Pb out-of-the-box et ajout de route
 - [x] **Les sites `next` et `never` partageaient la base de `never`** : l'URL de PocketBase était compilée dans le build depuis le `.env` du dépôt. `next` affichait les données de `never` et y aurait écrit les inscriptions, comme `www` après la bascule. Chaque site utilise désormais sa propre base, sur son propre domaine
 - [x] Page d'activation ouverte sans jeton : le cadre d'erreur s'affichait sans texte
 - [x] Import CSV de sessions : une fin de récurrence au format suisse (`30.11.2026`) figeait l'onglet de l'admin (boucle sans fin), et une date impossible (`2026-13-45`) passait pour une date de 2027 — la ligne est désormais signalée en erreur dans l'aperçu
-- [ ] Un envoi d'e-mail en échec n'est visible que dans les logs PocketBase : la demande d'activation ou de réinitialisation répond quand même OK à l'utilisateur
+- [x] Un envoi d'e-mail d'activation ou de réinitialisation en échec n'apparaissait que dans les logs PocketBase, l'utilisateur voyait un succès : il voit désormais « l'e-mail n'a pas pu être envoyé », comme dans le legacy
+- [x] E-mails d'activation et de réinitialisation : ils ne partaient plus sur `never` ni sur `next` depuis l'ajout des redirections (12 octobre) — la configuration Caddy, écrite dans le `.env` de l'app, en coupait la lecture et la clé Mandrill était perdue. Corrigé dans `jota-one/infra` ; un changement de `.env` n'est pris en compte qu'au redémarrage des services, par exemple en relançant le dernier déploiement
 
 ### Admin @Joël
 
@@ -61,10 +62,10 @@ Migration de l'UI et du backend. Décision prise : on reste sur **Element Plus**
 
 `never.urban-training.ch` reste l'environnement de DEV ; la prod tourne sur un VPS dédié, exposé sur `next.urban-training.ch` jusqu'à la bascule de `www`.
 
-- [x] Déploiement automatisé sur push `main` (build + migrations PB via les workflows `jota-one/infra`)
+- [x] Déploiement automatisé (build + migrations PB via les workflows `jota-one/infra`) : push `develop` → `never`, push `main` → prod
 - [x] Environnement de démo `never.urban-training.ch` en ligne
 - [x] VPS dédié pour la prod — `jota-apps-3-infomaniak`, l'app y est déployée sur `next.urban-training.ch` (2026-10-09)
-- [ ] Séparer DEV et PRD : `never` et `next` suivent aujourd'hui tous les deux la branche `main`, chaque push part donc directement en prod — faire suivre `develop` à `never` et réserver `main` à la prod (flux PRD Release `develop` → `main`)
+- [x] DEV et PRD séparés : `never` suit `develop`, la prod suit `main` ; une mise en prod passe par une PR « PRD Release » `develop` → `main`
 - [x] Domaine chez Infomaniak — zone DNS et registrar migrés depuis OVH le 2026-09-18, sans aucune coupure du site ni des mails : il n'y a personne à prévenir d'un downtime
 - [x] DNSSEC réactivé — fait automatiquement par Infomaniak à la reprise du domaine le 2026-09-18 : zone signée en algorithme 13 (ECDSA), DS correspondant publié au registre, validation vérifiée sur Google, Cloudflare et Quad9
 - [x] DMARC en `p=quarantine` depuis le 2026-09-19 — trois analyses des rapports `rua` (17 septembre, 26 septembre, 12 octobre) : toutes les sources légitimes sont alignées (Newsletter Infomaniak via Amazon SES, Mandrill, mail Infomaniak), y compris la campagne du 1er octobre envoyée sous `quarantine` (4 476 messages conformes sur 4 480)
@@ -90,7 +91,7 @@ Suite Playwright dans `tests/e2e`, lancée à la main en local (`./tests/e2e/run
 - [x] Les tests suppriment les comptes qu'ils créent (le test d'inscription en laissait un à chaque run) ; les comptes `e2e+…@example.com` déjà créés ont été purgés de la base locale
 - [x] Session pleine et course à la dernière place : chacune sur une session créée et remplie pour le test, au lieu de modifier la capacité d'une vraie session ; le refus côté serveur est aussi vérifié
 - [x] Export CSV des utilisateurs : environ 13 s pour 57 000 comptes, délai du test porté à 90 s ; ses échecs venaient de redémarrages intempestifs du PocketBase local, pas de la durée de l'export
-- [ ] Compte de test au vrai rôle membre : le compte « membre » actuel est superadmin, les specs membre ne vérifient donc pas ce qu'un membre a le droit de faire
+- [x] Specs membre jouées par un vrai membre : chaque test crée son propre compte au rôle `user` et le supprime ensuite ; le compte de test du `.env` ne sert plus qu'aux specs admin
 - [x] Droits d'accès d'un membre : rôle, champs legacy, inscription d'un tiers, inscription comme coach, présence, et non-régression sur ce qui était déjà bloqué (utilisateurs et inscriptions des autres, modification d'une session, feuille de présence, impersonation, admin)
 - [x] Connexion par l'interface : connexion, maintien après rechargement, déconnexion, mauvais mot de passe, compte pas encore activé
 - [x] Comptes importés : connexion avec l'ancien mot de passe (simple, accentué, emoji, court), migration vers un mot de passe PocketBase, mauvais mot de passe refusé
@@ -100,22 +101,28 @@ Suite Playwright dans `tests/e2e`, lancée à la main en local (`./tests/e2e/run
 - [x] Smoke test en lecture seule (`specs/smoke`), lançable sur `next` avant la bascule DNS puis sur `www` juste après : pages en fr/de/en, page ville, page session, le site appelle sa propre API, ouverture de la connexion, pages d'activation et de réinitialisation
 - [x] Anciennes URLs : spec `04-redirects`, 31 redirections vérifiées sur `never` et `next` (à lancer contre un site déployé, Caddy n'existant pas en local)
 
-Ensuite :
+Pas encore couvert :
 
-- [ ] Versions allemande et anglaise : pages (pas de sélecteur de langue, déjà masqué dans le legacy)
-- [ ] Profil : modification des infos, changement de mot de passe, onglet des villes suivies
-- [ ] Page ville : liste des sessions, filtres, navigation par date, bandeau sponsors
-- [ ] Formulaire coach et page contact : validation et envoi
-- [x] Admin : import CSV de sessions (aperçu avec erreurs par cellule, fusion des langues, récurrence, ligne décochée, doublons ignorés, sessions réellement créées)
-- [ ] Admin : création, modification et suppression d'une session, validation d'un compte, impersonation et retour, fusion de lieux, liste des inscrits
-- [ ] Affichage mobile (menu hamburger) et page 404
+- [ ] Site public — page ville : filtres des sessions, navigation par date (option désactivée), carte Google Maps, bandeau des sponsors (liens activables) ; accueil : contenu, teasers, carte des villes
+- [ ] Site public — versions allemande et anglaise au-delà du chargement des pages : textes, liens entre pages, e-mails (aujourd'hui en français seulement)
+- [ ] Site public — affichage mobile (menu hamburger), page 404, redirection d'un ancien identifiant numérique de session (`/fr/session/36` → 301)
+- [ ] Profil : modification des informations, changement de mot de passe, onglet des villes suivies (ajout et retrait), compteurs du header (villes, sessions, coaching)
+- [ ] Formulaire coach : validation, pièces jointes, envoi de l'e-mail (captcha désactivé en local)
+- [ ] Coach : validation finale de la feuille de présence (option désactivée), désinscription comme coach depuis le profil
+- [ ] Impersonation : se connecter en tant qu'un utilisateur depuis l'admin, bannière, retour au compte admin (seul le refus pour un membre est testé)
+- [ ] Admin sessions : création, modification, suppression, filtres et recherche, liste des inscrits (copie des e-mails, export)
+- [ ] Admin utilisateurs : recherche par e-mail, création, modification, validation du compte, suppression
+- [ ] Admin villes, lieux, types d'activité, proposants : création, modification, activation, suppression ; fusion de lieux ; exports par ville et statistiques (seul l'export global des personnes intéressées est testé)
+- [ ] Admin sponsors : création avec logo, limite de 150 Ko, sponsor global ou par villes, activation, affichage sur les pages ville
+- [ ] E-mails réellement envoyés par Mandrill (testé à la main sur `never`, les tests passent par Mailpit) ; rapport d'erreur d'envoi
+- [ ] Page de maintenance et retour automatique (testés à la main sur `never`, pas de spec)
 - [ ] Faire tourner la suite en CI sur un jeu de données de test, sans dépendre d'une copie des données de prod
 
 ### Bascule
 
 - [x] Failles de droits d'accès corrigées
 - [x] Fuseau horaire des serveurs corrigé
-- [ ] Couverture E2E « avant la bascule » ci-dessus au vert
+- [x] Couverture E2E « avant la bascule » ci-dessus au vert
 - [ ] `next` est vide (aucune ville ni session) : il affichait jusqu'ici les données de `never`, il montre désormais sa propre base — le smoke test y restera rouge sur la page ville et la page session jusqu'à l'import
 - [x] Page de maintenance (`public/maintenance.html`, en fr/de/en) servie par Caddy avec un code 503 dès que l'app ne répond pas — import, déploiement ou panne ; elle se recharge d'elle-même au retour du site. Testée sur `never`. Le monitoring continue de signaler le site en panne (« HTTP 503 »)
 - [x] Caddy officiel sur tous les serveurs : `jota-apps-3` tournait avec le Caddy 2.6 de Debian, qui refusait la config — le provisionnement installe désormais la version officielle
@@ -123,7 +130,7 @@ Ensuite :
 - [x] Redirection `urban-training.ch` et `next.urban-training.ch` → `www`, et liens des e-mails sur `www` : prêts dans la PR de bascule `jota-one/infra#30` (brouillon, à merger seulement le jour J après la bascule DNS)
 - [ ] Jour J : suivre `docs/switchover.md` — seuls le changement DNS chez Infomaniak et la vérification d'une connexion avec un ancien compte restent manuels
 - [x] Redirections des anciennes URLs en place et testées
-- [ ] Mettre à jour la sonde de monitoring (aujourd'hui `www.urban-training.ch/fr`) si l'URL de référence change
+- [x] Sonde de monitoring : rien à changer, elle surveille déjà `www.urban-training.ch/fr`
 
 ## Décisions actées
 
@@ -197,3 +204,7 @@ Certaines tâches doivent être faites en 1er lieu et ensebmle pour que tout le 
 - [2026-10-13] Page de maintenance — affichée automatiquement quand le site est arrêté (import, déploiement, panne) et retirée d'elle-même à son retour
 - [2026-10-13] Bascule — scriptée étape par étape et répétée sur `never` ; l'adresse `www` et les redirections de `urban-training.ch` sont prêtes à être activées le jour J
 - [2026-10-13] Admin — l'import CSV de sessions ne fige plus l'onglet sur une date de fin de récurrence mal formée ; parcours complet de l'import couvert par les tests E2E
+- [2026-10-13] Tests E2E — toutes les specs membre jouées par de vrais comptes membre jetables ; inventaire complet de ce qui reste à couvrir
+- [2026-10-14] Environnements — `never` déployé depuis `develop`, la prod uniquement depuis `main` via une PR de release
+- [2026-10-14] E-mails — un échec d'envoi du mail d'activation ou de réinitialisation est désormais signalé à l'utilisateur au lieu d'afficher un succès
+- [2026-10-14] E-mails — les mails d'activation et de réinitialisation partent de nouveau sur `never` et `next`, coupés depuis l'ajout des redirections
