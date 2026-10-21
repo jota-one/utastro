@@ -32,6 +32,8 @@ func ImportUsersCommand(app *pocketbase.PocketBase) *cobra.Command {
 			// an old account keep using the new one), then the newest account.
 			// The survivor gets the highest role found in its email group so a
 			// duplicated coach/admin account doesn't lose its privileges.
+			// Emails are stored trimmed and in lower case, as the app stores
+			// them (pb_hooks/users.pb.js): the legacy site ignored the case.
 			fmt.Println("\n📥 Step 1: Importing from hypercontent__users...")
 			importSQL := `
     INSERT OR IGNORE INTO ut_users (
@@ -48,21 +50,21 @@ func ImportUsersCommand(app *pocketbase.PocketBase) *cobra.Command {
       SELECT
         h.*,
         ROW_NUMBER() OVER (
-          PARTITION BY lower(h.email)
+          PARTITION BY lower(trim(h.email))
           ORDER BY
             COALESCE(h.soft_deleted, 0) ASC,
             COALESCE(ls.last_event_date, '') DESC,
             h.id DESC
         ) AS rn,
         MIN(CASE h.role_id WHEN 1 THEN 1 WHEN 2 THEN 2 WHEN 4 THEN 3 ELSE 4 END) OVER (
-          PARTITION BY lower(h.email)
+          PARTITION BY lower(trim(h.email))
         ) AS role_rank
       FROM hypercontent__users h
       LEFT JOIN last_subscription ls ON ls.user_id = h.id
-      WHERE h.email IS NOT NULL AND h.email != ''
+      WHERE h.email IS NOT NULL AND trim(h.email) != ''
     )
     SELECT
-      r.email,
+      lower(trim(r.email)),
       TRIM(COALESCE(r.first_name, '') || ' ' || COALESCE(r.last_name, '')),
       CASE r.role_rank
         WHEN 1 THEN 'superadmin'
