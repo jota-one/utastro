@@ -45,7 +45,7 @@ Visitors see the maintenance page from step 2 (on the new DNS) to the end of ste
 
 ## Rehearsal
 
-`TARGET=never` runs `freeze`, `export`, `import`, `unfreeze` and `cleanup` against never.urban-training.ch; the DNS, PR and legacy steps refuse to run. Done on 2026-10-13: maintenance page from 17:39:24 to 17:45:15, export included, smoke test green.
+`TARGET=never` runs `freeze`, `export`, `import`, `unfreeze` and `cleanup` against never.urban-training.ch; the DNS, PR and legacy steps refuse to run. Done on 2026-10-13: maintenance page from 17:39:24 to 17:45:15, export included, smoke test green. Done again on 2026-10-23 with the email fixes: maintenance page from 10:39:21 to 10:45:10, smoke test green including a real email, login with a legacy account checked.
 
 ```bash
 TARGET=never scripts/switchover.sh freeze

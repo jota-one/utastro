@@ -210,3 +210,4 @@ Certaines tâches doivent être faites en 1er lieu et ensebmle pour que tout le 
 - [2026-10-14] E-mails — un échec d'envoi du mail d'activation ou de réinitialisation est désormais signalé à l'utilisateur au lieu d'afficher un succès
 - [2026-10-14] E-mails — les mails d'activation et de réinitialisation partent de nouveau sur `never` et `next`, coupés depuis l'ajout des redirections
 - [2026-10-20] Comptes — une adresse e-mail tapée avec des majuscules ou un espace en trop fonctionne à l'inscription, à la connexion et pour le mot de passe oublié, comme sur l'ancien site
+- [2026-10-23] Bascule — deuxième répétition complète sur `never` : environ 6 minutes de maintenance, smoke test vert avec un vrai envoi de mail, connexion d'un ancien compte vérifiée
