@@ -46,6 +46,7 @@ Migration du backend vers calls aux endpoint Pb out-of-the-box et ajout de route
 - [x] Import CSV de sessions : une fin de récurrence au format suisse (`30.11.2026`) figeait l'onglet de l'admin (boucle sans fin), et une date impossible (`2026-13-45`) passait pour une date de 2027 — la ligne est désormais signalée en erreur dans l'aperçu
 - [x] Un envoi d'e-mail d'activation ou de réinitialisation en échec n'apparaissait que dans les logs PocketBase, l'utilisateur voyait un succès : il voit désormais « l'e-mail n'a pas pu être envoyé », comme dans le legacy
 - [x] E-mails d'activation et de réinitialisation : ils ne partaient plus sur `never` ni sur `next` depuis l'ajout des redirections (12 octobre) — la configuration Caddy, écrite dans le `.env` de l'app, en coupait la lecture et la clé Mandrill était perdue. Corrigé dans `jota-one/infra` ; un changement de `.env` n'est pris en compte qu'au redémarrage des services, par exemple en relançant le dernier déploiement
+- [x] Adresses e-mail : PocketBase tient compte des majuscules, le legacy non (MariaDB) — une personne inscrite `Jean.Dupont@…` qui tapait `jean.dupont@…` ne pouvait ni se connecter ni recevoir de mail de réinitialisation, et un espace en trop faisait refuser l'inscription. Les adresses sont désormais enregistrées et recherchées sans espaces et en minuscules (inscription, connexion, réinitialisation, admin, import), les 3 862 adresses avec majuscules de l'import converties
 
 ### Admin @Joël
 
@@ -208,3 +209,5 @@ Certaines tâches doivent être faites en 1er lieu et ensebmle pour que tout le 
 - [2026-10-14] Environnements — `never` déployé depuis `develop`, la prod uniquement depuis `main` via une PR de release
 - [2026-10-14] E-mails — un échec d'envoi du mail d'activation ou de réinitialisation est désormais signalé à l'utilisateur au lieu d'afficher un succès
 - [2026-10-14] E-mails — les mails d'activation et de réinitialisation partent de nouveau sur `never` et `next`, coupés depuis l'ajout des redirections
+- [2026-10-20] Comptes — une adresse e-mail tapée avec des majuscules ou un espace en trop fonctionne à l'inscription, à la connexion et pour le mot de passe oublié, comme sur l'ancien site
+- [2026-10-23] Bascule — deuxième répétition complète sur `never` : environ 6 minutes de maintenance, smoke test vert avec un vrai envoi de mail, connexion d'un ancien compte vérifiée

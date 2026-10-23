@@ -78,7 +78,7 @@
                 ? 'profile_update_success'
                 : 'subscriptionform_success_text',
               {
-                email: model.login.email,
+                email: normalizeEmail(model.login.email),
               },
             )
           "
@@ -104,6 +104,7 @@ import FormSubscriptionAgreements from '@/components/form/subscription/Agreement
 import FormCaptcha from '@/components/form/Captcha.vue'
 import config from '@/config'
 import {
+  normalizeEmail,
   validateEmail,
   validatePassword,
   validateName,
@@ -238,7 +239,12 @@ const submitButtonLabel = computed(() =>
 )
 
 const makePasswordRequired = () => {
-  requiredFields.value.login = ['email', 'oldPassword', 'password', 'passwordConfirm']
+  requiredFields.value.login = [
+    'email',
+    'oldPassword',
+    'password',
+    'passwordConfirm',
+  ]
 }
 
 const makePasswordOptional = () => {
@@ -289,7 +295,7 @@ const submit = async () => {
         await pb.collection('ut_users').create({
           id,
           ...pbData,
-          email: model.login.email,
+          email: normalizeEmail(model.login.email),
           emailVisibility: true,
           password: model.login.password,
           passwordConfirm: model.login.passwordConfirm,
@@ -303,7 +309,9 @@ const submit = async () => {
       }
 
       try {
-        await pb.collection('ut_users').requestVerification(model.login.email)
+        await pb
+          .collection('ut_users')
+          .requestVerification(normalizeEmail(model.login.email))
       } catch {
         throw new Error(t('ERROR_UT_EMAIL_COULD_NOT_BE_SENT'))
       }

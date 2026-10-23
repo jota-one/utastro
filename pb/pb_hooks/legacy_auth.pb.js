@@ -111,7 +111,9 @@ routerAdd('POST', '/api/custom/auth/login', e => {
   }
 
   const body = e.requestInfo().body
-  const email = (body?.email ?? '').trim()
+  // Accounts are stored in lower case (see users.pb.js); the legacy site
+  // ignored the case of the address too
+  const email = (body?.email ?? '').trim().toLowerCase()
   const password = body?.password ?? ''
 
   if (!email || !password) {

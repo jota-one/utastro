@@ -152,6 +152,49 @@ test.describe('accounts imported from the legacy app', () => {
   })
 })
 
+test.describe('an email typed with capitals or stray spaces', () => {
+  /** The same address as typed by someone in a hurry. */
+  const sloppy = (email: string) =>
+    `  ${email.replace('e2e+', 'E2E+').replace('example.com', 'Example.COM')} `
+
+  test('is stored trimmed and in lower case', async () => {
+    const email = uniqueEmail('case-stored')
+    createdEmails.push(email)
+    await createUser(admin, {
+      email: sloppy(email),
+      verified: true,
+      password: PASSWORD,
+    })
+
+    expect(await readUserByEmail(admin, email)).not.toBeNull()
+  })
+
+  test('still logs the member in', async ({ page }) => {
+    const email = await newAccount('case-login')
+    expect(await loginStatus(sloppy(email), PASSWORD)).toBe(200)
+
+    const login = new LoginForm(page)
+    await page.goto('/fr')
+    await login.open()
+    await login.login(sloppy(email), PASSWORD)
+    await expect(login.logoutButton()).toBeVisible()
+  })
+
+  test('still gets the password reset email', async ({ page }) => {
+    test.skip(!MAILPIT_AVAILABLE, 'MAILPIT_URL not set')
+    const email = await newAccount('case-reset')
+    const login = new LoginForm(page)
+
+    await page.goto('/fr')
+    await login.open()
+    await login.requestPasswordReset(sloppy(email))
+    await expect(
+      login.form().getByText('Nous t’avons envoyé un e-mail'),
+    ).toBeVisible()
+    expect((await waitForEmail(email)).Subject).toMatch(/mot de passe/i)
+  })
+})
+
 test.describe('password reset', () => {
   test.beforeEach(() => {
     test.skip(!MAILPIT_AVAILABLE, 'MAILPIT_URL not set')

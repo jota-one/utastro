@@ -4,8 +4,14 @@ import config from '@/config'
 const emailRe =
   /^(([^<>()[\].,;:\s@"]+(\.[^<>()[\].,;:\s@"]+)*)|(".+"))@(([^<>()[\].,;:\s@"]+\.)+[^<>()[\].,;:\s@"]{2,})$/i
 
+/**
+ * The form of an email address the accounts are stored and looked up with:
+ * a stray space or a capital letter typed by the visitor does not matter.
+ */
+export const normalizeEmail = (email: string) => email.trim().toLowerCase()
+
 export const validateEmail = (email: string) => {
-  if (email && !emailRe.exec(email)) {
+  if (email && !emailRe.exec(email.trim())) {
     throw new Error('Invalid email address', {
       cause: AppErrorCode.ERROR_HC_INVALID_EMAIL_ADDRESS,
     })

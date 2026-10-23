@@ -122,6 +122,7 @@ import TipBox from '@components/TipBox.vue'
 import ContentBlockSpace from '@components/content/BlockSpace.vue'
 import FormCaptcha from '@components/form/Captcha.vue'
 import config from '@/config'
+import { normalizeEmail } from '@/utils/validate'
 import ArrowLink from '@/components/ArrowLink.vue'
 
 import { useRoutes } from '@composables/useRoutes'
@@ -168,7 +169,9 @@ const close = () => {
 async function onLogin() {
   if (passwordForgotten.value) {
     try {
-      await pb.collection('ut_users').requestPasswordReset(credentials.email)
+      await pb
+        .collection('ut_users')
+        .requestPasswordReset(normalizeEmail(credentials.email))
       passwordResetEmailSent.value = true
     } catch {
       if (captchaEl.value) {

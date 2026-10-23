@@ -63,7 +63,7 @@ func ImportCitiesCommand(app *pocketbase.PocketBase) *cobra.Command {
 				`CREATE TABLE tmp_user_map AS
 					SELECT h.id AS legacy_id, u.user_id AS user_id, u.survivor_legacy_id AS survivor_legacy_id
 					FROM hypercontent__users h
-					JOIN tmp_user_lookup u ON u.lemail = lower(h.email)`,
+					JOIN tmp_user_lookup u ON u.lemail = lower(trim(h.email))`,
 				`CREATE INDEX idx_tmp_user_map_legacy ON tmp_user_map (legacy_id)`,
 				`DROP TABLE IF EXISTS tmp_user_lookup`,
 			}

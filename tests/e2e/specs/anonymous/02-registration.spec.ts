@@ -61,8 +61,10 @@ test('full registration sends an activation email whose link works', async ({
   const reg = new RegistrationPage(page)
   await reg.goto()
 
+  // Typed with capitals and stray spaces: the account is created with the
+  // address trimmed and in lower case
   await reg.fill({
-    email: testEmail,
+    email: `  ${testEmail.replace('e2e+', 'E2E+').replace('example.com', 'Example.COM')} `,
     password: 'TestPassword123!',
     name: 'E2E Test User',
     zip: '1000',

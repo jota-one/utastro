@@ -277,9 +277,10 @@ export function fetchAdminAuth(): Promise<Auth> {
 }
 
 /** A unique throwaway address, so a test never collides with a real user. */
+/** A throwaway address, in lower case as the accounts are stored. */
 export function uniqueEmail(tag: string) {
   const suffix = Math.random().toString(36).slice(2, 6)
-  return `e2e+${tag}-${Date.now()}${suffix}@example.com`
+  return `e2e+${tag.toLowerCase()}-${Date.now()}${suffix}@example.com`
 }
 
 /**
