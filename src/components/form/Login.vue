@@ -25,6 +25,11 @@
           class="input"
         />
       </FormFieldWrapper>
+      <FormResendActivation
+        v-if="activationPending"
+        class="resend-activation"
+        :email="normalizeEmail(credentials.email)"
+      />
       <template v-if="passwordForgotten">
         <template v-if="passwordResetEmailSent">
           <TipBox color-theme="success">
@@ -122,6 +127,7 @@ import FormFieldWrapper from '@components/form/FieldWrapper.vue'
 import TipBox from '@components/TipBox.vue'
 import ContentBlockSpace from '@components/content/BlockSpace.vue'
 import FormCaptcha from '@components/form/Captcha.vue'
+import FormResendActivation from '@components/form/ResendActivation.vue'
 import config from '@/config'
 import { normalizeEmail } from '@/utils/validate'
 import ArrowLink from '@/components/ArrowLink.vue'
@@ -138,6 +144,7 @@ const emit = defineEmits(['authenticated', 'signup', 'close'])
 
 const loginField = ref<HTMLInputElement | null>(null)
 const error = ref<string>('')
+const activationPending = ref(false)
 const passwordForgotten = ref(false)
 const captchaEl = ref(null)
 const passwordResetEmailSent = ref(false)
@@ -169,6 +176,7 @@ const captchaModel = ref({
 
 const toggleForgotPassword = () => {
   error.value = ''
+  activationPending.value = false
   passwordForgotten.value = !passwordForgotten.value
 }
 
@@ -192,12 +200,14 @@ async function onLogin() {
       resetPasswordError.value = t('ERROR_UT_EMAIL_COULD_NOT_BE_SENT')
     }
   } else {
+    activationPending.value = false
     try {
       await login(credentials)
       emit('authenticated')
     } catch (e: any) {
       if (e.status === 403) {
         error.value = t('ERROR_HC_USER_PENDING')
+        activationPending.value = true
       } else {
         error.value = t('login_invalid_credentials')
       }
@@ -217,6 +227,10 @@ onMounted(() => {
   margin: 0 auto;
   width: var(--size-content-width-tq);
   max-width: 100%;
+
+  .resend-activation {
+    margin-top: var(--size-gap-20);
+  }
 
   form {
     max-width: min(100%, 35rem);

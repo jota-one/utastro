@@ -276,5 +276,8 @@
   "subscriptionform_fix_errors": "Something is still missing. Look at the messages in red.",
   "subscriptionform_email_taken_field": "This address already has an account",
   "subscriptionform_email_taken_text": "<b>You already have an account with this email address.</b><p>Log in. If you no longer know your password, click “Password forgotten?”.</p>",
-  "subscriptionform_email_taken_login": "Log in"
+  "subscriptionform_email_taken_login": "Log in",
+  "activation_resend_button": "Send the activation link again",
+  "activation_resend_sent": "Sent! Check your inbox, and your spam folder too.",
+  "subscriptionform_email_pending_text": "<b>Your account already exists, but it is not activated yet.</b><p>Click the button to receive a new link by email.</p>"
 }

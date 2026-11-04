@@ -13,7 +13,9 @@
         v-model="model.login"
         :user-profile="userProfile"
         :show-required="submitAttempted"
-        :email-error="emailTaken ? t('subscriptionform_email_taken_field') : ''"
+        :email-error="
+          emailStatus ? t('subscriptionform_email_taken_field') : ''
+        "
         @show-update-password="makePasswordRequired"
         @hide-update-password="makePasswordOptional"
       />
@@ -45,10 +47,21 @@
       <TipBox v-if="submitAttempted && !canSubmit" color-theme="error">
         {{ t('subscriptionform_fix_errors') }}
       </TipBox>
-      <TipBox v-if="emailTaken" color-theme="error" data-feedback>
+      <TipBox
+        v-if="emailStatus === 'pending'"
+        color-theme="error"
+        data-feedback
+      >
+        <div v-html="t('subscriptionform_email_pending_text')" />
+        <FormResendActivation
+          class="action"
+          :email="normalizeEmail(model.login.email)"
+        />
+      </TipBox>
+      <TipBox v-if="emailStatus === 'taken'" color-theme="error" data-feedback>
         <div v-html="t('subscriptionform_email_taken_text')" />
         <button
-          class="button primary small login"
+          class="button primary small action"
           type="button"
           @click="openLogin"
         >
@@ -122,6 +135,7 @@ import FormSubscriptionLogin from '@/components/form/subscription/Login.vue'
 import FormSubscriptionDetails from '@/components/form/subscription/Details.vue'
 import FormSubscriptionAgreements from '@/components/form/subscription/Agreements.vue'
 import FormCaptcha from '@/components/form/Captcha.vue'
+import FormResendActivation from '@/components/form/ResendActivation.vue'
 import useModal from '@composables/useModal'
 import config from '@/config'
 import {
@@ -162,7 +176,7 @@ const hcaptcha = config.hcaptcha
 
 const formEl = useTemplateRef('formEl')
 const submitAttempted = ref(false)
-const emailTaken = ref(false)
+const emailStatus = ref<'' | 'taken' | 'pending'>('')
 const submitting = ref(false)
 const submitted = ref(false)
 const captchaEl = ref(null)
@@ -298,7 +312,7 @@ const openLogin = () => {
 
 const submit = async () => {
   submitError.value = ''
-  emailTaken.value = false
+  emailStatus.value = ''
   submitAttempted.value = true
 
   if (!canSubmit.value) {
@@ -350,10 +364,13 @@ const submit = async () => {
           role: 'user',
         })
       } catch (createErr: any) {
-        if (
-          createErr?.response?.data?.email?.code === 'validation_not_unique'
-        ) {
-          emailTaken.value = true
+        const emailErrorCode = createErr?.response?.data?.email?.code
+        if (emailErrorCode === 'validation_not_unique') {
+          emailStatus.value = 'taken'
+          return
+        }
+        if (emailErrorCode === 'account_not_activated') {
+          emailStatus.value = 'pending'
           return
         }
         throw new Error(t('ERROR_HC_ACCOUNT_CREATION_FAILED'))
@@ -374,7 +391,7 @@ const submit = async () => {
     submitError.value = e?.message || t('ERROR_HC_ACCOUNT_CREATION_FAILED')
   } finally {
     submitting.value = false
-    if (emailTaken.value || submitError.value) {
+    if (emailStatus.value || submitError.value) {
       if (captchaEl.value) {
         ;(captchaEl.value as any).reset()
       }
@@ -386,7 +403,7 @@ const submit = async () => {
 watch(
   () => model.login.email,
   () => {
-    emailTaken.value = false
+    emailStatus.value = ''
   },
 )
 
@@ -450,7 +467,7 @@ watch(
   gap: var(--size-gap-40);
 }
 
-.login {
+.action {
   margin-top: var(--size-gap-10);
 }
 

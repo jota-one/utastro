@@ -101,6 +101,26 @@ test.describe('login modal', () => {
     ).toBeVisible()
     await expect(login.logoutButton()).not.toBeVisible()
   })
+
+  test('an account not activated yet can ask for a new link', async ({
+    page,
+  }) => {
+    test.skip(!MAILPIT_AVAILABLE, 'MAILPIT_URL not set')
+
+    const email = await newAccount('pending-resend', { verified: false })
+    const login = new LoginForm(page)
+
+    await page.goto('/fr')
+    await login.open()
+    await login.login(email, PASSWORD)
+    await login
+      .form()
+      .getByRole('button', { name: 'Renvoyer le lien d’activation' })
+      .click()
+
+    await expect(login.form().getByText('C’est envoyé!')).toBeVisible()
+    expect((await waitForEmail(email)).Subject).toMatch(/activ/i)
+  })
 })
 
 test.describe('accounts imported from the legacy app', () => {

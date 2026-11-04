@@ -388,5 +388,8 @@
   "subscriptionform_fix_errors": "Il manque encore quelque chose. Regarde les messages en rouge.",
   "subscriptionform_email_taken_field": "Cette adresse a déjà un compte",
   "subscriptionform_email_taken_text": "<b>Tu as déjà un compte avec cette adresse e-mail.</b><p>Connecte-toi. Si tu ne connais plus ton mot de passe, clique sur « Mot de passe oublié ».</p>",
-  "subscriptionform_email_taken_login": "Me connecter"
+  "subscriptionform_email_taken_login": "Me connecter",
+  "activation_resend_button": "Renvoyer le lien d’activation",
+  "activation_resend_sent": "C’est envoyé! Regarde dans ta boîte e-mail, et aussi dans les spams.",
+  "subscriptionform_email_pending_text": "<b>Ton compte existe déjà, mais il n’est pas encore activé.</b><p>Clique sur le bouton pour recevoir un nouveau lien par e-mail.</p>"
 }

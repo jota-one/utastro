@@ -1,7 +1,8 @@
-import { test, expect } from '@playwright/test'
+import { test, expect, type Page } from '@playwright/test'
 import { RegistrationPage } from '../../pages/RegistrationPage'
 import {
   clearMailpit,
+  createUser,
   deleteUserByEmail,
   extractLinkFromEmail,
   fetchAdminAuth,
@@ -126,6 +127,76 @@ test('full registration sends an activation email whose link works', async ({
   await page.goto(activationLink)
   await expect(page.getByText('Compte activé avec succès!')).toBeVisible()
   expect(await loginStatus(testEmail, 'TestPassword123!')).toBe(200)
+})
+
+const signUpWith = async (page: Page, email: string) => {
+  const reg = new RegistrationPage(page)
+  await reg.goto()
+  await reg.fill({
+    email,
+    password: 'TestPassword123!',
+    name: 'Duplicate User',
+    zip: '1000',
+    city: 'Lausanne',
+    phone: '079 000 00 00',
+    birthYear: '1985',
+    gender: 'Féminin',
+    canton: 'VD',
+  })
+  await reg.submit()
+}
+
+test('an address waiting for its activation can ask for a new link', async ({
+  page,
+}) => {
+  test.skip(!MAILPIT_AVAILABLE, 'MAILPIT_URL not set — skipping email test')
+
+  const admin = await fetchAdminAuth()
+  const email = uniqueEmail('registration-pending')
+  await createUser(admin, {
+    email,
+    verified: false,
+    password: 'TestPassword123!',
+  })
+
+  try {
+    await signUpWith(page, email)
+    await expect(
+      page.getByText(
+        'Ton compte existe déjà, mais il n’est pas encore activé.',
+      ),
+    ).toBeVisible()
+
+    await page
+      .getByRole('button', { name: 'Renvoyer le lien d’activation' })
+      .click()
+    await expect(page.getByText('C’est envoyé!')).toBeVisible()
+    expect((await waitForEmail(email)).Subject).toMatch(/activ/i)
+  } finally {
+    await deleteUserByEmail(admin, email)
+  }
+})
+
+test('a migrated member who never logged in is sent to the login', async ({
+  page,
+}) => {
+  const admin = await fetchAdminAuth()
+  const email = uniqueEmail('registration-migrated')
+  await createUser(admin, {
+    email,
+    verified: false,
+    password: 'TestPassword123!',
+    legacy_password_sha1: 'da39a3ee5e6b4b0d3255bfef95601890afd80709',
+  })
+
+  try {
+    await signUpWith(page, email)
+    await expect(
+      page.getByText('Tu as déjà un compte avec cette adresse e-mail.'),
+    ).toBeVisible()
+  } finally {
+    await deleteUserByEmail(admin, email)
+  }
 })
 
 test('duplicate email shows an error', async ({ page }) => {
