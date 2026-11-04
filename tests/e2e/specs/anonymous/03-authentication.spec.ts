@@ -150,6 +150,56 @@ test.describe('accounts imported from the legacy app', () => {
       legacyHash,
     )
   })
+
+  test('a password reset replaces the old password', async () => {
+    test.skip(!MAILPIT_AVAILABLE, 'MAILPIT_URL not set')
+
+    const oldPassword = 'Legacy-Password-42'
+    const newPassword = 'Brand-New-Pass-99'
+    const email = await newAccount('legacy-reset', {
+      verified: false,
+      legacy_password_sha1: createHash('sha1')
+        .update(oldPassword)
+        .digest('hex'),
+    })
+    const pbUrl = process.env.PB_URL
+    await fetch(`${pbUrl}/api/collections/ut_users/request-password-reset`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    })
+    const link = extractLinkFromEmail(await waitForEmail(email))
+    await fetch(`${pbUrl}/api/collections/ut_users/confirm-password-reset`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        token: new URL(link).searchParams.get('token'),
+        password: newPassword,
+        passwordConfirm: newPassword,
+      }),
+    })
+
+    // Gone with the reset itself, before any login
+    const user = await readUserByEmail(admin, email)
+    expect(user?.legacy_password_sha1).toBe('')
+    expect(user?.verified).toBe(true)
+
+    expect(await loginStatus(email, oldPassword)).toBe(401)
+    expect(await loginStatus(email, newPassword)).toBe(200)
+  })
+
+  test('a member whose reset left the old hash behind can log in', async () => {
+    const oldPassword = 'Legacy-Password-42'
+    const email = await newAccount('legacy-stuck', {
+      legacy_password_sha1: createHash('sha1')
+        .update(oldPassword)
+        .digest('hex'),
+    })
+
+    expect(await loginStatus(email, PASSWORD)).toBe(200)
+    expect((await readUserByEmail(admin, email))?.legacy_password_sha1).toBe('')
+    expect(await loginStatus(email, oldPassword)).toBe(401)
+  })
 })
 
 test.describe('an email typed with capitals or stray spaces', () => {

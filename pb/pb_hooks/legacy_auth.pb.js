@@ -129,23 +129,30 @@ routerAdd('POST', '/api/custom/auth/login', e => {
 
   const legacyHash = record.getString('legacy_password_sha1')
 
-  if (legacyHash) {
-    if (computeSha1(password) !== legacyHash) {
-      throw new UnauthorizedError('Invalid credentials')
-    }
+  const isLegacyPassword = legacyHash && computeSha1(password) === legacyHash
 
-    record.setPassword(password)
+  if (!isLegacyPassword && !record.validatePassword(password)) {
+    throw new UnauthorizedError('Invalid credentials')
+  }
+
+  if (legacyHash) {
+    // A migrated member: either the old password, or one set since the import
+    // while the old hash was left behind
+    if (isLegacyPassword) {
+      record.setPassword(password)
+    }
     record.set('legacy_password_sha1', '')
     record.set('verified', true)
     $app.save(record)
-  } else {
-    if (!record.validatePassword(password)) {
-      throw new UnauthorizedError('Invalid credentials')
-    }
-    if (!record.getBool('verified')) {
-      throw new ForbiddenError('Account not verified')
-    }
+  } else if (!record.getBool('verified')) {
+    throw new ForbiddenError('Account not verified')
   }
 
   return $apis.recordAuthResponse(e, record, 'password')
 })
+
+// A new password replaces the one from the legacy app, which must stop working
+onRecordConfirmPasswordResetRequest(e => {
+  e.record.set('legacy_password_sha1', '')
+  e.next()
+}, 'ut_users')

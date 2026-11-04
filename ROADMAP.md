@@ -216,3 +216,4 @@ Certaines tâches doivent être faites en 1er lieu et ensebmle pour que tout le 
 - [2026-11-04] Accueil — typographie française : espaces insécables avant les points d'exclamation
 - [2026-11-04] Bascule — `www.urban-training.ch` tourne sur le nouveau site, `urban-training.ch` et `next` y redirigent
 - [2026-11-04] Inscription — le bouton reste cliquable et montre ce qui manque, un compte déjà existant est expliqué avec un accès direct à la connexion, les numéros au format 079 sont de nouveau acceptés (inscription et profil)
+- [2026-11-04] Mot de passe oublié — les membres migrés qui réinitialisent leur mot de passe peuvent de nouveau se connecter avec le nouveau, y compris ceux déjà bloqués
