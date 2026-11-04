@@ -3,14 +3,18 @@
     :label="t('subscriptionform_email_label')"
     required
     :filled="Boolean(model.email) && !errors.email"
-    :error="errors.email"
+    :error="errors.email || emailError || requiredError(model.email)"
   >
     <input
       v-model="model.email"
       type="text"
+      inputmode="email"
+      autocapitalize="none"
+      autocorrect="off"
+      spellcheck="false"
       required
       name="email"
-      autocomplete="on"
+      autocomplete="email"
       class="input"
       :disabled="Boolean(userProfile)"
       :placeholder="t('subscriptionform_email_placeholder')"
@@ -34,6 +38,7 @@
       :label="t('profile_old_password_label')"
       required
       :filled="Boolean(model.oldPassword)"
+      :error="requiredError(model.oldPassword)"
     >
       <input
         v-model="model.oldPassword"
@@ -53,7 +58,7 @@
             : 'subscriptionform_password_label',
         )
       "
-      :error="errors.password"
+      :error="errors.password || requiredError(model.password)"
       required
       :filled="Boolean(model.password) && !errors.password"
     >
@@ -62,9 +67,9 @@
         type="password"
         required
         name="password"
-        autocomplete="on"
+        autocomplete="new-password"
         class="input"
-        placeholder="******"
+        :placeholder="t('subscriptionform_password_placeholder')"
       />
     </FormFieldWrapper>
     <FormFieldWrapper
@@ -75,7 +80,7 @@
             : 'subscriptionform_password_confirm_label',
         )
       "
-      :error="errors.passwordConfirm"
+      :error="errors.passwordConfirm || requiredError(model.passwordConfirm)"
       required
       :filled="Boolean(model.passwordConfirm) && !errors.passwordConfirm"
     >
@@ -97,12 +102,14 @@ import { ref, reactive, watch } from 'vue'
 import { useI36n } from '@jota-one/i36n'
 import FormFieldWrapper from '@/components/form/FieldWrapper.vue'
 import AppErrorCode from '@/AppErrorCode'
-import { validateEmail, validatePassword } from '@/utils/validate'
+import { isEmpty, validateEmail, validatePassword } from '@/utils/validate'
 import type { UserProfile, UserProfileLogin } from '@/types'
 
 interface Props {
   modelValue: UserProfileLogin
   userProfile?: UserProfile
+  showRequired?: boolean
+  emailError?: string
 }
 
 const emit = defineEmits([
@@ -117,6 +124,11 @@ const { t } = useI36n()
 const model = ref(props.modelValue)
 const updatePassword = ref(false)
 const errors = reactive<any>({})
+
+const requiredError = (value: unknown) =>
+  props.showRequired && isEmpty(value)
+    ? t('subscriptionform_field_required')
+    : ''
 
 const onUpdatePasswordClick = () => {
   updatePassword.value = !updatePassword.value
@@ -161,7 +173,7 @@ watch(
       }
     }
   },
-  { deep: true },
+  { deep: true, immediate: true },
 )
 </script>
 

@@ -1,6 +1,6 @@
 # Migration UT to Pocketbase/Astro stack
 
-La version pb tourne sur `never.urban-training.ch` (DEV) et sur `next.urban-training.ch`, le futur environnement de prod, en attendant la bascule de `www.urban-training.ch`.
+La version pb est en production sur `www.urban-training.ch` depuis le 2026-11-04 ; `never.urban-training.ch` reste le DEV.
 
 ## Dev Lanes
 
@@ -61,7 +61,7 @@ Migration de l'UI et du backend. Décision prise : on reste sur **Element Plus**
 
 ### Infra @Istvan
 
-`never.urban-training.ch` reste l'environnement de DEV ; la prod tourne sur un VPS dédié, exposé sur `next.urban-training.ch` jusqu'à la bascule de `www`.
+`never.urban-training.ch` reste l'environnement de DEV ; la prod tourne sur un VPS dédié et répond sur `www.urban-training.ch` depuis le 2026-11-04.
 
 - [x] Déploiement automatisé (build + migrations PB via les workflows `jota-one/infra`) : push `develop` → `never`, push `main` → prod
 - [x] Environnement de démo `never.urban-training.ch` en ligne
@@ -74,6 +74,8 @@ Migration de l'UI et du backend. Décision prise : on reste sur **Element Plus**
 - [ ] SPF de `?all` à `~all` — de l'hygiène : la Newsletter et Mandrill utilisent leur propre domaine d'enveloppe, ce SPF ne couvre que le mail Infomaniak direct, déjà conforme
 - [x] Renouvellement du domaine sous contrôle — renouvellement automatique actif chez Infomaniak et désactivé chez OVH, plus aucune facturation possible de leur côté (échéance fin octobre 2026)
 - [x] Anciennes URLs redirigées par Caddy (clé `caddy` de l'app dans `apps.yaml`, sur `never` et `next`) : les 22 redirections du legacy, la page Sponsors abandonnée et `/{lang}/session`
+- [ ] Balise canonical sur les pages publiques (`/fr`, `/de`, `/en` et les suivantes) : aucune n'en a aujourd'hui
+- [ ] `robots.txt` en prod : `/robots.txt` répond 404, sans gêner le crawl ; à ajouter avec le lien vers un sitemap s'il y en a un, jamais de `Disallow: /`
 
 ### Tests E2E
 
@@ -124,12 +126,12 @@ Pas encore couvert :
 - [x] Failles de droits d'accès corrigées
 - [x] Fuseau horaire des serveurs corrigé
 - [x] Couverture E2E « avant la bascule » ci-dessus au vert
-- [ ] `next` est vide (aucune ville ni session) : il affichait jusqu'ici les données de `never`, il montre désormais sa propre base — le smoke test y restera rouge sur la page ville et la page session jusqu'à l'import
+- [x] Données de prod importées le jour J : 58 466 comptes, 15 888 sessions, 241 411 inscriptions
 - [x] Page de maintenance (`public/maintenance.html`, en fr/de/en) servie par Caddy avec un code 503 dès que l'app ne répond pas — import, déploiement ou panne ; elle se recharge d'elle-même au retour du site. Testée sur `never`. Le monitoring continue de signaler le site en panne (« HTTP 503 »)
 - [x] Caddy officiel sur tous les serveurs : `jota-apps-3` tournait avec le Caddy 2.6 de Debian, qui refusait la config — le provisionnement installe désormais la version officielle
 - [x] Bascule scriptée étape par étape (`scripts/switchover.sh`, marche à suivre dans `docs/switchover.md`) : gel du nouveau site, attente du DNS, merge de la PR de bascule, arrêt de l'ancien site, export, import, smoke test sur `www`, nettoyage — répétée sur `never` le 2026-10-13 (moins de 6 min de maintenance, export compris)
-- [x] Redirection `urban-training.ch` et `next.urban-training.ch` → `www`, et liens des e-mails sur `www` : prêts dans la PR de bascule `jota-one/infra#30` (brouillon, à merger seulement le jour J après la bascule DNS)
-- [ ] Jour J : suivre `docs/switchover.md` — seuls le changement DNS chez Infomaniak et la vérification d'une connexion avec un ancien compte restent manuels
+- [x] Redirection `urban-training.ch` et `next.urban-training.ch` → `www`, et liens des e-mails sur `www` : actifs depuis le merge de `jota-one/infra#30`
+- [x] Jour J, 2026-11-04 : bascule faite avec `docs/switchover.md` — 16 minutes de gel (09:22 → 09:38), smoke test et redirections au vert sur `www`, connexion d'un ancien compte et mail vérifiés, exports et sauvegarde supprimés. L'ancien hébergement est à résilier
 - [x] Redirections des anciennes URLs en place et testées
 - [x] Sonde de monitoring : rien à changer, elle surveille déjà `www.urban-training.ch/fr`
 
@@ -212,3 +214,7 @@ Certaines tâches doivent être faites en 1er lieu et ensebmle pour que tout le 
 - [2026-10-20] Comptes — une adresse e-mail tapée avec des majuscules ou un espace en trop fonctionne à l'inscription, à la connexion et pour le mot de passe oublié, comme sur l'ancien site
 - [2026-10-23] Bascule — deuxième répétition complète sur `never` : environ 6 minutes de maintenance, smoke test vert avec un vrai envoi de mail, connexion d'un ancien compte vérifiée
 - [2026-11-04] Accueil — typographie française : espaces insécables avant les points d'exclamation
+- [2026-11-04] Bascule — `www.urban-training.ch` tourne sur le nouveau site, `urban-training.ch` et `next` y redirigent
+- [2026-11-04] Inscription — le bouton reste cliquable et montre ce qui manque, un compte déjà existant est expliqué avec un accès direct à la connexion, les numéros au format 079 sont de nouveau acceptés (inscription et profil)
+- [2026-11-04] Mot de passe oublié — les membres migrés qui réinitialisent leur mot de passe peuvent de nouveau se connecter avec le nouveau, y compris ceux déjà bloqués
+- [2026-11-04] Activation — un compte pas encore activé est reconnu à l'inscription et à la connexion, avec un bouton pour renvoyer le lien

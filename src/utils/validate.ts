@@ -10,6 +10,9 @@ const emailRe =
  */
 export const normalizeEmail = (email: string) => email.trim().toLowerCase()
 
+export const isEmpty = (value: unknown) =>
+  [undefined, '', false].includes(value as any)
+
 export const validateEmail = (email: string) => {
   if (email && !emailRe.exec(email.trim())) {
     throw new Error('Invalid email address', {
@@ -50,17 +53,12 @@ export const validateName = (name: string) => {
 export const validatePhone = (phone: string) => {
   if (!phone.trim()) return true
   const trimmed = phone.trim()
-  let digits = ''
-  if (trimmed.startsWith('+')) {
-    digits = trimmed.slice(1).replace(/\D/g, '')
-  } else if (trimmed.startsWith('00')) {
-    digits = trimmed.slice(2).replace(/\D/g, '')
-  } else {
-    throw new Error('Invalid phone', {
-      cause: AppErrorCode.ERROR_UT_INVALID_PHONE,
-    })
-  }
-  if (digits.length < 11) {
+  const digits = trimmed.replace(/\D/g, '')
+  // International (+41 79…, 0041 79…) or national (079…) notation
+  const isInternational = trimmed.startsWith('+') || trimmed.startsWith('00')
+  const isNational = !isInternational && trimmed.startsWith('0')
+  const minDigits = trimmed.startsWith('00') ? 13 : isNational ? 10 : 11
+  if ((!isInternational && !isNational) || digits.length < minDigits) {
     throw new Error('Invalid phone', {
       cause: AppErrorCode.ERROR_UT_INVALID_PHONE,
     })

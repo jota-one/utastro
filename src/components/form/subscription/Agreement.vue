@@ -1,5 +1,5 @@
 <template>
-  <label class="agreement">
+  <label :class="['agreement', { invalid: error }]">
     <input
       v-model="model"
       type="checkbox"
@@ -12,6 +12,7 @@
         <FormFilled v-if="model" /><FormRequired v-else />&nbsp;
       </template>
       <slot />
+      <div v-if="error" class="error">{{ error }}</div>
     </div>
   </label>
 </template>
@@ -25,6 +26,7 @@ interface Props {
   name: string
   disabled?: boolean
   required?: boolean
+  error?: string
 }
 
 const emit = defineEmits(['update:modelValue'])
@@ -55,6 +57,12 @@ watch(
   .text {
     grid-row: 1;
     grid-column: 2;
+  }
+
+  .error {
+    padding-top: 0.15rem;
+    font-size: 0.8rem;
+    color: rgb(var(--color-error-text));
   }
 }
 </style>

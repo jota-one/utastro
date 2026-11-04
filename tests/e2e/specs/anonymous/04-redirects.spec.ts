@@ -9,6 +9,8 @@ import { test, expect } from '@playwright/test'
  */
 
 const REDIRECTS: [string, string][] = [
+  // home page
+  ['/', '/fr'],
   // former Nuxt URLs
   ['/fr/home', '/fr'],
   ['/de/home', '/de'],

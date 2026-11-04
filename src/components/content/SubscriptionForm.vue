@@ -1,5 +1,5 @@
 <template>
-  <form @submit.prevent="submit">
+  <form ref="formEl" novalidate @submit.prevent="submit">
     <div v-if="!userProfile" class="container superslim">
       <TipBox color-theme="info">
         <div v-html="t('subscriptionform_top_tip')" />
@@ -12,6 +12,10 @@
       <FormSubscriptionLogin
         v-model="model.login"
         :user-profile="userProfile"
+        :show-required="submitAttempted"
+        :email-error="
+          emailStatus ? t('subscriptionform_email_taken_field') : ''
+        "
         @show-update-password="makePasswordRequired"
         @hide-update-password="makePasswordOptional"
       />
@@ -21,7 +25,10 @@
     <ContentBlockTitle :text="t('subscriptionform_details_title')" />
 
     <div class="container superslim block">
-      <FormSubscriptionDetails v-model="model.details" />
+      <FormSubscriptionDetails
+        v-model="model.details"
+        :show-required="submitAttempted"
+      />
     </div>
 
     <ContentBlockSpace size="quarter" />
@@ -31,15 +38,37 @@
       <FormSubscriptionAgreements
         v-model="model.agreements"
         :user-profile="userProfile"
+        :show-required="submitAttempted"
       />
     </div>
 
     <ContentBlockSpace size="quarter" />
     <div class="container superslim submit">
-      <TipBox v-if="hasEmptyRequiredFields" color-theme="error">
-        {{ t('subscriptionform_empty_required_fields') }}
+      <TipBox v-if="submitAttempted && !canSubmit" color-theme="error">
+        {{ t('subscriptionform_fix_errors') }}
       </TipBox>
-      <TipBox v-if="submitError" color-theme="error">
+      <TipBox
+        v-if="emailStatus === 'pending'"
+        color-theme="error"
+        data-feedback
+      >
+        <div v-html="t('subscriptionform_email_pending_text')" />
+        <FormResendActivation
+          class="action"
+          :email="normalizeEmail(model.login.email)"
+        />
+      </TipBox>
+      <TipBox v-if="emailStatus === 'taken'" color-theme="error" data-feedback>
+        <div v-html="t('subscriptionform_email_taken_text')" />
+        <button
+          class="button primary small action"
+          type="button"
+          @click="openLogin"
+        >
+          {{ t('subscriptionform_email_taken_login') }}
+        </button>
+      </TipBox>
+      <TipBox v-if="submitError" color-theme="error" data-feedback>
         <div
           v-html="
             t('subscriptionform_subscription_not_sent', {
@@ -49,15 +78,19 @@
         />
       </TipBox>
       <template v-if="!userProfile && !submitted">
-        <FormCaptcha
+        <div
           v-if="hcaptcha.enabled"
-          ref="captchaEl"
-          v-model="model.captcha"
-        />
+          :class="['captcha', { invalid: captchaError }]"
+        >
+          <FormCaptcha ref="captchaEl" v-model="model.captcha" />
+          <div v-if="captchaError" class="captcha-error">
+            {{ t('subscriptionform_captcha_required') }}
+          </div>
+        </div>
         <button
           :class="['button primary', { loading: submitting }]"
           type="submit"
-          :disabled="!canSubmit || submitting"
+          :disabled="submitting"
         >
           {{ t(submitButtonLabel) }}
         </button>
@@ -66,11 +99,11 @@
         v-if="userProfile"
         :class="['button primary', { loading: submitting }]"
         type="submit"
-        :disabled="!canSubmit || submitting"
+        :disabled="submitting"
       >
         {{ t(submitButtonLabel) }}
       </button>
-      <TipBox v-if="submitted" color-theme="success">
+      <TipBox v-if="submitted" color-theme="success" data-feedback>
         <div
           v-html="
             t(
@@ -92,7 +125,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, watch } from 'vue'
+import { ref, reactive, computed, watch, nextTick, useTemplateRef } from 'vue'
 import { useI36n } from '@jota-one/i36n'
 import { pb } from '@/pb'
 import TipBox from '@/components/TipBox.vue'
@@ -102,8 +135,11 @@ import FormSubscriptionLogin from '@/components/form/subscription/Login.vue'
 import FormSubscriptionDetails from '@/components/form/subscription/Details.vue'
 import FormSubscriptionAgreements from '@/components/form/subscription/Agreements.vue'
 import FormCaptcha from '@/components/form/Captcha.vue'
+import FormResendActivation from '@/components/form/ResendActivation.vue'
+import useModal from '@composables/useModal'
 import config from '@/config'
 import {
+  isEmpty,
   normalizeEmail,
   validateEmail,
   validatePassword,
@@ -135,8 +171,12 @@ interface Props {
 const props = defineProps<Props>()
 
 const { t } = useI36n()
+const { openModal } = useModal()
 const hcaptcha = config.hcaptcha
 
+const formEl = useTemplateRef('formEl')
+const submitAttempted = ref(false)
+const emailStatus = ref<'' | 'taken' | 'pending'>('')
 const submitting = ref(false)
 const submitted = ref(false)
 const captchaEl = ref(null)
@@ -153,7 +193,7 @@ const model = reactive<Model>({
     street: '',
     zip: undefined,
     city: '',
-    regionId: undefined,
+    regionId: '',
     country: 'CH',
     phone: '',
     gender: '',
@@ -183,10 +223,7 @@ const hasEmptyRequiredFields = computed(() => {
   return Object.entries(requiredFields.value).reduce(
     (acc, [fieldGroup, keys]) => {
       for (const key of keys) {
-        const isEmpty = [undefined, '', false].includes(
-          (model as any)[fieldGroup][key],
-        )
-        acc = acc || isEmpty
+        acc = acc || isEmpty((model as any)[fieldGroup][key])
       }
       return acc
     },
@@ -232,6 +269,10 @@ const canSubmit = computed(
         : true),
 )
 
+const captchaError = computed(
+  () => submitAttempted.value && !model.captcha.isValid,
+)
+
 const submitButtonLabel = computed(() =>
   submitting.value
     ? 'subscriptionform_submit_button_loading'
@@ -251,10 +292,31 @@ const makePasswordOptional = () => {
   requiredFields.value.login = ['email']
 }
 
+const reveal = async (selector: string) => {
+  await nextTick()
+  const element = formEl.value?.querySelector(selector)
+  element?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  return element
+}
+
+const revealFirstError = async () => {
+  const field = await reveal('.field-wrapper.error, .invalid')
+  field
+    ?.querySelector<HTMLElement>('input, select')
+    ?.focus({ preventScroll: true })
+}
+
+const openLogin = () => {
+  openModal('login', { email: normalizeEmail(model.login.email) })
+}
+
 const submit = async () => {
   submitError.value = ''
+  emailStatus.value = ''
+  submitAttempted.value = true
 
   if (!canSubmit.value) {
+    await revealFirstError()
     return
   }
 
@@ -302,8 +364,14 @@ const submit = async () => {
           role: 'user',
         })
       } catch (createErr: any) {
-        if (createErr?.data?.email?.code === 'validation_not_unique') {
-          throw new Error(t('ERROR_HC_USER_ALREADY_EXISTS'))
+        const emailErrorCode = createErr?.response?.data?.email?.code
+        if (emailErrorCode === 'validation_not_unique') {
+          emailStatus.value = 'taken'
+          return
+        }
+        if (emailErrorCode === 'account_not_activated') {
+          emailStatus.value = 'pending'
+          return
         }
         throw new Error(t('ERROR_HC_ACCOUNT_CREATION_FAILED'))
       }
@@ -318,15 +386,26 @@ const submit = async () => {
     }
 
     submitted.value = true
+    reveal('[data-feedback]')
   } catch (e: any) {
-    if (captchaEl.value) {
-      ;(captchaEl.value as any).reset()
-    }
     submitError.value = e?.message || t('ERROR_HC_ACCOUNT_CREATION_FAILED')
   } finally {
     submitting.value = false
+    if (emailStatus.value || submitError.value) {
+      if (captchaEl.value) {
+        ;(captchaEl.value as any).reset()
+      }
+      reveal('[data-feedback]')
+    }
   }
 }
+
+watch(
+  () => model.login.email,
+  () => {
+    emailStatus.value = ''
+  },
+)
 
 watch(
   () => props.userProfile,
@@ -386,5 +465,15 @@ watch(
   flex-direction: column;
   align-items: center;
   gap: var(--size-gap-40);
+}
+
+.action {
+  margin-top: var(--size-gap-10);
+}
+
+.captcha-error {
+  padding-top: 0.15rem;
+  font-size: 0.8rem;
+  color: rgb(var(--color-error-text));
 }
 </style>
