@@ -26,8 +26,8 @@ const heroContent: Record<LangCode, {
   fr: {
     headlineTextLines: ['Marche et exercices', 'en plein air'],
     headlineHighlightTextLines: ['pour tous'],
-    subscribeButtonText: 'Inscris-toi!',
-    vignetteText: 'Gratuit!',
+    subscribeButtonText: 'Inscris-toi\u00A0!',
+    vignetteText: 'Gratuit\u00A0!',
   },
   de: {
     headlineTextLines: ['Outdoor Bewegung', 'und laufen'],
@@ -62,7 +62,7 @@ const coachTeasers: Teaser[] = lang === 'fr' ? [
   {
     tags: [{ id: '1', label: 'Job' }],
     title: 'Recherche coaches',
-    description: "<b>T'es sympa? Motivant? Souriant?</b><p>Alors rejoins-nous pour faire bouger la Suisse!</p>",
+    description: "<b>T'es sympa? Motivant? Souriant?</b><p>Alors rejoins-nous pour faire bouger la Suisse&nbsp;!</p>",
     link: { href: coachFormPath, label: 'Envoie ton CV' },
     displayTargets: [],
   },
@@ -70,7 +70,7 @@ const coachTeasers: Teaser[] = lang === 'fr' ? [
 
 const textColumns = {
   column1: '<p><b>Urban Training</b> te propose des cours <b>gratuits</b> alliant marche et exercices encadrés par un coach.</p><p>Cours libre <b>dès 16 ans</b></p>',
-  column2: '<p>Pour y participer, choisis la ville, remplis le questionnaire santé et rendez-vous au lieu indiqué en tenue de sport.</p><p><b>Attention!</b> Pas de vestiaire ou de lieu pour déposer tes affaires.</p><p><b>Les cours Urban Training ont lieu par tous les temps&nbsp;!</b></p>',
+  column2: '<p>Pour y participer, choisis la ville, remplis le questionnaire santé et rendez-vous au lieu indiqué en tenue de sport.</p><p><b>Attention&nbsp;!</b> Pas de vestiaire ou de lieu pour déposer tes affaires.</p><p><b>Les cours Urban Training ont lieu par tous les temps&nbsp;!</b></p>',
 }
 ---
 
