@@ -3,7 +3,7 @@
     :label="t('subscriptionform_name_label')"
     required
     :filled="Boolean(model.name) && !errors.name"
-    :error="errors.name"
+    :error="errors.name || requiredError(model.name)"
   >
     <input
       v-model="model.name"
@@ -20,7 +20,7 @@
       v-model="model.street"
       type="text"
       name="street"
-      autocomplete="on"
+      autocomplete="street-address"
       class="input"
       :placeholder="t('subscriptionform_street_placeholder')"
     />
@@ -29,14 +29,15 @@
     :label="t('subscriptionform_zip_label')"
     required
     :filled="Boolean(model.zip) && !errors.zip"
-    :error="errors.zip"
+    :error="errors.zip || requiredError(model.zip)"
   >
     <input
       v-model="model.zip"
       type="text"
       required
       name="zip"
-      autocomplete="on"
+      inputmode="numeric"
+      autocomplete="postal-code"
       class="input"
       :placeholder="t('subscriptionform_zip_placeholder')"
     />
@@ -45,14 +46,14 @@
     :label="t('subscriptionform_city_label')"
     required
     :filled="Boolean(model.city) && !errors.city"
-    :error="errors.city"
+    :error="errors.city || requiredError(model.city)"
   >
     <input
       v-model="model.city"
       type="text"
       required
       name="city"
-      autocomplete="on"
+      autocomplete="address-level2"
       class="input"
       :placeholder="t('subscriptionform_city_placeholder')"
     />
@@ -76,6 +77,7 @@
     :label="t('subscriptionform_region_label')"
     :required="model.country === 'CH'"
     :filled="Boolean(model.regionId)"
+    :error="requiredError(model.regionId)"
   >
     <select
       v-model="model.regionId"
@@ -99,13 +101,13 @@
     :label="t('subscriptionform_phone_label')"
     required
     :filled="Boolean(model.phone) && !errors.phone"
-    :error="errors.phone"
+    :error="errors.phone || requiredError(model.phone)"
   >
     <input
       v-model="model.phone"
-      type="text"
+      type="tel"
       name="phone"
-      autocomplete="on"
+      autocomplete="tel"
       class="input"
       :placeholder="t('subscriptionform_phone_placeholder')"
       required
@@ -115,6 +117,7 @@
     :label="t('subscriptionform_gender_label')"
     required
     :filled="Boolean(model.gender)"
+    :error="requiredError(model.gender)"
   >
     <select v-model="model.gender" class="dropdown" required>
       <option value="" disabled>
@@ -133,15 +136,17 @@
     :label="t('subscriptionform_birthdate_label')"
     required
     :filled="Boolean(model.birthdate) && !errors.birthdate"
-    :error="errors.birthdate"
+    :error="errors.birthdate || requiredError(model.birthdate)"
   >
     <input
       v-model="model.birthdate"
       type="number"
       required
       name="birthdate"
-      autocomplete="on"
+      inputmode="numeric"
+      autocomplete="bday-year"
       class="input"
+      :placeholder="t('subscriptionform_birthdate_placeholder')"
       :min="currentYear - 100"
       :max="currentYear - 5"
     />
@@ -154,6 +159,7 @@ import { useI36n } from '@jota-one/i36n'
 import FormFieldWrapper from '@/components/form/FieldWrapper.vue'
 import AppErrorCode from '@/AppErrorCode'
 import {
+  isEmpty,
   validateName,
   validatePhone,
   validateBirthYear,
@@ -192,6 +198,7 @@ const SWISS_CANTONS = [
 
 interface Props {
   modelValue: UserProfileDetails
+  showRequired?: boolean
 }
 
 const { t } = useI36n()
@@ -218,6 +225,11 @@ const genders = computed(() => [
   { label: t('subscriptionform_gender_other_label'), value: 'other' },
 ])
 
+const requiredError = (value: unknown) =>
+  props.showRequired && isEmpty(value)
+    ? t('subscriptionform_field_required')
+    : ''
+
 const applyError = (fn: () => void, key: string) => {
   try {
     fn()
@@ -237,7 +249,7 @@ watch(
     applyError(() => validateZip(value.zip), 'zip')
     emit('update:modelValue', value)
   },
-  { deep: true },
+  { deep: true, immediate: true },
 )
 
 watch(
@@ -246,7 +258,7 @@ watch(
     if (country !== 'CH') {
       model.value.regionId = 'OUTSIDE'
     } else if (model.value.regionId === 'OUTSIDE') {
-      model.value.regionId = undefined
+      model.value.regionId = ''
     }
   },
 )

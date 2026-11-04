@@ -46,11 +46,39 @@ test('registration form shows all required fields', async ({ page }) => {
   await expect(page.getByLabel('Canton')).toBeVisible()
 })
 
-test('submit button is disabled with empty form', async ({ page }) => {
+test('submitting an incomplete form shows what is missing', async ({
+  page,
+}) => {
   const reg = new RegistrationPage(page)
   await reg.goto()
-  const submit = page.locator('button', { hasText: 'Envoyer mes informations' })
-  await expect(submit).toBeDisabled()
+
+  await expect(page.getByText('Il manque encore quelque chose')).toBeHidden()
+  await reg.submit()
+
+  await expect(page.getByText('Il manque encore quelque chose')).toBeVisible()
+  await expect(page.getByText('Ce champ est obligatoire').first()).toBeVisible()
+  await expect(
+    page.getByText('Coche cette case pour pouvoir t’inscrire'),
+  ).toBeVisible()
+  await expect(page.getByLabel('E-mail')).toBeFocused()
+
+  // The first remaining error takes over once the first field is filled
+  await page.getByLabel('E-mail').fill('someone@example.com')
+  await reg.submit()
+  await expect(page.getByLabel('Mot de passe').first()).toBeFocused()
+})
+
+test('a phone number can be typed the way it is written in Switzerland', async ({
+  page,
+}) => {
+  const reg = new RegistrationPage(page)
+  await reg.goto()
+  const phone = page.getByLabel('Téléphone')
+
+  await phone.fill('079 123 45')
+  await expect(page.getByText('Numéro incomplet')).toBeVisible()
+  await phone.fill('079 123 45 67')
+  await expect(page.getByText('Numéro incomplet')).toBeHidden()
 })
 
 test('full registration sends an activation email whose link works', async ({
@@ -69,7 +97,7 @@ test('full registration sends an activation email whose link works', async ({
     name: 'E2E Test User',
     zip: '1000',
     city: 'Lausanne',
-    phone: '+41 79 000 00 00',
+    phone: '079 000 00 00',
     birthYear: '1990',
     gender: 'Masculin',
     canton: 'VD',
@@ -122,5 +150,14 @@ test('duplicate email shows an error', async ({ page }) => {
   await reg.submit()
 
   // Should show an error, not the success message
+  await expect(
+    page.getByText('Tu as déjà un compte avec cette adresse e-mail.'),
+  ).toBeVisible()
   await expect(page.getByText('Ton compte a été créé!')).not.toBeVisible()
+
+  // The way out: the login dialog, with the address already typed in
+  await page.getByRole('button', { name: 'Me connecter' }).click()
+  await expect(page.locator('.login-form input[name="email"]')).toHaveValue(
+    existingEmail!.toLowerCase(),
+  )
 })

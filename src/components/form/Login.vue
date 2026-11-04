@@ -112,7 +112,8 @@
 </template>
 
 <script setup lang="ts">
-import { nextTick, onMounted, reactive, ref } from 'vue'
+import { nextTick, onMounted, reactive, ref, watch } from 'vue'
+import useModal from '@composables/useModal'
 import { useI36n } from '@jota-one/i36n'
 import { useAuth } from '@composables/useAuth'
 import { pb } from '@/pb'
@@ -131,6 +132,7 @@ const { hcaptcha } = config
 const { t } = useI36n()
 const { login } = useAuth()
 const { route } = useRoutes()
+const { modalParams } = useModal()
 
 const emit = defineEmits(['authenticated', 'signup', 'close'])
 
@@ -145,6 +147,16 @@ const credentials = reactive({
   email: '',
   password: '',
 })
+
+watch(
+  () => modalParams.value.email,
+  email => {
+    if (email) {
+      credentials.email = email
+    }
+  },
+  { immediate: true },
+)
 
 const captchaModel = ref({
   verified: false,

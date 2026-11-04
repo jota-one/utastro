@@ -215,3 +215,4 @@ Certaines tâches doivent être faites en 1er lieu et ensebmle pour que tout le 
 - [2026-10-23] Bascule — deuxième répétition complète sur `never` : environ 6 minutes de maintenance, smoke test vert avec un vrai envoi de mail, connexion d'un ancien compte vérifiée
 - [2026-11-04] Accueil — typographie française : espaces insécables avant les points d'exclamation
 - [2026-11-04] Bascule — `www.urban-training.ch` tourne sur le nouveau site, `urban-training.ch` et `next` y redirigent
+- [2026-11-04] Inscription — le bouton reste cliquable et montre ce qui manque, un compte déjà existant est expliqué avec un accès direct à la connexion, les numéros au format 079 sont de nouveau acceptés (inscription et profil)

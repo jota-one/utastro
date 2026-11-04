@@ -9,6 +9,9 @@
       name="risks"
       required
       :disabled="model.risks && Boolean(userProfile)"
+      :error="
+        showRequired && !model.risks ? t('subscriptionform_risks_required') : ''
+      "
     >
       <span v-html="t('subscriptionform_risks_agreement')" />
     </FormSubscriptionAgreement>
@@ -29,6 +32,7 @@ import type { UserProfile, UserProfileAgreements } from '@/types'
 interface Props {
   modelValue: UserProfileAgreements
   userProfile?: UserProfile
+  showRequired?: boolean
 }
 
 const emit = defineEmits(['update:modelValue'])
