@@ -74,6 +74,8 @@ Migration de l'UI et du backend. Décision prise : on reste sur **Element Plus**
 - [ ] SPF de `?all` à `~all` — de l'hygiène : la Newsletter et Mandrill utilisent leur propre domaine d'enveloppe, ce SPF ne couvre que le mail Infomaniak direct, déjà conforme
 - [x] Renouvellement du domaine sous contrôle — renouvellement automatique actif chez Infomaniak et désactivé chez OVH, plus aucune facturation possible de leur côté (échéance fin octobre 2026)
 - [x] Anciennes URLs redirigées par Caddy (clé `caddy` de l'app dans `apps.yaml`, sur `never` et `next`) : les 22 redirections du legacy, la page Sponsors abandonnée et `/{lang}/session`
+- [ ] Balise canonical sur les pages publiques (`/fr`, `/de`, `/en` et les suivantes) : aucune n'en a aujourd'hui
+- [ ] `robots.txt` en prod : `/robots.txt` répond 404, sans gêner le crawl ; à ajouter avec le lien vers un sitemap s'il y en a un, jamais de `Disallow: /`
 
 ### Tests E2E
 
