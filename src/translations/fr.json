@@ -235,7 +235,7 @@
   "login_already_logged_in": "Tu es connecté!",
   "login_invalid_credentials": "Login ou mot de passe incorrect",
   "login_tip_reset_password": "Nous t’enverrons par e-mail la marche à suivre pour ré-initialiser ton mot de passe",
-  "login_tip_reset_password_sent": "Nous t’avons envoyé un e-mail pour réinitialiser ton mot de passe",
+  "login_tip_reset_password_sent": "Si cette adresse a un compte, tu vas recevoir un e-mail pour réinitialiser ton mot de passe. Rien reçu ? Regarde dans les spams, puis essaie une autre adresse : ton compte en utilise peut-être une autre.",
   "map_legend_city_off": "Pas de session prévue<br>dans cette ville",
   "map_legend_city_on": "Sessions prévues<br>dans cette ville",
   "map_legend_city_watching": "Tu es abonné<br>à cette ville",

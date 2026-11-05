@@ -124,7 +124,7 @@
   "login_already_logged_in": "Du bist eingeloggt!",
   "login_invalid_credentials": "Falscher Login oder Passwort",
   "login_tip_reset_password": "Wir schicken dir eine Anleitung per Email, wie du dein Passwort zurücksetzen kannst.",
-  "login_tip_reset_password_sent": "Wir haben dir eine E-Mail geschickt, um dein Passwort zurückzusetzen.",
+  "login_tip_reset_password_sent": "Wenn es für diese Adresse ein Konto gibt, erhältst du eine E-Mail, um dein Passwort zurückzusetzen. Nichts erhalten? Schau im Spam-Ordner nach und versuche es dann mit einer anderen Adresse: Vielleicht läuft dein Konto auf eine andere.",
   "map_legend_city_off": "Keine Session geplant<br>in dieser Stadt",
   "map_legend_city_on": "Geplante Sessions<br>in dieser Stadt",
   "map_legend_city_watching": "Du bist an dieser<br>Stadt angemeldet",

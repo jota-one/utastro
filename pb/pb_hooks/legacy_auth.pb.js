@@ -120,10 +120,17 @@ routerAdd('POST', '/api/custom/auth/login', e => {
     throw new BadRequestError('Email and password are required')
   }
 
+  // The request log does not say who tried: without the address, a member who
+  // cannot log in cannot be traced. Never log the password.
+  const logRefusal = reason => {
+    $app.logger().warn('Login refused', 'email', email, 'reason', reason)
+  }
+
   let record
   try {
     record = $app.findAuthRecordByEmail('ut_users', email)
   } catch {
+    logRefusal('unknown address')
     throw new UnauthorizedError('Invalid credentials')
   }
 
@@ -132,6 +139,7 @@ routerAdd('POST', '/api/custom/auth/login', e => {
   const isLegacyPassword = legacyHash && computeSha1(password) === legacyHash
 
   if (!isLegacyPassword && !record.validatePassword(password)) {
+    logRefusal('wrong password')
     throw new UnauthorizedError('Invalid credentials')
   }
 
@@ -145,6 +153,7 @@ routerAdd('POST', '/api/custom/auth/login', e => {
     record.set('verified', true)
     $app.save(record)
   } else if (!record.getBool('verified')) {
+    logRefusal('account not activated')
     throw new ForbiddenError('Account not verified')
   }
 
