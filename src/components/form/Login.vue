@@ -193,11 +193,15 @@ async function onLogin() {
         .collection('ut_users')
         .requestPasswordReset(normalizeEmail(credentials.email))
       passwordResetEmailSent.value = true
-    } catch {
+    } catch (e: any) {
       if (captchaEl.value) {
         ;(captchaEl.value as any).reset()
       }
-      resetPasswordError.value = t('ERROR_UT_EMAIL_COULD_NOT_BE_SENT')
+      resetPasswordError.value = t(
+        e.status === 429
+          ? 'login_too_many_attempts'
+          : 'ERROR_UT_EMAIL_COULD_NOT_BE_SENT',
+      )
     }
   } else {
     activationPending.value = false
@@ -208,6 +212,8 @@ async function onLogin() {
       if (e.status === 403) {
         error.value = t('ERROR_HC_USER_PENDING')
         activationPending.value = true
+      } else if (e.status === 429) {
+        error.value = t('login_too_many_attempts')
       } else {
         error.value = t('login_invalid_credentials')
       }

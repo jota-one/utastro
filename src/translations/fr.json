@@ -391,5 +391,6 @@
   "subscriptionform_email_taken_login": "Me connecter",
   "activation_resend_button": "Renvoyer le lien d’activation",
   "activation_resend_sent": "C’est envoyé! Regarde dans ta boîte e-mail, et aussi dans les spams.",
-  "subscriptionform_email_pending_text": "<b>Ton compte existe déjà, mais il n’est pas encore activé.</b><p>Clique sur le bouton pour recevoir un nouveau lien par e-mail.</p>"
+  "subscriptionform_email_pending_text": "<b>Ton compte existe déjà, mais il n’est pas encore activé.</b><p>Clique sur le bouton pour recevoir un nouveau lien par e-mail.</p>",
+  "login_too_many_attempts": "Trop d’essais. Attends une minute, puis réessaie."
 }

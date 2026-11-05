@@ -32,6 +32,25 @@ onBootstrap(e => {
 
   settings.batch.enabled = true
 
+  // Behind Caddy every request comes from 127.0.0.1. Caddy drops what a client
+  // sends in this header and sets the real address, on the right.
+  settings.trustedProxy.headers = ['X-Forwarded-For']
+  settings.trustedProxy.useLeftmostIP = false
+
+  // Limit the guesses on passwords and addresses, per visitor. Off locally,
+  // where the E2E tests log in far more often from a single address.
+  settings.rateLimits.enabled = Boolean(domain)
+  settings.rateLimits.rules = [
+    '/api/custom/auth/login',
+    '/api/collections/ut_users/auth-with-password',
+    '/api/collections/ut_users/request-password-reset',
+    '/api/collections/ut_users/request-verification',
+  ].map(path => ({
+    label: `POST ${path}`,
+    maxRequests: 10,
+    duration: 60,
+  }))
+
   $app.save(settings)
 })
 
