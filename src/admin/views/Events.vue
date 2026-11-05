@@ -128,6 +128,7 @@ import dayjs from 'dayjs'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Delete, Download, EditPen, Upload } from '@element-plus/icons-vue'
 import { pb } from '@/pb'
+import { citiesIgnoringAccents } from '@/admin/utils/citySearch'
 import { useEventExports } from '@/composables/useEventExports'
 import EntityView from '../components/EntityView.vue'
 import EventDialog from '../components/EventDialog.vue'
@@ -171,14 +172,30 @@ const progressType = (
     over: 'info',
   })[p] as any) ?? ''
 
-const buildFilter = () => {
+const buildFilter = async () => {
   const now = dayjs().format('YYYY-MM-DD HH:mm:ss')
   const parts: string[] = [
     showUpcoming.value ? `start_date >= "${now}"` : `start_date < "${now}"`,
   ]
   if (search.value.trim()) {
     const s = search.value.trim().replace(/"/g, '\\"')
-    parts.push(`(title_fr ~ "${s}" || title_de ~ "${s}" || title_en ~ "${s}")`)
+    const conditions = [
+      'city.label',
+      'location.label_fr',
+      'location.label_de',
+      'location.label_en',
+      'title_fr',
+      'title_de',
+      'title_en',
+    ].map(field => `${field} ~ "${s}"`)
+    conditions.push(`id = "${s}"`)
+    conditions.push(
+      ...(await citiesIgnoringAccents(search.value.trim(), 'city')),
+    )
+    if (/^\d+$/.test(s)) {
+      conditions.push(`legacy_id = ${s}`)
+    }
+    parts.push(`(${conditions.join(' || ')})`)
   }
   return parts.join(' && ')
 }
@@ -189,7 +206,7 @@ const load = async () => {
     const result = await pb
       .collection('ut_events')
       .getList(page.value, pageSize.value, {
-        filter: buildFilter(),
+        filter: await buildFilter(),
         sort: showUpcoming.value ? 'start_date' : '-start_date',
         expand: 'location,city,types',
       })

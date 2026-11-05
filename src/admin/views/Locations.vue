@@ -98,6 +98,7 @@ import {
   EditPen,
 } from '@element-plus/icons-vue'
 import { pb } from '@/pb'
+import { citiesIgnoringAccents } from '@/admin/utils/citySearch'
 import EntityView from '../components/EntityView.vue'
 import LocationDialog from '../components/LocationDialog.vue'
 import MergeLocationsDialog from '../components/MergeLocationsDialog.vue'
@@ -115,13 +116,21 @@ const mergeDialogOpen = ref(false)
 const editedItem = ref<Record<string, any> | null>(null)
 const mergedItem = ref<Record<string, any> | null>(null)
 
-const buildFilter = () => {
+const buildFilter = async () => {
   const parts: string[] = [`enabled = ${showEnabled.value}`]
   if (search.value.trim()) {
     const s = search.value.trim().replace(/"/g, '\\"')
-    parts.push(
-      `(xid ~ "${s}" || label_fr ~ "${s}" || label_de ~ "${s}" || address ~ "${s}")`,
+    const conditions = [
+      'xid',
+      'label_fr',
+      'label_de',
+      'address',
+      'city.label',
+    ].map(field => `${field} ~ "${s}"`)
+    conditions.push(
+      ...(await citiesIgnoringAccents(search.value.trim(), 'city')),
     )
+    parts.push(`(${conditions.join(' || ')})`)
   }
   return parts.join(' && ')
 }
@@ -132,7 +141,7 @@ const load = async () => {
     const result = await pb
       .collection('ut_locations')
       .getList(page.value, pageSize.value, {
-        filter: buildFilter(),
+        filter: await buildFilter(),
         sort: 'label_fr',
         expand: 'city',
       })
