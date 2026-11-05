@@ -259,7 +259,7 @@ test.describe('an email typed with capitals or stray spaces', () => {
     await login.open()
     await login.requestPasswordReset(sloppy(email))
     await expect(
-      login.form().getByText('Nous t’avons envoyé un e-mail'),
+      login.form().getByText('ton compte en utilise peut-être une autre'),
     ).toBeVisible()
     expect((await waitForEmail(email)).Subject).toMatch(/mot de passe/i)
   })
@@ -281,7 +281,7 @@ test.describe('password reset', () => {
     await login.open()
     await login.requestPasswordReset(email)
     await expect(
-      login.form().getByText('Nous t’avons envoyé un e-mail'),
+      login.form().getByText('ton compte en utilise peut-être une autre'),
     ).toBeVisible()
 
     const message = await waitForEmail(email)

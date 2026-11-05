@@ -129,7 +129,7 @@
   "login_already_logged_in": "You are connected!",
   "login_invalid_credentials": "Wrong login or password",
   "login_tip_reset_password": "We will send you an email witht the instructions on how to reset your password",
-  "login_tip_reset_password_sent": "We sent you an email to reset your password",
+  "login_tip_reset_password_sent": "If this address has an account, you will receive an email to reset your password. Nothing received? Check your spam folder, then try another address: your account may use a different one.",
   "map_legend_city_off": "No session planned<br>in this city",
   "map_legend_city_on": "Planned sessions<br>in this city",
   "map_legend_city_watching": "You are subscribed<br>to this city",

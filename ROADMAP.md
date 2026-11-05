@@ -218,3 +218,4 @@ Certaines tâches doivent être faites en 1er lieu et ensebmle pour que tout le 
 - [2026-11-04] Inscription — le bouton reste cliquable et montre ce qui manque, un compte déjà existant est expliqué avec un accès direct à la connexion, les numéros au format 079 sont de nouveau acceptés (inscription et profil)
 - [2026-11-04] Mot de passe oublié — les membres migrés qui réinitialisent leur mot de passe peuvent de nouveau se connecter avec le nouveau, y compris ceux déjà bloqués
 - [2026-11-04] Activation — un compte pas encore activé est reconnu à l'inscription et à la connexion, avec un bouton pour renvoyer le lien
+- [2026-11-05] Mot de passe oublié — le message explique quoi faire si aucun e-mail n'arrive, notamment essayer une autre adresse
