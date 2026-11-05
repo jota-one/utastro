@@ -392,5 +392,6 @@
   "activation_resend_button": "Renvoyer le lien d’activation",
   "activation_resend_sent": "C’est envoyé! Regarde dans ta boîte e-mail, et aussi dans les spams.",
   "subscriptionform_email_pending_text": "<b>Ton compte existe déjà, mais il n’est pas encore activé.</b><p>Clique sur le bouton pour recevoir un nouveau lien par e-mail.</p>",
-  "login_too_many_attempts": "Trop d’essais. Attends une minute, puis réessaie."
+  "login_too_many_attempts": "Trop d’essais. Attends une minute, puis réessaie.",
+  "login_account_locked": "Trop de mots de passe incorrects : ce compte est bloqué pendant 15 minutes. Si tu ne connais plus ton mot de passe, clique sur « Mot de passe oublié? »."
 }

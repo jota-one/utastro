@@ -221,3 +221,4 @@ Certaines tâches doivent être faites en 1er lieu et ensebmle pour que tout le 
 - [2026-11-05] Mot de passe oublié — le message explique quoi faire si aucun e-mail n'arrive, notamment essayer une autre adresse
 - [2026-11-05] Admin — la recherche des sessions et des lieux retrouve de nouveau les villes, avec ou sans accents, comme sur l'ancien site
 - [2026-11-05] Sécurité — le nombre d'essais de connexion et de demandes d'e-mail est limité par visiteur
+- [2026-11-05] Sécurité — un compte se bloque 15 minutes après 10 mots de passe faux, et son propriétaire est prévenu par e-mail

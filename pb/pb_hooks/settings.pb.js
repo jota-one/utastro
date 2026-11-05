@@ -40,14 +40,19 @@ onBootstrap(e => {
   // Limit the guesses on passwords and addresses, per visitor. Off locally,
   // where the E2E tests log in far more often from a single address.
   settings.rateLimits.enabled = Boolean(domain)
+  // The login gets more room: a company or a mobile network can put many
+  // members behind one address. Each account has its own limit on top of it,
+  // in legacy_auth.pb.js.
   settings.rateLimits.rules = [
-    '/api/custom/auth/login',
-    '/api/collections/ut_users/auth-with-password',
-    '/api/collections/ut_users/request-password-reset',
-    '/api/collections/ut_users/request-verification',
-  ].map(path => ({
+    { path: '/api/custom/auth/login', maxRequests: 30 },
+    {
+      path: '/api/collections/ut_users/request-password-reset',
+      maxRequests: 10,
+    },
+    { path: '/api/collections/ut_users/request-verification', maxRequests: 10 },
+  ].map(({ path, maxRequests }) => ({
     label: `POST ${path}`,
-    maxRequests: 10,
+    maxRequests,
     duration: 60,
   }))
 

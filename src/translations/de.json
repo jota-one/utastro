@@ -275,5 +275,6 @@
   "activation_resend_button": "Aktivierungslink erneut senden",
   "activation_resend_sent": "Gesendet! Schau in dein E-Mail-Postfach und auch in den Spam-Ordner.",
   "subscriptionform_email_pending_text": "<b>Dein Konto existiert bereits, ist aber noch nicht aktiviert.</b><p>Klicke auf die Schaltfläche, um einen neuen Link per E-Mail zu erhalten.</p>",
-  "login_too_many_attempts": "Zu viele Versuche. Warte eine Minute und versuche es dann erneut."
+  "login_too_many_attempts": "Zu viele Versuche. Warte eine Minute und versuche es dann erneut.",
+  "login_account_locked": "Zu viele falsche Passwörter: Dieses Konto ist 15 Minuten lang gesperrt. Wenn du dein Passwort nicht mehr weisst, klicke auf «Passwort vergessen?»."
 }

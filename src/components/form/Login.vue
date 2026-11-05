@@ -213,7 +213,11 @@ async function onLogin() {
         error.value = t('ERROR_HC_USER_PENDING')
         activationPending.value = true
       } else if (e.status === 429) {
-        error.value = t('login_too_many_attempts')
+        error.value = t(
+          e.response?.message?.startsWith('Account locked')
+            ? 'login_account_locked'
+            : 'login_too_many_attempts',
+        )
       } else {
         error.value = t('login_invalid_credentials')
       }

@@ -280,5 +280,6 @@
   "activation_resend_button": "Send the activation link again",
   "activation_resend_sent": "Sent! Check your inbox, and your spam folder too.",
   "subscriptionform_email_pending_text": "<b>Your account already exists, but it is not activated yet.</b><p>Click the button to receive a new link by email.</p>",
-  "login_too_many_attempts": "Too many attempts. Wait a minute, then try again."
+  "login_too_many_attempts": "Too many attempts. Wait a minute, then try again.",
+  "login_account_locked": "Too many wrong passwords: this account is locked for 15 minutes. If you no longer know your password, click “Password forgotten?”."
 }
