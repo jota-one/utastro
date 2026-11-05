@@ -131,7 +131,50 @@ routerAdd('POST', '/api/custom/auth/login', e => {
     record = $app.findAuthRecordByEmail('ut_users', email)
   } catch {
     logRefusal('unknown address')
-    throw new UnauthorizedError('Invalid credentials')
+    throw new UnauthorizedError('Unknown address')
+  }
+
+  // Each account stops the guesses on its own, whatever address they come from
+  const MAX_FAILURES = 10
+  const FAILURES_WINDOW = 15 * 60 * 1000
+  const LOCK_DURATION = 15 * 60 * 1000
+  const ALERT_INTERVAL = 24 * 60 * 60 * 1000
+  const now = Date.now()
+  const failuresKey = `ut_login_failures_${record.id}`
+  const storedFailures = $app.store().get(failuresKey)
+  const failures = storedFailures ? JSON.parse(storedFailures) : null
+
+  if (failures?.lockedUntil > now) {
+    logRefusal('account locked')
+    throw new TooManyRequestsError('Account locked')
+  }
+
+  const sendLockAlert = () => {
+    const alertKey = `ut_login_alert_${record.id}`
+    const lastAlert = $app.store().get(alertKey)
+    if (lastAlert && now - lastAlert < ALERT_INTERVAL) {
+      return
+    }
+
+    const firstName = record.getString('name').split(' ')[0]
+    const { senderAddress, senderName, appURL } = $app.settings().meta
+    try {
+      $app.newMailClient().send(
+        new MailerMessage({
+          from: { address: senderAddress, name: senderName },
+          to: [{ address: record.email() }],
+          subject: 'Tentatives de connexion à ton compte Urban Training',
+          html: `<p>Bonjour ${firstName},</p>
+<p>Quelqu’un a essayé plusieurs fois de se connecter à ton compte Urban Training avec un mauvais mot de passe. Par sécurité, les connexions à ton compte sont bloquées pendant 15 minutes.</p>
+<p><b>Si c’était toi :</b> pas de souci. Réessaie dans 15 minutes, ou clique sur «&nbsp;Mot de passe oublié?&nbsp;» sur le site si tu ne t’en souviens plus.</p>
+<p><b>Si ce n’était pas toi :</b> personne n’est entré dans ton compte. Par précaution, change ton mot de passe sur <a href="${appURL}">urban-training.ch</a> en cliquant sur «&nbsp;Connexion&nbsp;», puis «&nbsp;Mot de passe oublié?&nbsp;».</p>
+<p>À bientôt,<br>L’équipe Urban Training</p>`,
+        }),
+      )
+      $app.store().set(alertKey, now)
+    } catch (err) {
+      $app.logger().error('Lock alert failed', 'error', String(err))
+    }
   }
 
   const legacyHash = record.getString('legacy_password_sha1')
@@ -140,8 +183,27 @@ routerAdd('POST', '/api/custom/auth/login', e => {
 
   if (!isLegacyPassword && !record.validatePassword(password)) {
     logRefusal('wrong password')
+
+    const isCounting = failures && now - failures.since < FAILURES_WINDOW
+    const count = (isCounting ? failures.count : 0) + 1
+    const since = isCounting ? failures.since : now
+    const isLocked = count >= MAX_FAILURES
+    $app.store().set(
+      failuresKey,
+      JSON.stringify({
+        count: isLocked ? 0 : count,
+        since,
+        lockedUntil: isLocked ? now + LOCK_DURATION : 0,
+      }),
+    )
+    if (isLocked) {
+      sendLockAlert()
+    }
+
     throw new UnauthorizedError('Invalid credentials')
   }
+
+  $app.store().remove(failuresKey)
 
   if (legacyHash) {
     // A migrated member: either the old password, or one set since the import
@@ -160,8 +222,28 @@ routerAdd('POST', '/api/custom/auth/login', e => {
   return $apis.recordAuthResponse(e, record, 'password')
 })
 
+// PocketBase answers the same whether the address has an account or not. The
+// sign-up form tells it already, and a member who typed another address needs
+// to know. Limited per visitor like the login (settings.pb.js).
+routerAdd('POST', '/api/custom/auth/known-address', e => {
+  const email = (e.requestInfo().body?.email ?? '').trim().toLowerCase()
+  try {
+    $app.findAuthRecordByEmail('ut_users', email)
+  } catch {
+    throw new NotFoundError('Unknown address')
+  }
+  return e.noContent(204)
+})
+
 // A new password replaces the one from the legacy app, which must stop working
 onRecordConfirmPasswordResetRequest(e => {
   e.record.set('legacy_password_sha1', '')
   e.next()
+  $app.store().remove(`ut_login_failures_${e.record.id}`)
+}, 'ut_users')
+
+// Members log in through the route above, which holds the limits per account:
+// the standard one would be a way around them
+onRecordAuthWithPasswordRequest(() => {
+  throw new ForbiddenError('Use the login of the site')
 }, 'ut_users')

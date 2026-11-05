@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto'
 import { test, expect } from '@playwright/test'
 import {
+  clearMailpit,
   createUser,
   deleteUserByEmail,
   extractLinkFromEmail,
@@ -80,10 +81,42 @@ test.describe('login modal', () => {
     await login.open()
     await login.login(email, 'NotThePassword1!')
 
-    await expect(
-      login.form().getByText('Login ou mot de passe incorrect'),
-    ).toBeVisible()
+    await expect(login.form().getByText('Mot de passe incorrect')).toBeVisible()
     await expect(login.logoutButton()).not.toBeVisible()
+  })
+
+  test('an address without an account is told so', async ({ page }) => {
+    const login = new LoginForm(page)
+
+    await page.goto('/fr')
+    await login.open()
+    await login.login(uniqueEmail('no-account'), PASSWORD)
+
+    await expect(
+      login.form().getByText('Aucun compte avec cette adresse e-mail'),
+    ).toBeVisible()
+  })
+
+  test('a password reset for an unknown address is told so and can be retried', async ({
+    page,
+  }) => {
+    test.skip(!MAILPIT_AVAILABLE, 'MAILPIT_URL not set')
+    const email = await newAccount('reset-retry')
+    const login = new LoginForm(page)
+
+    await page.goto('/fr')
+    await login.open()
+    await login.requestPasswordReset(uniqueEmail('no-account'))
+    await expect(
+      login.form().getByText('Aucun compte avec cette adresse e-mail'),
+    ).toBeVisible()
+
+    await login.form().getByLabel('Identifiant').fill(email)
+    await login.form().locator('button', { hasText: 'Réinitialiser' }).click()
+    await expect(
+      login.form().getByText('Nous t’avons envoyé un e-mail'),
+    ).toBeVisible()
+    expect((await waitForEmail(email)).Subject).toMatch(/mot de passe/i)
   })
 
   test('an account not activated yet is told to activate it', async ({
@@ -259,9 +292,93 @@ test.describe('an email typed with capitals or stray spaces', () => {
     await login.open()
     await login.requestPasswordReset(sloppy(email))
     await expect(
-      login.form().getByText('ton compte en utilise peut-être une autre'),
+      login.form().getByText('Nous t’avons envoyé un e-mail'),
     ).toBeVisible()
     expect((await waitForEmail(email)).Subject).toMatch(/mot de passe/i)
+  })
+})
+
+test.describe('guessing the password of an account', () => {
+  const WRONG = 'NotThePassword1!'
+
+  const guess = async (email: string, times: number) => {
+    for (let i = 0; i < times; i++) {
+      expect(await loginStatus(email, WRONG)).toBe(401)
+    }
+  }
+
+  test('nine wrong passwords do not lock the account', async () => {
+    const email = await newAccount('lock-under')
+    await guess(email, 9)
+    expect(await loginStatus(email, PASSWORD)).toBe(200)
+    // A successful login starts the count again
+    await guess(email, 9)
+    expect(await loginStatus(email, PASSWORD)).toBe(200)
+  })
+
+  test('ten wrong passwords lock it and warn the member', async ({ page }) => {
+    test.skip(!MAILPIT_AVAILABLE, 'MAILPIT_URL not set')
+
+    const email = await newAccount('lock')
+    await guess(email, 10)
+
+    // Even the right password is refused: guessing it must not stand out
+    expect(await loginStatus(email, PASSWORD)).toBe(429)
+
+    const message = await waitForEmail(email)
+    expect(message.Subject).toBe(
+      'Tentatives de connexion à ton compte Urban Training',
+    )
+
+    const login = new LoginForm(page)
+    await page.goto('/fr')
+    await login.open()
+    await login.login(email, PASSWORD)
+    await expect(
+      login.form().getByText('ce compte est bloqué pendant 15 minutes'),
+    ).toBeVisible()
+  })
+
+  test('a password reset unlocks the account', async () => {
+    test.skip(!MAILPIT_AVAILABLE, 'MAILPIT_URL not set')
+
+    const email = await newAccount('lock-reset')
+    const newPassword = 'BrandNewPassword456!'
+    await guess(email, 10)
+    await waitForEmail(email)
+    await clearMailpit()
+
+    const pbUrl = process.env.PB_URL
+    await fetch(`${pbUrl}/api/collections/ut_users/request-password-reset`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    })
+    const link = extractLinkFromEmail(await waitForEmail(email))
+    await fetch(`${pbUrl}/api/collections/ut_users/confirm-password-reset`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        token: new URL(link).searchParams.get('token'),
+        password: newPassword,
+        passwordConfirm: newPassword,
+      }),
+    })
+
+    expect(await loginStatus(email, newPassword)).toBe(200)
+  })
+
+  test('the standard PocketBase login is closed to members', async () => {
+    const email = await newAccount('native-login')
+    const response = await fetch(
+      `${process.env.PB_URL}/api/collections/ut_users/auth-with-password`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ identity: email, password: PASSWORD }),
+      },
+    )
+    expect(response.status).toBe(403)
   })
 })
 
@@ -281,7 +398,7 @@ test.describe('password reset', () => {
     await login.open()
     await login.requestPasswordReset(email)
     await expect(
-      login.form().getByText('ton compte en utilise peut-être une autre'),
+      login.form().getByText('Nous t’avons envoyé un e-mail'),
     ).toBeVisible()
 
     const message = await waitForEmail(email)
