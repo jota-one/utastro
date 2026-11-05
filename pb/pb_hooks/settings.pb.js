@@ -45,6 +45,8 @@ onBootstrap(e => {
   // in legacy_auth.pb.js.
   settings.rateLimits.rules = [
     { path: '/api/custom/auth/login', maxRequests: 30 },
+    { path: '/api/custom/auth/known-address', maxRequests: 10 },
+    { path: '/api/collections/ut_users/records', maxRequests: 20 },
     {
       path: '/api/collections/ut_users/request-password-reset',
       maxRequests: 10,

@@ -235,7 +235,7 @@
   "login_already_logged_in": "Tu es connecté!",
   "login_invalid_credentials": "Login ou mot de passe incorrect",
   "login_tip_reset_password": "Nous t’enverrons par e-mail la marche à suivre pour ré-initialiser ton mot de passe",
-  "login_tip_reset_password_sent": "Si cette adresse a un compte, tu vas recevoir un e-mail pour réinitialiser ton mot de passe. Rien reçu ? Regarde dans les spams, puis essaie une autre adresse : ton compte en utilise peut-être une autre.",
+  "login_tip_reset_password_sent": "Nous t’avons envoyé un e-mail pour réinitialiser ton mot de passe. Rien reçu ? Regarde dans les spams.",
   "map_legend_city_off": "Pas de session prévue<br>dans cette ville",
   "map_legend_city_on": "Sessions prévues<br>dans cette ville",
   "map_legend_city_watching": "Tu es abonné<br>à cette ville",
@@ -393,5 +393,7 @@
   "activation_resend_sent": "C’est envoyé! Regarde dans ta boîte e-mail, et aussi dans les spams.",
   "subscriptionform_email_pending_text": "<b>Ton compte existe déjà, mais il n’est pas encore activé.</b><p>Clique sur le bouton pour recevoir un nouveau lien par e-mail.</p>",
   "login_too_many_attempts": "Trop d’essais. Attends une minute, puis réessaie.",
-  "login_account_locked": "Trop de mots de passe incorrects : ce compte est bloqué pendant 15 minutes. Si tu ne connais plus ton mot de passe, clique sur « Mot de passe oublié? »."
+  "login_account_locked": "Trop de mots de passe incorrects : ce compte est bloqué pendant 15 minutes. Si tu ne connais plus ton mot de passe, clique sur « Mot de passe oublié? ».",
+  "login_unknown_address": "Aucun compte avec cette adresse e-mail. Ton compte en utilise peut-être une autre.",
+  "login_wrong_password": "Mot de passe incorrect"
 }

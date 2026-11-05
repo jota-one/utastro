@@ -129,7 +129,7 @@
   "login_already_logged_in": "You are connected!",
   "login_invalid_credentials": "Wrong login or password",
   "login_tip_reset_password": "We will send you an email witht the instructions on how to reset your password",
-  "login_tip_reset_password_sent": "If this address has an account, you will receive an email to reset your password. Nothing received? Check your spam folder, then try another address: your account may use a different one.",
+  "login_tip_reset_password_sent": "We sent you an email to reset your password. Nothing received? Check your spam folder.",
   "map_legend_city_off": "No session planned<br>in this city",
   "map_legend_city_on": "Planned sessions<br>in this city",
   "map_legend_city_watching": "You are subscribed<br>to this city",
@@ -281,5 +281,7 @@
   "activation_resend_sent": "Sent! Check your inbox, and your spam folder too.",
   "subscriptionform_email_pending_text": "<b>Your account already exists, but it is not activated yet.</b><p>Click the button to receive a new link by email.</p>",
   "login_too_many_attempts": "Too many attempts. Wait a minute, then try again.",
-  "login_account_locked": "Too many wrong passwords: this account is locked for 15 minutes. If you no longer know your password, click “Password forgotten?”."
+  "login_account_locked": "Too many wrong passwords: this account is locked for 15 minutes. If you no longer know your password, click “Password forgotten?”.",
+  "login_unknown_address": "No account with this email address. Your account may use a different one.",
+  "login_wrong_password": "Wrong password"
 }

@@ -131,7 +131,7 @@ routerAdd('POST', '/api/custom/auth/login', e => {
     record = $app.findAuthRecordByEmail('ut_users', email)
   } catch {
     logRefusal('unknown address')
-    throw new UnauthorizedError('Invalid credentials')
+    throw new UnauthorizedError('Unknown address')
   }
 
   // Each account stops the guesses on its own, whatever address they come from
@@ -220,6 +220,19 @@ routerAdd('POST', '/api/custom/auth/login', e => {
   }
 
   return $apis.recordAuthResponse(e, record, 'password')
+})
+
+// PocketBase answers the same whether the address has an account or not. The
+// sign-up form tells it already, and a member who typed another address needs
+// to know. Limited per visitor like the login (settings.pb.js).
+routerAdd('POST', '/api/custom/auth/known-address', e => {
+  const email = (e.requestInfo().body?.email ?? '').trim().toLowerCase()
+  try {
+    $app.findAuthRecordByEmail('ut_users', email)
+  } catch {
+    throw new NotFoundError('Unknown address')
+  }
+  return e.noContent(204)
 })
 
 // A new password replaces the one from the legacy app, which must stop working

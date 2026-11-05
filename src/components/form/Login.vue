@@ -14,7 +14,11 @@
           class="input"
         />
       </FormFieldWrapper>
-      <FormFieldWrapper v-if="!passwordForgotten" :label="t('common_password')">
+      <FormFieldWrapper
+        v-if="!passwordForgotten"
+        :label="t('common_password')"
+        :error="passwordError"
+      >
         <input
           v-model="credentials.password"
           type="password"
@@ -144,6 +148,7 @@ const emit = defineEmits(['authenticated', 'signup', 'close'])
 
 const loginField = ref<HTMLInputElement | null>(null)
 const error = ref<string>('')
+const passwordError = ref<string>('')
 const activationPending = ref(false)
 const passwordForgotten = ref(false)
 const captchaEl = ref(null)
@@ -176,6 +181,7 @@ const captchaModel = ref({
 
 const toggleForgotPassword = () => {
   error.value = ''
+  passwordError.value = ''
   activationPending.value = false
   passwordForgotten.value = !passwordForgotten.value
 }
@@ -187,13 +193,23 @@ const close = () => {
 }
 
 async function onLogin() {
+  error.value = ''
+  passwordError.value = ''
+
   if (passwordForgotten.value) {
     try {
-      await pb
-        .collection('ut_users')
-        .requestPasswordReset(normalizeEmail(credentials.email))
+      const email = normalizeEmail(credentials.email)
+      await pb.send('/api/custom/auth/known-address', {
+        method: 'POST',
+        body: { email },
+      })
+      await pb.collection('ut_users').requestPasswordReset(email)
       passwordResetEmailSent.value = true
     } catch (e: any) {
+      if (e.status === 404) {
+        error.value = t('login_unknown_address')
+        return
+      }
       if (captchaEl.value) {
         ;(captchaEl.value as any).reset()
       }
@@ -218,8 +234,10 @@ async function onLogin() {
             ? 'login_account_locked'
             : 'login_too_many_attempts',
         )
+      } else if (e.response?.message?.startsWith('Unknown address')) {
+        error.value = t('login_unknown_address')
       } else {
-        error.value = t('login_invalid_credentials')
+        passwordError.value = t('login_wrong_password')
       }
     }
   }

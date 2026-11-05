@@ -81,10 +81,42 @@ test.describe('login modal', () => {
     await login.open()
     await login.login(email, 'NotThePassword1!')
 
-    await expect(
-      login.form().getByText('Login ou mot de passe incorrect'),
-    ).toBeVisible()
+    await expect(login.form().getByText('Mot de passe incorrect')).toBeVisible()
     await expect(login.logoutButton()).not.toBeVisible()
+  })
+
+  test('an address without an account is told so', async ({ page }) => {
+    const login = new LoginForm(page)
+
+    await page.goto('/fr')
+    await login.open()
+    await login.login(uniqueEmail('no-account'), PASSWORD)
+
+    await expect(
+      login.form().getByText('Aucun compte avec cette adresse e-mail'),
+    ).toBeVisible()
+  })
+
+  test('a password reset for an unknown address is told so and can be retried', async ({
+    page,
+  }) => {
+    test.skip(!MAILPIT_AVAILABLE, 'MAILPIT_URL not set')
+    const email = await newAccount('reset-retry')
+    const login = new LoginForm(page)
+
+    await page.goto('/fr')
+    await login.open()
+    await login.requestPasswordReset(uniqueEmail('no-account'))
+    await expect(
+      login.form().getByText('Aucun compte avec cette adresse e-mail'),
+    ).toBeVisible()
+
+    await login.form().getByLabel('Identifiant').fill(email)
+    await login.form().locator('button', { hasText: 'Réinitialiser' }).click()
+    await expect(
+      login.form().getByText('Nous t’avons envoyé un e-mail'),
+    ).toBeVisible()
+    expect((await waitForEmail(email)).Subject).toMatch(/mot de passe/i)
   })
 
   test('an account not activated yet is told to activate it', async ({
@@ -260,7 +292,7 @@ test.describe('an email typed with capitals or stray spaces', () => {
     await login.open()
     await login.requestPasswordReset(sloppy(email))
     await expect(
-      login.form().getByText('ton compte en utilise peut-être une autre'),
+      login.form().getByText('Nous t’avons envoyé un e-mail'),
     ).toBeVisible()
     expect((await waitForEmail(email)).Subject).toMatch(/mot de passe/i)
   })
@@ -366,7 +398,7 @@ test.describe('password reset', () => {
     await login.open()
     await login.requestPasswordReset(email)
     await expect(
-      login.form().getByText('ton compte en utilise peut-être une autre'),
+      login.form().getByText('Nous t’avons envoyé un e-mail'),
     ).toBeVisible()
 
     const message = await waitForEmail(email)
