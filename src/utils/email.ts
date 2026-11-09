@@ -8,11 +8,13 @@ export const sendEmail = async ({
   subject,
   htmlBody,
   to,
+  replyTo,
   attachments = [],
 }: {
   subject: string
   htmlBody: string
   to: { email: string; name?: string }
+  replyTo?: string
   attachments?: Attachment[]
 }): Promise<void> => {
   const res = await fetch('https://mandrillapp.com/api/1.0/messages/send', {
@@ -28,6 +30,7 @@ export const sendEmail = async ({
         track_clicks: false,
         track_opens: false,
         to: [{ email: to.email, name: to.name || to.email, type: 'to' }],
+        ...(replyTo ? { headers: { 'Reply-To': replyTo } } : {}),
         attachments: attachments.map(a => ({
           type: a.type || 'application/octet-stream',
           name: a.name,
