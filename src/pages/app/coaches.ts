@@ -69,10 +69,15 @@ export const POST: APIRoute = async ({ request }) => {
       ${message ? `<p><b>Message :</b></p><p>${message.replace(/\n/g, '<br>')}</p>` : ''}
     `
 
+    // The build is shared by every deployment: the production sets its own
+    // recipient (jota-one/infra apps.yaml env), the others fall back to ours
+    const recipient = process.env.ENV_WEBMASTER_EMAIL || config.webmasterEmail
+
     await sendEmail({
       subject: 'Message du site — page Job coach',
       htmlBody,
-      to: { email: config.webmasterEmail, name: 'Urban Training' },
+      to: { email: recipient, name: 'Urban Training' },
+      replyTo: email,
       attachments,
     })
 
