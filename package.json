@@ -24,7 +24,7 @@
     "ut:import": "cd pb && ./pb-custom import-all-data && ./pb-custom import-users && ./pb-custom import-cities && ./pb-custom import-events && ./pb-custom import-sponsors"
   },
   "dependencies": {
-    "@astrojs/node": "^11.0.2",
+    "@astrojs/node": "^11.1.12",
     "@astrojs/vue": "^7.0.1",
     "@element-plus/icons-vue": "^2.3.2",
     "@googlemaps/js-api-loader": "^2.1.1",
