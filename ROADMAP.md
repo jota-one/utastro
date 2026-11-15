@@ -224,3 +224,4 @@ Certaines tâches doivent être faites en 1er lieu et ensebmle pour que tout le 
 - [2026-11-05] Sécurité — un compte se bloque 15 minutes après 10 mots de passe faux, et son propriétaire est prévenu par e-mail
 - [2026-11-05] Connexion — les messages disent clairement si l'adresse n'a pas de compte ou si le mot de passe est faux, y compris pour le mot de passe oublié
 - [2026-11-09] Candidature coach — les candidatures arrivent au bureau Urban Training (et non plus chez un développeur), et « Répondre » écrit directement au candidat
+- [2026-11-12] Connexion — plus d'e-mail automatique « nouvelle connexion » envoyé aux membres qui se connectent depuis un nouvel appareil
